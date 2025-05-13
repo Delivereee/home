@@ -1,5 +1,6 @@
 import apiClient from './config';
 import { Restaurant, RestaurantSearchParams } from '../types/restaurant';
+import { buildQueryString, handleApiError, logApiResponse } from './utils';
 
 /**
  * 카테고리별 근처 음식점 조회
@@ -7,19 +8,52 @@ import { Restaurant, RestaurantSearchParams } from '../types/restaurant';
  * @returns 음식점 목록
  */
 export const getNearbyRestaurants = async (params: RestaurantSearchParams): Promise<Restaurant[]> => {
+  const endpoint = '/api/restaurant-details/nearby';
+  
   try {
-    const { category, lat, lng, lang = 'en' } = params;
+    const queryString = buildQueryString({
+      lat: params.lat,
+      lng: params.lng,
+      category: params.category,
+      lang: params.lang || 'en'
+    });
     
-    // URL 파라미터로 인코딩하여 전송
-    const encodedCategory = encodeURIComponent(category);
-    const response = await apiClient.get(`/api/restaurant-details/nearby?lat=${lat}&lng=${lng}&category=${encodedCategory}${lang ? `&lang=${lang}` : ''}`);
+    const response = await apiClient.get(`${endpoint}${queryString}`);
+    logApiResponse(endpoint, response.data);
     
     return response.data;
   } catch (error) {
-    console.error('Error fetching nearby restaurants:', error);
+    const apiError = handleApiError(error);
+    console.error(`Error fetching nearby restaurants: ${apiError.message}`, apiError);
     
     // 에러 발생 시 샘플 데이터 반환 (개발용)
-    return getSampleRestaurants();
+    if (process.env.NODE_ENV === 'development') {
+      console.info('Using sample restaurant data in development environment');
+      return getSampleRestaurants();
+    }
+    
+    throw apiError;
+  }
+};
+
+/**
+ * 음식점 상세 정보 조회
+ * @param id 음식점 ID
+ * @returns 음식점 상세 정보
+ */
+export const getRestaurantDetails = async (id: string): Promise<Restaurant> => {
+  const endpoint = `/api/restaurant-details/${id}`;
+  
+  try {
+    const response = await apiClient.get(endpoint);
+    logApiResponse(endpoint, response.data);
+    
+    return response.data;
+  } catch (error) {
+    const apiError = handleApiError(error);
+    console.error(`Error fetching restaurant details: ${apiError.message}`, apiError);
+    
+    throw apiError;
   }
 };
 
