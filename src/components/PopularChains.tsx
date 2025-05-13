@@ -4,6 +4,7 @@ import LoadingState from './LoadingState';
 import ErrorState from './ErrorState';
 import EmptyState from './EmptyState';
 import { STATUS_MESSAGES } from '../config/constants';
+import ImageWithFallback from './ImageWithFallback';
 
 const PopularChains: React.FC = () => {
   const { chains, loading, error, refetch } = usePopularChains();
@@ -46,10 +47,11 @@ const PopularChains: React.FC = () => {
           {chains.map((chain) => (
             <div key={chain.id} className="flex flex-col items-center min-w-[80px] pb-3">
               <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md border mb-2">
-                <img 
+                <ImageWithFallback 
                   src={chain.logo} 
                   alt={chain.name} 
                   className="w-12 h-12 object-contain"
+                  fallback="https://delivereee.github.io/home/images/chains/default-logo.png"
                 />
               </div>
               <span className="text-sm text-center">{chain.name}</span>

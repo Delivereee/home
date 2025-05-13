@@ -11,7 +11,12 @@ export interface Chain {
  * 이미지 경로를 만드는 함수
  */
 const getLogoPath = (imageName: string): string => {
-  return `${process.env.PUBLIC_URL}/images/chains/${imageName}`;
+  // 개발 환경에서는 상대 경로 사용, 배포 환경에서는 절대 경로 사용
+  if (process.env.NODE_ENV === 'development') {
+    return `/images/chains/${imageName}`;
+  }
+  // GitHub Pages 배포 경로
+  return `https://delivereee.github.io/home/images/chains/${imageName}`;
 }
 
 /**

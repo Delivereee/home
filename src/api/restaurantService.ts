@@ -8,6 +8,12 @@ import { buildQueryString, handleApiError, logApiResponse } from './utils';
  * @returns 음식점 목록
  */
 export const getNearbyRestaurants = async (params: RestaurantSearchParams): Promise<Restaurant[]> => {
+  // 배포 환경에서는 즉시 샘플 데이터 반환
+  if (process.env.NODE_ENV !== 'development') {
+    console.info('Production environment: using sample restaurant data');
+    return getSampleRestaurants();
+  }
+
   const endpoint = '/api/restaurant-details/nearby';
   
   try {
@@ -26,13 +32,9 @@ export const getNearbyRestaurants = async (params: RestaurantSearchParams): Prom
     const apiError = handleApiError(error);
     console.error(`Error fetching nearby restaurants: ${apiError.message}`, apiError);
     
-    // 에러 발생 시 샘플 데이터 반환 (개발용)
-    if (process.env.NODE_ENV === 'development') {
-      console.info('Using sample restaurant data in development environment');
-      return getSampleRestaurants();
-    }
-    
-    throw apiError;
+    // 에러 발생 시 샘플 데이터 반환
+    console.info('Using sample restaurant data');
+    return getSampleRestaurants();
   }
 };
 
@@ -42,6 +44,13 @@ export const getNearbyRestaurants = async (params: RestaurantSearchParams): Prom
  * @returns 음식점 상세 정보
  */
 export const getRestaurantDetails = async (id: string): Promise<Restaurant> => {
+  // 배포 환경에서는 즉시 샘플 데이터 반환
+  if (process.env.NODE_ENV !== 'development') {
+    console.info('Production environment: using sample restaurant data');
+    const samples = getSampleRestaurants();
+    return samples.find(r => r.id === id) || samples[0];
+  }
+
   const endpoint = `/api/restaurant-details/${id}`;
   
   try {
@@ -53,7 +62,10 @@ export const getRestaurantDetails = async (id: string): Promise<Restaurant> => {
     const apiError = handleApiError(error);
     console.error(`Error fetching restaurant details: ${apiError.message}`, apiError);
     
-    throw apiError;
+    // 에러 발생 시 샘플 데이터 반환
+    console.info('Using sample restaurant data');
+    const samples = getSampleRestaurants();
+    return samples.find(r => r.id === id) || samples[0];
   }
 };
 

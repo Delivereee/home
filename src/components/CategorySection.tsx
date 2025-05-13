@@ -5,6 +5,7 @@ import LoadingState from './LoadingState';
 import ErrorState from './ErrorState';
 import { useCategories } from '../hooks/useCategories';
 import { STATUS_MESSAGES } from '../config/constants';
+import ImageWithFallback from './ImageWithFallback';
 
 const CategorySection: React.FC = () => {
   const { categories, loading, error, refetch } = useCategories();
@@ -46,10 +47,11 @@ const CategorySection: React.FC = () => {
             className="relative overflow-hidden rounded-lg h-40 cursor-pointer"
             onClick={() => handleCategoryClick(category)}
           >
-            <img 
+            <ImageWithFallback 
               src={category.image} 
               alt={category.name}
               className="w-full h-full object-cover"
+              fallback="https://delivereee.github.io/home/images/categories/default-food.jpg"
             />
             <div className="absolute inset-0 bg-black bg-opacity-30 flex items-end">
               <h3 className="text-white text-xl font-bold p-3">{category.nameEn || category.name}</h3>
