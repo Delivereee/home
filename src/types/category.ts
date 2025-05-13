@@ -21,12 +21,17 @@ export interface Category {
   image: string;
 }
 
-// 기본 카테고리 데이터 (로컬 이미지 경로 사용)
+// 이미지 경로를 만드는 함수
+const getImagePath = (imageName: string): string => {
+  return `${process.env.PUBLIC_URL}/images/categories/${imageName}`;
+}
+
+// 기본 카테고리 데이터 (PUBLIC_URL을 이용한 경로 사용)
 export const CATEGORIES: Category[] = [
-  { id: 'korean-bbq', name: FoodCategory.KOREAN_BBQ, nameEn: 'Korean BBQ', image: '/images/categories/korean-bbq.jpg' },
-  { id: 'street-food', name: FoodCategory.STREET_FOOD, nameEn: 'Street Food', image: '/images/categories/street-food.jpg' },
-  { id: 'bibimbap', name: FoodCategory.BIBIMBAP, nameEn: 'Bibimbap', image: '/images/categories/bibimbap.jpg' },
-  { id: 'fried-chicken', name: FoodCategory.FRIED_CHICKEN, nameEn: 'Fried Chicken', image: '/images/categories/fried-chicken.jpg' },
-  { id: 'tteokbokki', name: FoodCategory.TTEOKBOKKI, nameEn: 'Tteokbokki', image: '/images/categories/tteokbokki.jpg' },
-  { id: 'desserts', name: FoodCategory.DESSERTS, nameEn: 'Desserts', image: '/images/categories/desserts.jpg' },
+  { id: 'korean-bbq', name: FoodCategory.KOREAN_BBQ, nameEn: 'Korean BBQ', image: getImagePath('korean-bbq.jpg') },
+  { id: 'street-food', name: FoodCategory.STREET_FOOD, nameEn: 'Street Food', image: getImagePath('street-food.jpg') },
+  { id: 'bibimbap', name: FoodCategory.BIBIMBAP, nameEn: 'Bibimbap', image: getImagePath('bibimbap.jpg') },
+  { id: 'fried-chicken', name: FoodCategory.FRIED_CHICKEN, nameEn: 'Fried Chicken', image: getImagePath('fried-chicken.jpg') },
+  { id: 'tteokbokki', name: FoodCategory.TTEOKBOKKI, nameEn: 'Tteokbokki', image: getImagePath('tteokbokki.jpg') },
+  { id: 'desserts', name: FoodCategory.DESSERTS, nameEn: 'Desserts', image: getImagePath('desserts.jpg') },
 ]; 

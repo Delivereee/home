@@ -8,32 +8,39 @@ export interface Chain {
 }
 
 /**
+ * 이미지 경로를 만드는 함수
+ */
+const getLogoPath = (imageName: string): string => {
+  return `${process.env.PUBLIC_URL}/images/chains/${imageName}`;
+}
+
+/**
  * 샘플 체인점 데이터
  */
 export const SAMPLE_CHAINS: Chain[] = [
   { 
     id: 'mcdonalds', 
     name: "McDonald's", 
-    logo: '/images/chains/mcdonalds.png' 
+    logo: getLogoPath('mcdonalds.png')
   },
   { 
     id: 'kfc', 
     name: 'KFC', 
-    logo: '/images/chains/kfc.png' 
+    logo: getLogoPath('kfc.png')
   },
   { 
     id: 'burger-king', 
     name: 'Burger King', 
-    logo: '/images/chains/burger-king.png' 
+    logo: getLogoPath('burger-king.png')
   },
   { 
     id: 'starbucks', 
     name: 'Starbucks', 
-    logo: '/images/chains/starbucks.png' 
+    logo: getLogoPath('starbucks.png')
   },
   { 
     id: 'pizza-hut', 
     name: 'Pizza Hut', 
-    logo: '/images/chains/pizza-hut.png'
+    logo: getLogoPath('pizza-hut.png')
   }
 ]; 
