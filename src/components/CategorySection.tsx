@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCategories } from '../api/categoryService';
-import { FoodCategory, CATEGORIES, Category } from '../types/category';
+import { CATEGORIES, Category } from '../types/category';
 
 const CategorySection: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);

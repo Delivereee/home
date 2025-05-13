@@ -6,7 +6,6 @@ export enum FoodCategory {
   FRIED_CHICKEN = '치킨',
   TTEOKBOKKI = '떡볶이',
   DESSERTS = '디저트',
-  PIZZA = '피자',
   CHINESE = '중식',
   JAPANESE = '일식',
   WESTERN = '양식',
@@ -30,5 +29,4 @@ export const CATEGORIES: Category[] = [
   { id: 'fried-chicken', name: FoodCategory.FRIED_CHICKEN, nameEn: 'Fried Chicken', image: 'https://source.unsplash.com/random/300x200/?fried-chicken' },
   { id: 'tteokbokki', name: FoodCategory.TTEOKBOKKI, nameEn: 'Tteokbokki', image: 'https://source.unsplash.com/random/300x200/?tteokbokki' },
   { id: 'desserts', name: FoodCategory.DESSERTS, nameEn: 'Desserts', image: 'https://source.unsplash.com/random/300x200/?desserts' },
-  { id: 'pizza', name: FoodCategory.PIZZA, nameEn: 'Pizza', image: 'https://source.unsplash.com/random/300x200/?pizza' },
 ]; 

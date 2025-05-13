@@ -39,19 +39,21 @@ const PopularChains: React.FC = () => {
   return (
     <div className="p-4 pb-20">
       <h2 className="text-xl font-semibold mb-4 text-left">Popular Chains</h2>
-      <div className="flex overflow-x-auto scrollbar-hide pb-2 space-x-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-        {chains.map((chain) => (
-          <div key={chain.id} className="flex flex-col items-center min-w-[80px]">
-            <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md border mb-2">
-              <img 
-                src={chain.logo} 
-                alt={chain.name} 
-                className="w-12 h-12 object-contain"
-              />
+      <div className="relative">
+        <div className="flex overflow-x-auto scrollbar-hide pb-2 space-x-4 border-b border-gray-200" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          {chains.map((chain) => (
+            <div key={chain.id} className="flex flex-col items-center min-w-[80px] pb-3">
+              <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md border mb-2">
+                <img 
+                  src={chain.logo} 
+                  alt={chain.name} 
+                  className="w-12 h-12 object-contain"
+                />
+              </div>
+              <span className="text-sm text-center">{chain.name}</span>
             </div>
-            <span className="text-sm text-center">{chain.name}</span>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
       
       {/* Social Media Icons */}

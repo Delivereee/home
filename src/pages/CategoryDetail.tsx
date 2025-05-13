@@ -22,7 +22,7 @@ const CategoryDetail: React.FC = () => {
         const lng = 127.043914628076;
         
         // URL에서 받은 카테고리 이름을 사용하거나 기본값 사용
-        const category = categoryName || FoodCategory.PIZZA;
+        const category = categoryName || FoodCategory.FAST_FOOD;
         
         const data = await getNearbyRestaurants({
           category,
