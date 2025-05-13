@@ -1,40 +1,42 @@
 import React from 'react';
-
-interface Chain {
-  id: string;
-  name: string;
-  logo: string;
-}
+import { usePopularChains } from '../hooks/usePopularChains';
+import LoadingState from './LoadingState';
+import ErrorState from './ErrorState';
+import EmptyState from './EmptyState';
+import { STATUS_MESSAGES } from '../config/constants';
 
 const PopularChains: React.FC = () => {
-  // 샘플 체인점 데이터
-  const chains: Chain[] = [
-    { 
-      id: 'mcdonalds', 
-      name: "McDonald's", 
-      logo: '/images/chains/mcdonalds.png' 
-    },
-    { 
-      id: 'kfc', 
-      name: 'KFC', 
-      logo: '/images/chains/kfc.png' 
-    },
-    { 
-      id: 'burger-king', 
-      name: 'Burger King', 
-      logo: '/images/chains/burger-king.png' 
-    },
-    { 
-      id: 'starbucks', 
-      name: 'Starbucks', 
-      logo: '/images/chains/starbucks.png' 
-    },
-    { 
-      id: 'pizza-hut', 
-      name: 'Pizza Hut', 
-      logo: '/images/chains/pizza-hut.png'
-    }
-  ];
+  const { chains, loading, error, refetch } = usePopularChains();
+
+  // 로딩 상태 표시
+  if (loading) {
+    return (
+      <div className="p-4">
+        <h2 className="text-xl font-semibold mb-4 text-left">Popular Chains</h2>
+        <LoadingState height="h-20" message={STATUS_MESSAGES.loading.chains} />
+      </div>
+    );
+  }
+
+  // 에러 상태 표시
+  if (error) {
+    return (
+      <div className="p-4">
+        <h2 className="text-xl font-semibold mb-4 text-left">Popular Chains</h2>
+        <ErrorState height="h-20" message={error} onRetry={refetch} />
+      </div>
+    );
+  }
+
+  // 체인점이 없는 경우
+  if (chains.length === 0) {
+    return (
+      <div className="p-4">
+        <h2 className="text-xl font-semibold mb-4 text-left">Popular Chains</h2>
+        <EmptyState message={STATUS_MESSAGES.empty.chains} />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 pb-20">
@@ -53,22 +55,6 @@ const PopularChains: React.FC = () => {
               <span className="text-sm text-center">{chain.name}</span>
             </div>
           ))}
-        </div>
-      </div>
-      
-      {/* Social Media Icons */}
-      <div className="flex justify-center mt-10 space-x-4">
-        <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
-          <span className="text-white text-2xl">W</span>
-        </div>
-        <div className="w-10 h-10 rounded-full bg-green-400 flex items-center justify-center">
-          <span className="text-white text-2xl">L</span>
-        </div>
-        <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center">
-          <span className="text-white text-2xl">W</span>
-        </div>
-        <div className="w-10 h-10 rounded-full bg-red-400 flex items-center justify-center">
-          <span className="text-white text-2xl">C</span>
         </div>
       </div>
     </div>
