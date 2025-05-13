@@ -1,20 +1,34 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
 import CategorySection from './components/CategorySection';
 import PopularChains from './components/PopularChains';
 import NavigationBar from './components/NavigationBar';
+import CategoryDetail from './pages/CategoryDetail';
 
 function App() {
   return (
-    <div className="App bg-gray-50 min-h-screen">
-      <Header />
-      <main className="pb-16">
-        <CategorySection />
-        <PopularChains />
-      </main>
-      <NavigationBar />
-    </div>
+    <Router>
+      <div className="App bg-gray-50 min-h-screen">
+        <Routes>
+          {/* 홈 화면 */}
+          <Route path="/" element={
+            <>
+              <Header />
+              <main className="pb-16">
+                <CategorySection />
+                <PopularChains />
+              </main>
+              <NavigationBar />
+            </>
+          } />
+          
+          {/* 카테고리 상세 페이지 */}
+          <Route path="/categories/:categoryId/:categoryName" element={<CategoryDetail />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
