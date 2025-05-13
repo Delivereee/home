@@ -12,27 +12,27 @@ const PopularChains: React.FC = () => {
     { 
       id: 'mcdonalds', 
       name: "McDonald's", 
-      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/McDonald%27s_Golden_Arches.svg/800px-McDonald%27s_Golden_Arches.svg.png' 
+      logo: '/images/chains/mcdonalds.png' 
     },
     { 
       id: 'kfc', 
       name: 'KFC', 
-      logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/bf/KFC_logo.svg/1024px-KFC_logo.svg.png' 
+      logo: '/images/chains/kfc.png' 
     },
     { 
-      id: 'burgerking', 
+      id: 'burger-king', 
       name: 'Burger King', 
-      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Burger_King_logo_%281999%29.svg/1024px-Burger_King_logo_%281999%29.svg.png' 
+      logo: '/images/chains/burger-king.png' 
     },
     { 
       id: 'starbucks', 
       name: 'Starbucks', 
-      logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/d/d3/Starbucks_Corporation_Logo_2011.svg/1024px-Starbucks_Corporation_Logo_2011.svg.png' 
+      logo: '/images/chains/starbucks.png' 
     },
     { 
-      id: 'pizzahut', 
+      id: 'pizza-hut', 
       name: 'Pizza Hut', 
-      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Pizza_Hut_1967-1999_logo.svg/1024px-Pizza_Hut_1967-1999_logo.svg.png' 
+      logo: '/images/chains/pizza-hut.png'
     }
   ];
 

@@ -21,12 +21,12 @@ export interface Category {
   image: string;
 }
 
-// 기본 카테고리 데이터
+// 기본 카테고리 데이터 (로컬 이미지 경로 사용)
 export const CATEGORIES: Category[] = [
-  { id: 'korean-bbq', name: FoodCategory.KOREAN_BBQ, nameEn: 'Korean BBQ', image: 'https://source.unsplash.com/random/300x200/?korean-bbq' },
-  { id: 'street-food', name: FoodCategory.STREET_FOOD, nameEn: 'Street Food', image: 'https://source.unsplash.com/random/300x200/?street-food' },
-  { id: 'bibimbap', name: FoodCategory.BIBIMBAP, nameEn: 'Bibimbap', image: 'https://source.unsplash.com/random/300x200/?bibimbap' },
-  { id: 'fried-chicken', name: FoodCategory.FRIED_CHICKEN, nameEn: 'Fried Chicken', image: 'https://source.unsplash.com/random/300x200/?fried-chicken' },
-  { id: 'tteokbokki', name: FoodCategory.TTEOKBOKKI, nameEn: 'Tteokbokki', image: 'https://source.unsplash.com/random/300x200/?tteokbokki' },
-  { id: 'desserts', name: FoodCategory.DESSERTS, nameEn: 'Desserts', image: 'https://source.unsplash.com/random/300x200/?desserts' },
+  { id: 'korean-bbq', name: FoodCategory.KOREAN_BBQ, nameEn: 'Korean BBQ', image: '/images/categories/korean-bbq.jpg' },
+  { id: 'street-food', name: FoodCategory.STREET_FOOD, nameEn: 'Street Food', image: '/images/categories/street-food.jpg' },
+  { id: 'bibimbap', name: FoodCategory.BIBIMBAP, nameEn: 'Bibimbap', image: '/images/categories/bibimbap.jpg' },
+  { id: 'fried-chicken', name: FoodCategory.FRIED_CHICKEN, nameEn: 'Fried Chicken', image: '/images/categories/fried-chicken.jpg' },
+  { id: 'tteokbokki', name: FoodCategory.TTEOKBOKKI, nameEn: 'Tteokbokki', image: '/images/categories/tteokbokki.jpg' },
+  { id: 'desserts', name: FoodCategory.DESSERTS, nameEn: 'Desserts', image: '/images/categories/desserts.jpg' },
 ]; 
