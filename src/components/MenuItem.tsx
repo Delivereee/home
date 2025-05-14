@@ -3,6 +3,7 @@ import { MenuItem as MenuItemType } from '../types/menu';
 import { useCart } from '../contexts/CartContext';
 import { CartItem } from '../types/cart';
 import ImageWithFallback from './ImageWithFallback';
+import { useNavigate } from 'react-router-dom';
 
 interface MenuItemProps {
   menuItem: MenuItemType;
@@ -12,6 +13,7 @@ interface MenuItemProps {
 
 const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantName }) => {
   const { cart, addToCart, updateItemQuantity, canceledItemId } = useCart();
+  const navigate = useNavigate();
   
   // 영문 이름과 설명을 우선 사용하고, 없을 경우 기본 필드 사용
   const displayName = menuItem.nameEn || menuItem.name || '[Menu Name]';
@@ -95,6 +97,11 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
     }
   };
   
+  // 메뉴 상세 페이지로 이동
+  const handleViewMenuDetail = () => {
+    navigate(`/restaurant/${restaurantId}/menu/${menuItem.id}`);
+  };
+  
   return (
     <div className="flex flex-col pb-4 mb-4 border-b border-gray-200 hover:bg-gray-50 transition-colors">
       <div className="flex items-stretch relative">
@@ -156,6 +163,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
           className="absolute right-0 inset-y-0 flex items-center justify-center w-10 transition-colors hover:bg-gray-100 active:bg-gray-200 rounded-r cursor-pointer"
           role="button"
           aria-label="View menu details"
+          onClick={handleViewMenuDetail}
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-gray-400">
             <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
