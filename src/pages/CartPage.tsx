@@ -50,6 +50,11 @@ const CartPage: React.FC = () => {
     }
   };
   
+  // 레스토랑 브라우징 페이지로 이동
+  const navigateToRestaurants = () => {
+    navigate('/restaurants'); // 음식점 목록 페이지로 이동
+  };
+  
   // 수량 증가
   const increaseQuantity = (itemId: string, currentQuantity: number) => {
     updateItemQuantity(itemId, currentQuantity + 1);
@@ -79,9 +84,16 @@ const CartPage: React.FC = () => {
   if (!cart || cart.items.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <BackHeader title="Cart" />
-        <div className="p-4">
-          <EmptyState message="Your cart is empty" />
+        <BackHeader title="Your Cart" />
+        <div className="flex flex-col items-center justify-center h-[calc(100vh-120px)] px-6 text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-3">Your cart is empty</h2>
+          <p className="text-gray-500 mb-8">Add some delicious items from our restaurants!</p>
+          <button
+            onClick={navigateToRestaurants}
+            className="bg-red-500 text-white py-3 px-6 rounded-md font-medium hover:bg-red-600 transition-colors"
+          >
+            Browse Restaurants
+          </button>
         </div>
         <NavigationBar />
       </div>
