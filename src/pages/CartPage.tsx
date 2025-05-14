@@ -114,7 +114,7 @@ const CartPage: React.FC = () => {
               key={item.id} 
               className="bg-white rounded-lg shadow-sm overflow-hidden"
             >
-              <div className="flex items-start relative p-3">
+              <div className="flex items-start relative p-4 pb-4">
                 {/* 메뉴 이미지 */}
                 <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                   <ImageWithFallback
@@ -125,44 +125,44 @@ const CartPage: React.FC = () => {
                   />
                 </div>
                 
-                {/* 메뉴 정보 - 좌측 여백 증가 */}
-                <div className="flex-grow flex flex-col justify-between pl-5 py-1 min-h-[5rem]">
+                {/* 메뉴 정보 - 간격 조정 */}
+                <div className="flex-grow flex flex-col justify-between ml-4 py-1">
                   <div>
-                    <h3 className="text-base font-medium mb-1 text-left line-clamp-1 text-gray-800">{item.name}</h3>
-                    <span className="text-base font-medium text-gray-900">{formatPrice(item.price)}</span>
-                    <span className="text-xs text-gray-500 block">(per 1 piece)</span>
+                    <h3 className="text-lg font-medium mb-1 text-left line-clamp-2 text-gray-800">{item.name}</h3>
+                    <span className="text-base font-medium text-left text-gray-900 block">{formatPrice(item.price)}</span>
+                    <span className="text-xs text-left text-gray-500 block">(per 1 piece)</span>
                   </div>
                 </div>
                 
-                {/* 수량 조절 - 우측 정렬 */}
-                <div className="flex items-center space-x-2 ml-auto">
-                  <button
-                    className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full bg-white text-gray-700 shadow-sm"
-                    onClick={() => decreaseQuantity(item.id, item.quantity)}
-                    aria-label={`Decrease quantity of ${item.name}`}
-                  >
-                    <span className="text-lg font-medium">−</span>
-                  </button>
-                  <span className="text-base font-medium min-w-[20px] text-center text-gray-800">{item.quantity}</span>
-                  <button
-                    className="w-8 h-8 flex items-center justify-center border rounded-full bg-red-500 text-white border-red-500 shadow-sm"
-                    onClick={() => increaseQuantity(item.id, item.quantity)}
-                    aria-label={`Increase quantity of ${item.name}`}
-                  >
-                    <span className="text-lg font-medium">+</span>
-                  </button>
-                </div>
-                
-                {/* 삭제 버튼 */}
+                {/* 삭제 버튼 - 우측 상단 */}
                 <button
-                  className="absolute right-3 top-3 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                  className="absolute right-4 top-4 text-gray-400 hover:text-gray-500"
                   onClick={() => handleRemoveItem(item.id)}
                   aria-label={`Remove ${item.name} from cart`}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                     <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
                   </svg>
                 </button>
+                
+                {/* 수량 조절 - 우측 하단으로 이동 */}
+                <div className="absolute bottom-4 right-4 flex items-center space-x-3">
+                  <button
+                    className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-full bg-white text-gray-700"
+                    onClick={() => decreaseQuantity(item.id, item.quantity)}
+                    aria-label={`Decrease quantity of ${item.name}`}
+                  >
+                    <span className="text-xl font-medium">−</span>
+                  </button>
+                  <span className="text-lg font-medium min-w-[24px] text-center text-gray-800">{item.quantity}</span>
+                  <button
+                    className="w-10 h-10 flex items-center justify-center border rounded-full bg-red-500 text-white border-red-500"
+                    onClick={() => increaseQuantity(item.id, item.quantity)}
+                    aria-label={`Increase quantity of ${item.name}`}
+                  >
+                    <span className="text-xl font-medium">+</span>
+                  </button>
+                </div>
               </div>
             </div>
           ))}
