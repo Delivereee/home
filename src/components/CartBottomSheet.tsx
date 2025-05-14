@@ -25,7 +25,7 @@ const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onChe
   };
   
   return (
-    <div className="fixed bottom-16 left-0 right-0 bg-white border-t shadow-lg rounded-t-lg z-10">
+    <div className="fixed bottom-16 left-0 right-0 bg-white border-t shadow-xl rounded-t-2xl z-10">
       <div className="py-3 px-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex-shrink-0 min-w-[30%]">
@@ -35,7 +35,7 @@ const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onChe
           <div className="flex-grow flex justify-end">
             {deliveryAvailable ? (
               <button 
-                className="min-w-[80%] bg-red-500 text-white py-3.5 px-4 rounded-md font-semibold flex items-center justify-center"
+                className="min-w-[80%] bg-red-500 text-white py-3.5 px-4 rounded-lg font-semibold flex items-center justify-center shadow-md"
                 onClick={onCheckout}
               >
                 <div className="text-red-500 bg-white rounded-full w-5 h-5 flex items-center justify-center mr-3">
@@ -45,7 +45,7 @@ const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onChe
               </button>
             ) : (
               <button 
-                className="min-w-[80%] bg-gray-300 text-gray-700 py-3.5 px-4 rounded-md font-semibold flex items-center justify-center"
+                className="min-w-[80%] bg-gray-300 text-gray-700 py-3.5 px-4 rounded-lg font-semibold flex items-center justify-center shadow-md"
                 disabled
               >
                 {formatPrice(amountToMinOrder)} 더 담으면 배달 가능
