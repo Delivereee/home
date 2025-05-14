@@ -6,6 +6,7 @@ import CategorySection from './components/CategorySection';
 import PopularChains from './components/PopularChains';
 import NavigationBar from './components/NavigationBar';
 import CategoryDetail from './pages/CategoryDetail';
+import RestaurantDetail from './pages/RestaurantDetail';
 
 function App() {
   return (
@@ -44,6 +45,9 @@ function App() {
           
           {/* 체인점 상세 페이지 */}
           <Route path="/chains/:chainId/:chainName" element={<CategoryDetail />} />
+          
+          {/* 가게 상세 페이지 */}
+          <Route path="/restaurant/:restaurantId" element={<RestaurantDetail />} />
         </Routes>
       </div>
     </Router>

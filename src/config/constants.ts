@@ -17,16 +17,19 @@ export const STATUS_MESSAGES = {
   loading: {
     categories: 'Loading categories...',
     restaurants: 'Loading restaurants...',
-    chains: 'Loading popular chains...'
+    chains: 'Loading popular chains...',
+    menus: 'Loading menus...'
   },
   error: {
     categories: 'Failed to load categories. Please try again later.',
     restaurants: 'Failed to load restaurants. Please try again later.',
     chains: 'Failed to load popular chains. Please try again later.',
+    menus: 'Failed to load menus. Please try again later.',
     default: 'Something went wrong. Please try again later.'
   },
   empty: {
     restaurants: 'No restaurants found for this category.',
-    chains: 'No popular chains found.'
+    chains: 'No popular chains found.',
+    menus: 'No menus available for this restaurant.'
   }
 }; 

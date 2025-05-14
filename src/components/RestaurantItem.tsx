@@ -1,11 +1,15 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Restaurant } from '../types/restaurant';
 
 interface RestaurantItemProps {
   restaurant: Restaurant;
+  disableNavigation?: boolean;
 }
 
-const RestaurantItem: React.FC<RestaurantItemProps> = ({ restaurant }) => {
+const RestaurantItem: React.FC<RestaurantItemProps> = ({ restaurant, disableNavigation = false }) => {
+  const navigate = useNavigate();
+  
   // 영문 이름과 설명을 우선 사용하고, 없을 경우 기본 필드 사용
   const displayName = restaurant.nameEn || restaurant.name || '[Shop Name]';
   const displayDescription = restaurant.introductionTitleEn || restaurant.introductionTitle || '[shop description]';
@@ -20,9 +24,18 @@ const RestaurantItem: React.FC<RestaurantItemProps> = ({ restaurant }) => {
   const minOrderText = restaurant.minOrderAmount > 0 
     ? `Minimum Order: $${minOrderInUSD.toFixed(2)}` 
     : 'No Minimum Order';
+    
+  // 가게 상세 페이지로 이동
+  const handleClick = () => {
+    if (disableNavigation) return;
+    navigate(`/restaurant/${restaurant.id}`);
+  };
 
   return (
-    <div className="border rounded-lg overflow-hidden mb-4 bg-white shadow-sm">
+    <div 
+      className={`border rounded-lg overflow-hidden mb-4 bg-white shadow-sm ${!disableNavigation ? 'cursor-pointer' : ''}`}
+      onClick={handleClick}
+    >
       {/* 레스토랑 이미지 */}
       <div className="h-48 overflow-hidden">
         <img 
