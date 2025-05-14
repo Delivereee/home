@@ -1,23 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Delivereee</title>
-  <script type="text/javascript">
-    // GitHub Pages에서 SPA 라우팅을 위한 리다이렉트
-    // https://github.com/rafgraph/spa-github-pages
-    var pathSegmentsToKeep = 1;
+  <title>Page Not Found</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f9fafb;
+      color: #1f2937;
+    }
+    .container {
+      text-align: center;
+      padding: 2rem;
+      max-width: 500px;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      margin-bottom: 2rem;
+      color: #4b5563;
+      line-height: 1.5;
+    }
+    .redirect-message {
+      margin-top: 1rem;
+      font-style: italic;
+      color: #6b7280;
+    }
+  </style>
+  <script>
+    // This script handles the redirect for GitHub Pages
+    // It preserves the path and redirects to the main app
+    (function() {
+      // Get the current path
+      var path = window.location.pathname;
+      // Extract the base path for the GitHub Pages site
+      var basePath = '/home';
+      
+      // If we're not at the base route
+      if (path !== basePath && path !== basePath + '/') {
+        // Store the current URL's path to redirect within the SPA
+        sessionStorage.setItem('redirectPath', path.replace(basePath, ''));
+      }
+      
+      // Redirect to the main app
+      var redirectUrl = window.location.origin + basePath;
+      var timer = setTimeout(function() {
+        window.location.href = redirectUrl;
+      }, 3000);
 
-    var l = window.location;
-    l.replace(
-      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-      l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-      l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-      l.hash
-    );
+      // Allow user to cancel redirect by clicking anywhere
+      document.addEventListener('click', function() {
+        clearTimeout(timer);
+        window.location.href = redirectUrl;
+      });
+    })();
   </script>
 </head>
 <body>
+  <div class="container">
+    <h1>Page Not Found</h1>
+    <p>The page you're looking for doesn't exist or has been moved.</p>
+    <p>We'll redirect you to the home page in a few seconds.</p>
+    <div class="redirect-message">Click anywhere to redirect immediately</div>
+  </div>
 </body>
 </html> 

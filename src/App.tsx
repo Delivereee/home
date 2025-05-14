@@ -13,6 +13,7 @@ import CartReplaceConfirm from './components/CartReplaceConfirm';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
   return (
@@ -68,6 +69,9 @@ function App() {
             
             {/* 주문 성공 페이지 */}
             <Route path="/order-success" element={<OrderSuccessPage />} />
+            
+            {/* 404 에러 페이지 - 항상 모든 라우트의 마지막에 배치 */}
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
 
           {/* 전역 컴포넌트 - 어디서든 접근 가능 */}
