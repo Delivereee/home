@@ -25,7 +25,10 @@ const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onChe
   };
   
   return (
-    <div className="fixed bottom-16 left-0 right-0 bg-white border-t shadow-xl rounded-t-2xl z-10">
+    <div className="fixed bottom-[49px] left-0 right-0 bg-white border-t border-gray-200 z-10">
+      {/* 경계선 - 네비게이션 바와의 구분선 */}
+      <div className="absolute -top-px left-0 right-0 h-px bg-gray-200"></div>
+      
       <div className="py-3 px-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex-shrink-0 min-w-[30%]">
