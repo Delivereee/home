@@ -31,8 +31,8 @@ const CartPage: React.FC = () => {
   // 총 주문 금액
   const total = subtotal + DELIVERY_FEE + PROXY_FEE;
   
-  // 최소 주문 금액 (하드코딩된 값)
-  const minOrderAmount = 10; // $10
+  // 최소 주문 금액 (CartContext에서 제공)
+  const minOrderAmount = getMinOrderAmount();
   
   // 최소 주문 금액 충족 여부
   const deliveryAvailable = isDeliveryAvailable(minOrderAmount);

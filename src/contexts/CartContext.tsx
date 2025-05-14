@@ -17,6 +17,8 @@ interface CartContextType {
   showCartReplaceConfirm: boolean;
   pendingCartItem: { restaurantId: string; restaurantName: string; item: CartItem } | null;
   canceledItemId: string | null;
+  restaurantMinOrderAmount: number | null;
+  setRestaurantMinOrderAmount: (amount: number | null) => void;
   addToCart: (restaurantId: string, restaurantName: string, item: CartItem) => void;
   updateItemQuantity: (itemId: string, quantity: number) => void;
   removeItem: (itemId: string) => void;
@@ -174,6 +176,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [showCartReplaceConfirm, setShowCartReplaceConfirm] = useState<boolean>(false);
   const [pendingCartItem, setPendingCartItem] = useState<{ restaurantId: string; restaurantName: string; item: CartItem } | null>(null);
   const [canceledItemId, setCanceledItemId] = useState<string | null>(null);
+  const [restaurantMinOrderAmount, setRestaurantMinOrderAmount] = useState<number | null>(null);
   
   // 초기 마운트 시에 로컬 스토리지에서 불러온 cart와 currentRestaurantId를 동기화
   useEffect(() => {
@@ -190,8 +193,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       localStorage.setItem('cart', JSON.stringify(cart));
     } else {
       localStorage.removeItem('cart');
-      // 카트가 비어있을 때 currentRestaurantId도 초기화
+      // 카트가 비어있을 때 관련 상태 초기화
       setCurrentRestaurantId(null);
+      setRestaurantMinOrderAmount(null);
     }
   }, [cart]);
   
@@ -286,6 +290,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const clearCart = () => {
     setSwitchMessage(null);
     setCurrentRestaurantId(null); // 카트를 비울 때 현재 레스토랑 ID도 초기화
+    setRestaurantMinOrderAmount(null); // 카트를 비울 때 최소 주문 금액도 초기화
     dispatch({ type: 'CLEAR_CART' });
   };
   
@@ -319,9 +324,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   
   // 최소 주문 금액 가져오기 (USD로 변환)
   const getMinOrderAmount = (): number | null => {
-    // 실제로는 레스토랑 API에서 가져오거나 전달받아야 함
-    // 임시 로직: null 반환 (최소 주문 금액 없음)
-    return null;
+    // 저장된 레스토랑의 최소 주문 금액 반환
+    return restaurantMinOrderAmount;
   };
   
   // 배달 가능 여부 확인
@@ -345,6 +349,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     showCartReplaceConfirm,
     pendingCartItem,
     canceledItemId,
+    restaurantMinOrderAmount,
+    setRestaurantMinOrderAmount,
     addToCart,
     updateItemQuantity,
     removeItem,

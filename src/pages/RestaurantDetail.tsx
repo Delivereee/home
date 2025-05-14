@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useRestaurant } from '../hooks/useRestaurant';
 import { useRestaurantMenus } from '../hooks/useRestaurantMenus';
+import { useCart } from '../contexts/CartContext';
 import BackHeader from '../components/BackHeader';
 import RestaurantItem from '../components/RestaurantItem';
 import NavigationBar from '../components/NavigationBar';
@@ -15,6 +16,7 @@ import { STATUS_MESSAGES } from '../config/constants';
 const RestaurantDetail: React.FC = () => {
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
   const navigate = useNavigate();
+  const { setRestaurantMinOrderAmount } = useCart();
   
   // 가게 정보 가져오기
   const { restaurant, loading: restaurantLoading, error: restaurantError } = useRestaurant(restaurantId);
@@ -28,6 +30,13 @@ const RestaurantDetail: React.FC = () => {
     if (!restaurant || !restaurant.minOrderAmount) return null;
     return restaurant.minOrderAmount * EXCHANGE_RATE;
   }, [restaurant]);
+  
+  // CartContext에 최소 주문 금액 저장
+  useEffect(() => {
+    if (minOrderInUSD !== null) {
+      setRestaurantMinOrderAmount(minOrderInUSD);
+    }
+  }, [minOrderInUSD, setRestaurantMinOrderAmount]);
   
   // 영문 이름을 우선 사용하고, 없을 경우 기본 필드 사용
   const displayName = useMemo(() => {
