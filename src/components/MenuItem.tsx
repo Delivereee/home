@@ -59,11 +59,12 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
   
   // 장바구니 업데이트
   const updateCartItem = (newQuantity: number) => {
+    // 수량이 0이면 아이템 제거 (updateItemQuantity에서 자동으로 처리됨)
     if (newQuantity === 0) {
-      // 수량이 0이면 아이템 제거 (updateItemQuantity에서 자동으로 처리됨)
       updateItemQuantity(menuItem.id, 0);
-    } else if (quantity === 0 && newQuantity > 0) {
-      // 처음 추가하는 경우
+    } 
+    // 처음 추가하는 경우 (혹은 다른 레스토랑 카트가 있을 경우)
+    else if (quantity === 0 && newQuantity > 0) {
       const cartItem: CartItem = {
         id: menuItem.id,
         name: displayName,
@@ -74,8 +75,9 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
       };
       
       addToCart(restaurantId, restaurantName, cartItem);
-    } else {
-      // 기존 아이템 수량 업데이트
+    } 
+    // 기존 아이템 수량 업데이트 (같은 레스토랑일 경우에만)
+    else if (cart && cart.restaurantId === restaurantId) {
       updateItemQuantity(menuItem.id, newQuantity);
     }
   };

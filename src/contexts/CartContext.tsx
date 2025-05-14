@@ -6,11 +6,16 @@ type CartAction =
   | { type: 'ADD_ITEM'; payload: { restaurantId: string; restaurantName: string; item: CartItem } }
   | { type: 'UPDATE_ITEM_QUANTITY'; payload: { itemId: string; quantity: number } }
   | { type: 'REMOVE_ITEM'; payload: { itemId: string } }
-  | { type: 'CLEAR_CART' };
+  | { type: 'CLEAR_CART' }
+  | { type: 'REPLACE_CART'; payload: { restaurantId: string; restaurantName: string; item: CartItem } };
 
 // 카트 컨텍스트 타입 정의
 interface CartContextType {
   cart: Cart | null;
+  currentRestaurantId: string | null;
+  setCurrentRestaurantId: (id: string | null) => void;
+  showCartReplaceConfirm: boolean;
+  pendingCartItem: { restaurantId: string; restaurantName: string; item: CartItem } | null;
   addToCart: (restaurantId: string, restaurantName: string, item: CartItem) => void;
   updateItemQuantity: (itemId: string, quantity: number) => void;
   removeItem: (itemId: string) => void;
@@ -22,6 +27,8 @@ interface CartContextType {
   getAmountToMinOrder: (minOrderAmount: number | null) => number;
   switchMessage: string | null;
   clearSwitchMessage: () => void;
+  confirmReplaceCart: () => void;
+  cancelReplaceCart: () => void;
 }
 
 // 초기 카트 상태
@@ -53,15 +60,9 @@ const cartReducer = (state: Cart | null, action: CartAction): Cart | null => {
         };
       }
       
-      // 다른 레스토랑의 메뉴를 추가하려는 경우 - 카트를 초기화하고 새 아이템으로 시작
+      // 다른 레스토랑의 메뉴를 추가하려는 경우는 컨텍스트에서 처리하므로 여기서는 무시
       if (state.restaurantId !== restaurantId) {
-        // 사용자에게 다른 레스토랑의 메뉴를 추가할 것임을 알릴 수 있음
-        console.log(`Clearing cart and adding item from ${restaurantName}`);
-        return {
-          restaurantId,
-          restaurantName,
-          items: [item],
-        };
+        return state;
       }
       
       // 이미 카트에 있는 아이템인지 확인
@@ -87,6 +88,17 @@ const cartReducer = (state: Cart | null, action: CartAction): Cart | null => {
       return {
         ...state,
         items: [...state.items, item],
+      };
+    }
+    
+    case 'REPLACE_CART': {
+      const { restaurantId, restaurantName, item } = action.payload;
+      
+      // 새 카트로 완전히 교체
+      return {
+        restaurantId,
+        restaurantName,
+        items: [item],
       };
     }
     
@@ -149,6 +161,9 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cart, dispatch] = useReducer(cartReducer, null, loadCartFromStorage);
   const [switchMessage, setSwitchMessage] = useState<string | null>(null);
+  const [currentRestaurantId, setCurrentRestaurantId] = useState<string | null>(null);
+  const [showCartReplaceConfirm, setShowCartReplaceConfirm] = useState<boolean>(false);
+  const [pendingCartItem, setPendingCartItem] = useState<{ restaurantId: string; restaurantName: string; item: CartItem } | null>(null);
   
   // 카트 상태가 변경될 때마다 로컬 스토리지에 저장
   useEffect(() => {
@@ -161,15 +176,41 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   
   // 카트에 아이템 추가
   const addToCart = (restaurantId: string, restaurantName: string, item: CartItem) => {
-    // 다른 레스토랑 메뉴를 추가하려는 경우 메시지 설정
-    if (cart && cart.restaurantId !== restaurantId) {
-      setSwitchMessage(`Switched to ${restaurantName}. Your previous cart has been cleared.`);
+    // 카트가 비어있거나 같은 레스토랑의 아이템인 경우
+    if (!cart || cart.restaurantId === restaurantId) {
+      dispatch({
+        type: 'ADD_ITEM',
+        payload: { restaurantId, restaurantName, item },
+      });
+    } else {
+      // 다른 레스토랑의 메뉴를 추가하려는 경우 - 확인 팝업 표시
+      setPendingCartItem({ restaurantId, restaurantName, item });
+      setShowCartReplaceConfirm(true);
     }
-    
-    dispatch({
-      type: 'ADD_ITEM',
-      payload: { restaurantId, restaurantName, item },
-    });
+  };
+  
+  // 카트 교체 확인
+  const confirmReplaceCart = () => {
+    if (pendingCartItem) {
+      const { restaurantId, restaurantName, item } = pendingCartItem;
+      dispatch({
+        type: 'REPLACE_CART',
+        payload: { restaurantId, restaurantName, item },
+      });
+      
+      // 교체 확인 후 메시지 설정
+      setSwitchMessage(`Switched to ${restaurantName}. Your previous cart has been replaced.`);
+      
+      // 상태 초기화
+      setShowCartReplaceConfirm(false);
+      setPendingCartItem(null);
+    }
+  };
+  
+  // 카트 교체 취소
+  const cancelReplaceCart = () => {
+    setShowCartReplaceConfirm(false);
+    setPendingCartItem(null);
   };
   
   // 전환 메시지 초기화
@@ -250,6 +291,10 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // 컨텍스트 값
   const contextValue: CartContextType = {
     cart,
+    currentRestaurantId,
+    setCurrentRestaurantId,
+    showCartReplaceConfirm,
+    pendingCartItem,
     addToCart,
     updateItemQuantity,
     removeItem,
@@ -261,6 +306,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     getAmountToMinOrder,
     switchMessage,
     clearSwitchMessage,
+    confirmReplaceCart,
+    cancelReplaceCart
   };
   
   return (

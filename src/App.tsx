@@ -8,6 +8,7 @@ import PopularChains from './components/PopularChains';
 import NavigationBar from './components/NavigationBar';
 import CategoryDetail from './pages/CategoryDetail';
 import RestaurantDetail from './pages/RestaurantDetail';
+import CartReplaceConfirm from './components/CartReplaceConfirm';
 
 function App() {
   return (
@@ -51,6 +52,9 @@ function App() {
             {/* 가게 상세 페이지 */}
             <Route path="/restaurant/:restaurantId" element={<RestaurantDetail />} />
           </Routes>
+
+          {/* 전역 컴포넌트 - 어디서든 접근 가능 */}
+          <CartReplaceConfirm />
         </div>
       </Router>
     </CartProvider>

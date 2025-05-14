@@ -135,6 +135,7 @@ const RestaurantDetail: React.FC = () => {
       <CartBottomSheet 
         minOrderAmount={minOrderInUSD}
         onCheckout={handleCheckout}
+        restaurantId={restaurantId}
       />
       
       {/* 하단 네비게이션 바 */}

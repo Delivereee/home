@@ -4,9 +4,10 @@ import { useCart } from '../contexts/CartContext';
 interface CartBottomSheetProps {
   minOrderAmount: number | null;
   onCheckout: () => void;
+  restaurantId: string;
 }
 
-const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onCheckout }) => {
+const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onCheckout, restaurantId }) => {
   const { 
     cart, 
     getTotalPrice, 
@@ -14,14 +15,21 @@ const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onChe
     isDeliveryAvailable, 
     getAmountToMinOrder,
     switchMessage,
-    clearSwitchMessage
+    clearSwitchMessage,
+    currentRestaurantId,
+    setCurrentRestaurantId
   } = useCart();
   const [isVisible, setIsVisible] = useState(false);
   const [showSwitchMessage, setShowSwitchMessage] = useState(false);
   
+  // 현재 레스토랑 ID 업데이트
+  useEffect(() => {
+    setCurrentRestaurantId(restaurantId);
+  }, [restaurantId, setCurrentRestaurantId]);
+  
   // 카트 상태가 변경될 때마다 애니메이션 효과를 위한 상태 업데이트
   useEffect(() => {
-    if (cart && cart.items.length > 0) {
+    if (cart && cart.items.length > 0 && cart.restaurantId === restaurantId) {
       const timer = setTimeout(() => {
         setIsVisible(true);
       }, 50);
@@ -29,7 +37,7 @@ const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onChe
     } else {
       setIsVisible(false);
     }
-  }, [cart]);
+  }, [cart, restaurantId]);
   
   // 전환 메시지 표시 처리
   useEffect(() => {
@@ -43,8 +51,11 @@ const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onChe
     }
   }, [switchMessage, clearSwitchMessage]);
   
-  // 카트가 비어있고 메시지도 없으면 렌더링하지 않음
-  if ((!cart || cart.items.length === 0) && !showSwitchMessage) {
+  // 카트가 비어있거나, 메시지가 없거나, 현재 레스토랑과 카트의 레스토랑이 다르면 렌더링하지 않음
+  if (
+    (!cart || cart.items.length === 0) && !showSwitchMessage || 
+    (cart && cart.restaurantId !== restaurantId)
+  ) {
     return null;
   }
   
@@ -85,8 +96,8 @@ const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onChe
         </div>
       )}
       
-      {/* 카트 콘텐츠 */}
-      {cart && cart.items.length > 0 && (
+      {/* 카트 콘텐츠 - 현재 레스토랑과 카트의 레스토랑이 같을 때만 표시 */}
+      {cart && cart.items.length > 0 && cart.restaurantId === restaurantId && (
         <div className="py-2.5 px-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex-shrink-0 w-1/3">
