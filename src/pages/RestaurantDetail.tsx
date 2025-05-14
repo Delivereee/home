@@ -35,10 +35,9 @@ const RestaurantDetail: React.FC = () => {
     return restaurant.nameEn || restaurant.name;
   }, [restaurant, restaurantLoading]);
   
-  // 결제 페이지로 이동
+  // 장바구니 페이지로 이동
   const handleCheckout = () => {
-    console.log('Navigate to checkout page');
-    // navigate('/checkout');
+    navigate('/cart');
   };
   
   // restaurantId가 없는 경우

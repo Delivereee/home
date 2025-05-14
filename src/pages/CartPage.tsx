@@ -11,7 +11,8 @@ const CartPage: React.FC = () => {
   const { 
     cart, 
     removeItem, 
-    getTotalPrice 
+    getTotalPrice,
+    updateItemQuantity
   } = useCart();
   
   // 화폐 변환 상수
@@ -36,6 +37,20 @@ const CartPage: React.FC = () => {
   const navigateToRestaurant = () => {
     if (cart && cart.restaurantId) {
       navigate(`/restaurant/${cart.restaurantId}`);
+    }
+  };
+  
+  // 수량 증가
+  const increaseQuantity = (itemId: string, currentQuantity: number) => {
+    updateItemQuantity(itemId, currentQuantity + 1);
+  };
+  
+  // 수량 감소
+  const decreaseQuantity = (itemId: string, currentQuantity: number) => {
+    if (currentQuantity > 1) {
+      updateItemQuantity(itemId, currentQuantity - 1);
+    } else {
+      removeItem(itemId);
     }
   };
   
@@ -85,35 +100,65 @@ const CartPage: React.FC = () => {
         {/* 카트 아이템 목록 */}
         <div className="mb-4">
           {cart.items.map(item => (
-            <div key={item.id} className="bg-white p-4 mb-1 border-b border-gray-100 flex items-center">
-              {/* 메뉴 이미지 */}
-              <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden mr-3 flex-shrink-0">
-                <ImageWithFallback
-                  src={item.image || ''}
-                  alt={item.name}
-                  className="w-full h-full object-cover"
-                  fallback="https://source.unsplash.com/random/300x300/?food"
-                />
-              </div>
-              
-              {/* 메뉴 정보 */}
-              <div className="flex-grow">
-                <div className="flex justify-between mb-1">
-                  <h3 className="font-medium text-left">{item.name}</h3>
-                  <button
-                    className="text-gray-400 hover:text-red-500"
-                    onClick={() => handleRemoveItem(item.id)}
-                    aria-label="Remove item"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                      <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-                    </svg>
-                  </button>
+            <div key={item.id} className="bg-white p-4 mb-1 border-b border-gray-100">
+              <div className="flex items-stretch relative">
+                {/* 메뉴 이미지 */}
+                <div className="w-24 h-24 sm:w-28 sm:h-28 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 mr-3 my-auto">
+                  <ImageWithFallback
+                    src={item.image || ''}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                    fallback="https://source.unsplash.com/random/300x300/?food"
+                  />
                 </div>
-                <div className="flex justify-between items-center">
-                  <p className="text-gray-500 text-sm">Qty: {item.quantity}</p>
-                  <p className="font-semibold">{formatPrice(item.price * item.quantity)}</p>
+                
+                {/* 메뉴 정보 */}
+                <div className="flex-grow flex flex-col justify-between py-1 pr-10">
+                  <div>
+                    <h3 className="text-base sm:text-lg font-semibold mb-1 text-left line-clamp-1">{item.name}</h3>
+                  </div>
+                  
+                  {/* 가격, 수량 조절 */}
+                  <div className="mt-auto">
+                    <div className="flex items-center justify-between">
+                      {/* 가격 */}
+                      <div className="font-semibold text-base sm:text-lg flex flex-col">
+                        {formatPrice(item.price)}
+                        <span className="text-xs text-gray-500">(per 1 piece)</span>
+                      </div>
+                      
+                      {/* 수량 조절 */}
+                      <div className="flex items-center">
+                        <button
+                          className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center border border-gray-300 rounded-md bg-white text-gray-700"
+                          onClick={() => decreaseQuantity(item.id, item.quantity)}
+                          aria-label={`Decrease quantity of ${item.name}`}
+                        >
+                          <span className="text-lg sm:text-xl font-medium">−</span>
+                        </button>
+                        <span className="mx-2 sm:mx-3 text-base sm:text-lg font-medium min-w-[20px] text-center">{item.quantity}</span>
+                        <button
+                          className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center border rounded-md bg-red-500 text-white border-red-500"
+                          onClick={() => increaseQuantity(item.id, item.quantity)}
+                          aria-label={`Increase quantity of ${item.name}`}
+                        >
+                          <span className="text-lg sm:text-xl font-medium">+</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+                
+                {/* 삭제 버튼 */}
+                <button
+                  className="absolute right-0 top-0 p-2 text-gray-400 hover:text-red-500"
+                  onClick={() => handleRemoveItem(item.id)}
+                  aria-label={`Remove ${item.name} from cart`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                  </svg>
+                </button>
               </div>
             </div>
           ))}
@@ -153,7 +198,7 @@ const CartPage: React.FC = () => {
           className="w-full py-4 rounded-lg font-bold text-white bg-red-500"
           onClick={handleCheckout}
         >
-          Checkout - {formatPrice(total)}
+          Proceed to Checkout
         </button>
       </div>
       
