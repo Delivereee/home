@@ -10,7 +10,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem }) => {
   const [quantity, setQuantity] = useState(0);
   
   // 영문 이름과 설명을 우선 사용하고, 없을 경우 기본 필드 사용
-  const displayName = menuItem.nameEn || menuItem.name || '[Menu Name]';
+  const displayName = menuItem.nameEn || '[Menu Name]';
   const displayDescription = menuItem.descriptionEn || menuItem.description || '[menu description]';
   
   // 달러로 변환된 가격
@@ -31,7 +31,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem }) => {
   };
   
   return (
-    <div className="flex flex-col pb-6 mb-6 border-b border-gray-200">
+    <div className="flex flex-col pb-4 mb-4 border-b border-gray-200">
       <div className="flex">
         {/* 메뉴 이미지 */}
         <div className="w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 mr-4">
@@ -48,7 +48,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem }) => {
           <div className="flex justify-between items-start">
             <div>
               <h3 className="text-lg font-semibold mb-1 text-left">{displayName}</h3>
-              <p className="text-gray-500 text-sm mb-2 line-clamp-2 text-left">{displayDescription}</p>
+              <p className="text-gray-500 text-sm mb-2 line-clamp-1 text-left">{displayDescription}</p>
             </div>
             
             {/* 메뉴 상세보기 버튼 아이콘 */}
@@ -63,9 +63,9 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem }) => {
           <div className="mt-2">
             <div className="flex items-center justify-between">
               {/* 가격 */}
-              <div className="font-semibold text-lg">
+              <div className="font-semibold text-lg flex flex-col">
                 {displayPrice}
-                <span className="text-xs text-gray-500 ml-1">(per 1 piece)</span>
+                <span className="text-xs text-gray-500">(per 1 piece)</span>
               </div>
               
               {/* 수량 조절 */}
