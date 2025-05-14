@@ -11,6 +11,7 @@ import RestaurantDetail from './pages/RestaurantDetail';
 import MenuDetail from './pages/MenuDetail';
 import CartReplaceConfirm from './components/CartReplaceConfirm';
 import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
 
 function App() {
   return (
@@ -59,6 +60,9 @@ function App() {
             
             {/* 장바구니 페이지 */}
             <Route path="/cart" element={<CartPage />} />
+            
+            {/* 결제 페이지 */}
+            <Route path="/checkout" element={<CheckoutPage />} />
           </Routes>
 
           {/* 전역 컴포넌트 - 어디서든 접근 가능 */}

@@ -76,8 +76,7 @@ const CartPage: React.FC = () => {
   
   // 체크아웃 진행
   const handleCheckout = () => {
-    // 아직 미구현
-    console.log('Proceed to checkout');
+    navigate('/checkout');
   };
   
   // 카트가 비어있을 때
