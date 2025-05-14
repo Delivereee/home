@@ -96,10 +96,10 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
   };
   
   return (
-    <div className="flex flex-col pb-4 mb-4 border-b border-gray-200">
-      <div className="flex">
+    <div className="flex flex-col pb-4 mb-4 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+      <div className="flex items-stretch relative">
         {/* 메뉴 이미지 */}
-        <div className="w-28 h-28 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 mr-4">
+        <div className="w-24 h-24 sm:w-28 sm:h-28 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 mr-3 my-auto">
           <ImageWithFallback
             src={menuItem.image || ''}
             alt={displayName}
@@ -109,26 +109,17 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
         </div>
         
         {/* 메뉴 정보 */}
-        <div className="flex-grow flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="text-lg font-semibold mb-1 text-left">{displayName}</h3>
-              <p className="text-gray-500 text-sm mb-2 line-clamp-1 text-left">{displayDescription}</p>
-            </div>
-            
-            {/* 메뉴 상세보기 버튼 아이콘 */}
-            <div className="ml-2 text-gray-400">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-              </svg>
-            </div>
+        <div className="flex-grow flex flex-col justify-between py-1 pr-10">
+          <div>
+            <h3 className="text-base sm:text-lg font-semibold mb-1 text-left line-clamp-1">{displayName}</h3>
+            <p className="text-gray-500 text-xs sm:text-sm mb-2 line-clamp-2 text-left">{displayDescription}</p>
           </div>
           
           {/* 가격, 수량 조절 */}
           <div className="mt-auto">
             <div className="flex items-center justify-between">
               {/* 가격 */}
-              <div className="font-semibold text-lg flex flex-col">
+              <div className="font-semibold text-base sm:text-lg flex flex-col">
                 {displayPrice}
                 <span className="text-xs text-gray-500">(per 1 piece)</span>
               </div>
@@ -136,26 +127,39 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
               {/* 수량 조절 */}
               <div className="flex items-center">
                 <button
-                  className={`w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md bg-white ${quantity > 0 ? 'text-gray-700' : 'text-gray-400'}`}
+                  className={`w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center border border-gray-300 rounded-md bg-white ${quantity > 0 ? 'text-gray-700' : 'text-gray-400'}`}
                   onClick={decreaseQuantity}
                   disabled={quantity === 0}
+                  aria-label="Decrease quantity"
                 >
-                  <span className="text-xl font-medium">−</span>
+                  <span className="text-lg sm:text-xl font-medium">−</span>
                 </button>
-                <span className="mx-3 text-lg font-medium min-w-[20px] text-center">{quantity}</span>
+                <span className="mx-2 sm:mx-3 text-base sm:text-lg font-medium min-w-[20px] text-center">{quantity}</span>
                 <button
-                  className={`w-8 h-8 flex items-center justify-center border rounded-md ${
+                  className={`w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center border rounded-md ${
                     quantity > 0 
                       ? 'bg-red-500 text-white border-red-500' 
                       : 'bg-white text-gray-700 border-gray-300'
                   }`}
                   onClick={increaseQuantity}
+                  aria-label="Increase quantity"
                 >
-                  <span className="text-xl font-medium">+</span>
+                  <span className="text-lg sm:text-xl font-medium">+</span>
                 </button>
               </div>
             </div>
           </div>
+        </div>
+        
+        {/* 메뉴 상세보기 버튼 - Material Design 스타일 */}
+        <div 
+          className="absolute right-0 inset-y-0 flex items-center justify-center w-10 transition-colors hover:bg-gray-100 active:bg-gray-200 rounded-r cursor-pointer"
+          role="button"
+          aria-label="View menu details"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-gray-400">
+            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+          </svg>
         </div>
       </div>
     </div>
