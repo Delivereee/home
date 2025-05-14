@@ -12,7 +12,10 @@ const CartPage: React.FC = () => {
     cart, 
     removeItem, 
     getTotalPrice,
-    updateItemQuantity
+    updateItemQuantity,
+    getMinOrderAmount,
+    isDeliveryAvailable,
+    getAmountToMinOrder
   } = useCart();
   
   // 화폐 변환 상수
@@ -27,6 +30,13 @@ const CartPage: React.FC = () => {
   
   // 총 주문 금액
   const total = subtotal + DELIVERY_FEE + PROXY_FEE;
+  
+  // 최소 주문 금액 (하드코딩된 값)
+  const minOrderAmount = 10; // $10
+  
+  // 최소 주문 금액 충족 여부
+  const deliveryAvailable = isDeliveryAvailable(minOrderAmount);
+  const amountToMinOrder = getAmountToMinOrder(minOrderAmount);
   
   // 가격 포맷팅 (USD)
   const formatPrice = (price: number) => {
@@ -104,9 +114,9 @@ const CartPage: React.FC = () => {
               key={item.id} 
               className="bg-white rounded-lg shadow-sm overflow-hidden"
             >
-              <div className="flex items-stretch relative p-3">
+              <div className="flex items-start relative p-3">
                 {/* 메뉴 이미지 */}
-                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 mr-3">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                   <ImageWithFallback
                     src={item.image || ''}
                     alt={item.name}
@@ -115,41 +125,32 @@ const CartPage: React.FC = () => {
                   />
                 </div>
                 
-                {/* 메뉴 정보 */}
-                <div className="flex-grow flex flex-col justify-between py-1 pr-10">
+                {/* 메뉴 정보 - 좌측 여백 증가 */}
+                <div className="flex-grow flex flex-col justify-between pl-5 py-1 min-h-[5rem]">
                   <div>
                     <h3 className="text-base font-medium mb-1 text-left line-clamp-1 text-gray-800">{item.name}</h3>
+                    <span className="text-base font-medium text-gray-900">{formatPrice(item.price)}</span>
+                    <span className="text-xs text-gray-500 block">(per 1 piece)</span>
                   </div>
-                  
-                  {/* 가격, 수량 조절 */}
-                  <div className="mt-auto">
-                    <div className="flex items-center justify-between">
-                      {/* 가격 */}
-                      <div className="flex flex-col">
-                        <span className="text-base font-medium text-gray-900">{formatPrice(item.price)}</span>
-                        <span className="text-xs text-gray-500">(per 1 piece)</span>
-                      </div>
-                      
-                      {/* 수량 조절 */}
-                      <div className="flex items-center">
-                        <button
-                          className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full bg-white text-gray-700 shadow-sm"
-                          onClick={() => decreaseQuantity(item.id, item.quantity)}
-                          aria-label={`Decrease quantity of ${item.name}`}
-                        >
-                          <span className="text-lg font-medium">−</span>
-                        </button>
-                        <span className="mx-3 text-base font-medium min-w-[20px] text-center text-gray-800">{item.quantity}</span>
-                        <button
-                          className="w-8 h-8 flex items-center justify-center border rounded-full bg-red-500 text-white border-red-500 shadow-sm"
-                          onClick={() => increaseQuantity(item.id, item.quantity)}
-                          aria-label={`Increase quantity of ${item.name}`}
-                        >
-                          <span className="text-lg font-medium">+</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                </div>
+                
+                {/* 수량 조절 - 우측 정렬 */}
+                <div className="flex items-center space-x-2 ml-auto">
+                  <button
+                    className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full bg-white text-gray-700 shadow-sm"
+                    onClick={() => decreaseQuantity(item.id, item.quantity)}
+                    aria-label={`Decrease quantity of ${item.name}`}
+                  >
+                    <span className="text-lg font-medium">−</span>
+                  </button>
+                  <span className="text-base font-medium min-w-[20px] text-center text-gray-800">{item.quantity}</span>
+                  <button
+                    className="w-8 h-8 flex items-center justify-center border rounded-full bg-red-500 text-white border-red-500 shadow-sm"
+                    onClick={() => increaseQuantity(item.id, item.quantity)}
+                    aria-label={`Increase quantity of ${item.name}`}
+                  >
+                    <span className="text-lg font-medium">+</span>
+                  </button>
                 </div>
                 
                 {/* 삭제 버튼 */}
@@ -197,9 +198,19 @@ const CartPage: React.FC = () => {
       
       {/* 체크아웃 버튼 */}
       <div className="fixed bottom-[60px] left-0 right-0 p-4 bg-white shadow-lg z-10">
+        {!deliveryAvailable && (
+          <div className="mb-2 text-center text-sm text-red-500 font-medium">
+            Add {formatPrice(amountToMinOrder)} more to order
+          </div>
+        )}
         <button
-          className="w-full py-4 rounded-lg font-medium text-white bg-red-500 text-base tracking-wide shadow-md transition-colors hover:bg-red-600 active:bg-red-700"
+          className={`w-full py-4 rounded-lg font-medium text-white text-base tracking-wide shadow-md transition-colors ${
+            deliveryAvailable 
+              ? 'bg-red-500 hover:bg-red-600 active:bg-red-700' 
+              : 'bg-gray-400 cursor-not-allowed'
+          }`}
           onClick={handleCheckout}
+          disabled={!deliveryAvailable}
         >
           Proceed to Checkout
         </button>
