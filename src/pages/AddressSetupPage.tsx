@@ -12,6 +12,45 @@ const AddressSetupPage: React.FC = () => {
   const [detailAddress, setDetailAddress] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [touched, setTouched] = useState({
+    mainAddress: false,
+    detailAddress: false
+  });
+
+  // 유효성 검사 상태와 유효성 검사 함수
+  const validateMainAddress = (address: string): { isValid: boolean; message: string | null } => {
+    const trimmedAddress = address.trim();
+    
+    // 비어 있는지 확인
+    if (trimmedAddress.length === 0) {
+      return { isValid: false, message: 'Main address is required' };
+    }
+    
+    // 너무 짧은지 확인 (최소 8자)
+    if (trimmedAddress.length < 8) {
+      return { isValid: false, message: 'Address is too short, please enter a complete address' };
+    }
+    
+    // 숫자가 포함되어 있는지 확인 (대부분의 주소에는 숫자가 포함됨)
+    if (!/\d/.test(trimmedAddress)) {
+      return { isValid: false, message: 'Address should include a number (building or street number)' };
+    }
+    
+    // 쉼표가 있는지 확인 (올바른 주소 형식인지)
+    if (!trimmedAddress.includes(',')) {
+      return { isValid: false, message: 'Please use commas to separate address components' };
+    }
+    
+    return { isValid: true, message: null };
+  };
+  
+  // 주소 검증 결과
+  const mainAddressValidation = validateMainAddress(mainAddress);
+  const isMainAddressValid = mainAddressValidation.isValid;
+  
+  // 상세 주소 유효성 검사는 단순히 비어있지 않은지만 확인
+  const isDetailAddressValid = detailAddress.trim().length > 0;
+  const isFormValid = isMainAddressValid && isDetailAddressValid;
 
   // 기존 주소 정보가 있으면 로드
   useEffect(() => {
@@ -20,6 +59,17 @@ const AddressSetupPage: React.FC = () => {
       setDetailAddress(address.detailAddress || '');
     }
   }, [address]);
+
+  // 필드 변경 및 터치 상태 관리 핸들러
+  const handleMainAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMainAddress(e.target.value);
+    setTouched(prev => ({ ...prev, mainAddress: true }));
+  };
+
+  const handleDetailAddressChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDetailAddress(e.target.value);
+    setTouched(prev => ({ ...prev, detailAddress: true }));
+  };
 
   // GPS를 사용하여 현재 위치 정보 가져오기
   const handleUseGPS = async () => {
@@ -57,12 +107,29 @@ const AddressSetupPage: React.FC = () => {
       console.log('변환된 주소:', geoAddress);
       
       if (geoAddress) {
-        setMainAddress(geoAddress);
+        // API에서 가져온 주소에 쉼표가 없다면 추가
+        let formattedAddress = geoAddress;
+        if (!formattedAddress.includes(',')) {
+          // 공백을 기준으로 주소를 분리하고 콤마로 재구성
+          const parts = formattedAddress.split(' ').filter(Boolean);
+          if (parts.length >= 3) {
+            // 주소 요소가 충분하면 쉼표 추가 (예: "123 Main Street, New York, USA")
+            formattedAddress = [
+              parts.slice(0, Math.ceil(parts.length / 3)).join(' '),
+              parts.slice(Math.ceil(parts.length / 3), Math.ceil(parts.length * 2 / 3)).join(' '),
+              parts.slice(Math.ceil(parts.length * 2 / 3)).join(' ')
+            ].filter(Boolean).join(', ');
+          }
+        }
+        
+        setMainAddress(formattedAddress);
+        setTouched(prev => ({ ...prev, mainAddress: true }));
         console.log('주소 입력 필드 업데이트 완료');
       } else {
         // 주소를 얻지 못했지만 위치는 얻은 경우, 좌표만 표시
         const coordsText = `Latitude: ${position.lat.toFixed(5)}, Longitude: ${position.lng.toFixed(5)}`;
         setMainAddress(coordsText);
+        setTouched(prev => ({ ...prev, mainAddress: true }));
         setLocationError('Could not find address for your location. Showing coordinates only.');
         console.log('좌표로 주소 필드 업데이트');
       }
@@ -96,9 +163,24 @@ const AddressSetupPage: React.FC = () => {
   };
 
   const handleSaveAddress = () => {
-    // 유효성 검사: 메인 주소가 비어있으면 저장하지 않음
-    if (!mainAddress.trim()) {
-      alert("Please enter your main address");
+    // 모든 필드를 터치된 상태로 설정 (검증 에러 표시를 위해)
+    setTouched({ mainAddress: true, detailAddress: true });
+
+    // GPS로 가져온 주소가 좌표 형식이면 저장 허용
+    const isGpsCoordinates = mainAddress.includes('Latitude:') && mainAddress.includes('Longitude:');
+    
+    // 유효성 검사
+    if (!isGpsCoordinates) {
+      const mainAddressCheck = validateMainAddress(mainAddress);
+      
+      if (!mainAddressCheck.isValid) {
+        alert(mainAddressCheck.message);
+        return;
+      }
+    }
+    
+    if (!detailAddress.trim()) {
+      alert("Please enter your detail address");
       return;
     }
 
@@ -106,7 +188,7 @@ const AddressSetupPage: React.FC = () => {
     setAddress({
       mainAddress: mainAddress.trim(),
       detailAddress: detailAddress.trim(),
-      isComplete: !!mainAddress.trim() // 메인 주소가 있으면 완료 상태로 간주
+      isComplete: true // GPS 좌표 또는 유효한 주소와 상세 주소가 있으면 완료 상태로 간주
     });
 
     // 홈으로 이동
@@ -124,8 +206,9 @@ const AddressSetupPage: React.FC = () => {
           {/* Main Address Section */}
           <div className="mb-5">
             <div className="flex justify-between items-center mb-2">
-              <label htmlFor="mainAddress" className="text-base font-medium text-gray-700">
+              <label htmlFor="mainAddress" className="text-base font-medium text-gray-700 flex items-center">
                 Main Address
+                <span className="text-red-500 ml-1">*</span>
               </label>
               
               <button
@@ -157,10 +240,25 @@ const AddressSetupPage: React.FC = () => {
               type="text"
               id="mainAddress"
               value={mainAddress}
-              onChange={(e) => setMainAddress(e.target.value)}
+              onChange={handleMainAddressChange}
               placeholder="Enter your address"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all duration-150 placeholder-gray-400"
+              className={`w-full p-3 border ${
+                !touched.mainAddress 
+                  ? 'border-gray-300'
+                  : isMainAddressValid 
+                    ? 'border-green-500' 
+                    : 'border-red-500'
+              } rounded-lg focus:outline-none focus:ring-1 ${
+                isMainAddressValid ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500'
+              } transition-all duration-150 placeholder-gray-400`}
+              aria-invalid={touched.mainAddress && !isMainAddressValid}
             />
+            
+            {touched.mainAddress && !isMainAddressValid && (
+              <div className="mt-1 text-red-500 text-sm">
+                {mainAddressValidation.message}
+              </div>
+            )}
             
             {locationError && (
               <div className="mt-2 text-yellow-600 text-sm flex items-start">
@@ -174,17 +272,33 @@ const AddressSetupPage: React.FC = () => {
           
           {/* Detail Address Section - Smaller font size and left aligned */}
           <div>
-            <label htmlFor="detailAddress" className="block text-sm font-medium text-gray-600 mb-2 text-left">
+            <label htmlFor="detailAddress" className="block text-sm font-medium text-gray-600 mb-2 text-left flex items-center">
               Detail Address
+              <span className="text-red-500 ml-1">*</span>
             </label>
             
             <textarea
               id="detailAddress"
               value={detailAddress}
-              onChange={(e) => setDetailAddress(e.target.value)}
+              onChange={handleDetailAddressChange}
               placeholder="e.g. Room 301, 123 Hongdae-ro"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all duration-150 resize-none h-28 placeholder-gray-400"
+              className={`w-full p-3 border ${
+                !touched.detailAddress 
+                  ? 'border-gray-300'
+                  : isDetailAddressValid 
+                    ? 'border-green-500' 
+                    : 'border-red-500'
+              } rounded-lg focus:outline-none focus:ring-1 ${
+                isDetailAddressValid ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500'
+              } transition-all duration-150 resize-none h-28 placeholder-gray-400`}
+              aria-invalid={touched.detailAddress && !isDetailAddressValid}
             />
+            
+            {touched.detailAddress && !isDetailAddressValid && (
+              <div className="mt-1 text-red-500 text-sm">
+                Detail address is required
+              </div>
+            )}
           </div>
         </div>
         
@@ -211,7 +325,11 @@ const AddressSetupPage: React.FC = () => {
         <button
           type="button"
           onClick={handleSaveAddress}
-          className="w-full py-3.5 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 active:bg-red-700 transition-all duration-150 shadow-md focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
+          className={`w-full py-3.5 ${
+            isFormValid 
+              ? 'bg-red-500 hover:bg-red-600 active:bg-red-700'
+              : 'bg-red-300 cursor-not-allowed'
+          } text-white rounded-lg font-medium transition-all duration-150 shadow-md focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2`}
         >
           Save Address
         </button>
