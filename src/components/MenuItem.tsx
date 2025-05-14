@@ -117,19 +117,26 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
               
               {/* 수량 조절 */}
               <div className="flex items-center">
+                {quantity > 0 && (
+                  <>
+                    <button
+                      className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md bg-white text-gray-700"
+                      onClick={decreaseQuantity}
+                    >
+                      <span className="text-xl font-medium">−</span>
+                    </button>
+                    <span className="mx-3 text-lg font-medium min-w-[20px] text-center">{quantity}</span>
+                  </>
+                )}
                 <button
-                  className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md"
-                  onClick={decreaseQuantity}
-                  disabled={quantity === 0}
-                >
-                  <span className="text-xl">−</span>
-                </button>
-                <span className="mx-4 text-lg">{quantity}</span>
-                <button
-                  className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md bg-red-500 text-white"
+                  className={`w-8 h-8 flex items-center justify-center border rounded-md ${
+                    quantity > 0 
+                      ? 'bg-red-500 text-white border-red-500' 
+                      : 'bg-white text-gray-700 border-gray-300'
+                  }`}
                   onClick={increaseQuantity}
                 >
-                  <span className="text-xl">+</span>
+                  <span className="text-xl font-medium">+</span>
                 </button>
               </div>
             </div>
