@@ -12,6 +12,7 @@ import MenuDetail from './pages/MenuDetail';
 import CartReplaceConfirm from './components/CartReplaceConfirm';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
+import OrderSuccessPage from './pages/OrderSuccessPage';
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
             <Route path="/categories/:categoryId/:categoryName" element={<CategoryDetail />} />
             
             {/* 전체 레스토랑 목록 (Browse) */}
+            <Route path="/browse" element={<CategoryDetail />} />
             <Route path="/restaurants" element={<CategoryDetail />} />
             
             {/* 체인점 상세 페이지 */}
@@ -63,6 +65,9 @@ function App() {
             
             {/* 결제 페이지 */}
             <Route path="/checkout" element={<CheckoutPage />} />
+            
+            {/* 주문 성공 페이지 */}
+            <Route path="/order-success" element={<OrderSuccessPage />} />
           </Routes>
 
           {/* 전역 컴포넌트 - 어디서든 접근 가능 */}
