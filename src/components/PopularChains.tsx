@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { usePopularChains } from '../hooks/usePopularChains';
 import LoadingState from './LoadingState';
 import ErrorState from './ErrorState';
@@ -8,6 +9,12 @@ import ImageWithFallback from './ImageWithFallback';
 
 const PopularChains: React.FC = () => {
   const { chains, loading, error, refetch } = usePopularChains();
+  const navigate = useNavigate();
+  
+  // 체인점 클릭 핸들러
+  const handleChainClick = (chainId: string, chainName: string) => {
+    navigate(`/chains/${chainId}/${encodeURIComponent(chainName)}`);
+  };
 
   // 로딩 상태 표시
   if (loading) {
@@ -45,7 +52,11 @@ const PopularChains: React.FC = () => {
       <div className="relative">
         <div className="flex overflow-x-auto scrollbar-hide pb-2 space-x-4 border-b border-gray-200" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {chains.map((chain) => (
-            <div key={chain.id} className="flex flex-col items-center min-w-[80px] pb-3">
+            <div 
+              key={chain.id} 
+              className="flex flex-col items-center min-w-[80px] pb-3 cursor-pointer"
+              onClick={() => handleChainClick(chain.id, chain.name)}
+            >
               <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md border mb-2">
                 <ImageWithFallback 
                   src={chain.logo} 

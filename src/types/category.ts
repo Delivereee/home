@@ -23,9 +23,9 @@ export interface Category {
 
 // 이미지 경로를 만드는 함수
 const getImagePath = (imageName: string): string => {
-  // 개발 환경에서는 상대 경로 사용, 배포 환경에서는 절대 경로 사용
+  // process.env.PUBLIC_URL을 활용하여 올바른 경로 생성
   if (process.env.NODE_ENV === 'development') {
-    return `/images/categories/${imageName}`;
+    return `${process.env.PUBLIC_URL}/images/categories/${imageName}`;
   }
   // GitHub Pages 배포 경로
   return `https://delivereee.github.io/home/images/categories/${imageName}`;

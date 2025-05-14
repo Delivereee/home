@@ -47,12 +47,18 @@ export interface Restaurant {
 }
 
 /**
- * 카테고리별 레스토랑 조회 파라미터
+ * 레스토랑 조회 파라미터
  */
 export interface RestaurantSearchParams {
-  category: string;
+  // 검색 조건 (카테고리, 체인점 ID)
+  category?: string;
+  franchiseId?: string;
+  
+  // 위치 정보 (필수)
   lat: number;
   lng: number;
+  
+  // 언어 설정 (선택)
   lang?: string;
 }
 

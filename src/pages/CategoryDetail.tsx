@@ -1,19 +1,54 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useMemo } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
 import BackHeader from '../components/BackHeader';
 import RestaurantItem from '../components/RestaurantItem';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
 import EmptyState from '../components/EmptyState';
+import NavigationBar from '../components/NavigationBar';
 import { useRestaurants } from '../hooks/useRestaurants';
 import { STATUS_MESSAGES } from '../config/constants';
 
 const CategoryDetail: React.FC = () => {
-  const { categoryName } = useParams<{ categoryId: string, categoryName: string }>();
-  const { restaurants, loading, error, refetch } = useRestaurants(categoryName);
+  const { categoryName, chainName, chainId } = useParams<{ 
+    categoryId?: string, 
+    categoryName?: string,
+    chainId?: string,
+    chainName?: string
+  }>();
+  const location = useLocation();
+  
+  // 현재 어떤 타입의 요청인지 확인
+  const isAllRestaurants = location.pathname === '/restaurants';
+  
+  // 검색 조건 구성
+  const searchParams = useMemo(() => {
+    if (isAllRestaurants) {
+      return { allRestaurants: true };
+    }
+    
+    if (chainId && chainName) {
+      return { franchiseId: chainId };
+    }
+    
+    return { categoryName };
+  }, [categoryName, chainId, chainName, isAllRestaurants]);
+  
+  // API 요청
+  const { restaurants, loading, error, refetch } = useRestaurants(searchParams);
   
   // 표시할 타이틀 결정
-  const displayTitle = categoryName ? `[${categoryName}]` : '[Categories / Chains Name]';
+  const displayTitle = useMemo(() => {
+    if (isAllRestaurants) {
+      return 'All Restaurants Near You';
+    }
+    
+    if (chainName) {
+      return decodeURIComponent(chainName);
+    }
+    
+    return categoryName ? decodeURIComponent(categoryName) : 'Restaurants';
+  }, [categoryName, chainName, isAllRestaurants]);
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -40,6 +75,9 @@ const CategoryDetail: React.FC = () => {
           </div>
         )}
       </main>
+      
+      {/* 네비게이션 바 추가 */}
+      <NavigationBar />
     </div>
   );
 };
