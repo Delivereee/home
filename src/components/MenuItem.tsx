@@ -1,16 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { MenuItem as MenuItemType } from '../types/menu';
+import { useCart } from '../contexts/CartContext';
+import { CartItem } from '../types/cart';
 import ImageWithFallback from './ImageWithFallback';
 
 interface MenuItemProps {
   menuItem: MenuItemType;
+  restaurantId: string;
+  restaurantName: string;
 }
 
-const MenuItem: React.FC<MenuItemProps> = ({ menuItem }) => {
-  const [quantity, setQuantity] = useState(0);
+const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantName }) => {
+  const { cart, addToCart, updateItemQuantity } = useCart();
   
   // 영문 이름과 설명을 우선 사용하고, 없을 경우 기본 필드 사용
-  const displayName = menuItem.nameEn || '[Menu Name]';
+  const displayName = menuItem.nameEn || menuItem.name || '[Menu Name]';
   const displayDescription = menuItem.descriptionEn || menuItem.description || '[menu description]';
   
   // 달러로 변환된 가격
@@ -18,15 +22,58 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem }) => {
   const priceInUSD = menuItem.price * EXCHANGE_RATE;
   const displayPrice = `$${priceInUSD.toFixed(2)}`;
   
+  // 장바구니에서 현재 아이템의 수량 찾기
+  const getCartQuantity = useCallback((): number => {
+    if (!cart) return 0;
+    
+    const cartItem = cart.items.find(item => item.id === menuItem.id);
+    return cartItem ? cartItem.quantity : 0;
+  }, [cart, menuItem.id]);
+  
+  // 현재 수량 상태 관리
+  const [quantity, setQuantity] = useState<number>(getCartQuantity());
+  
+  // 카트 상태가 변경될 때마다 수량 동기화
+  useEffect(() => {
+    setQuantity(getCartQuantity());
+  }, [cart, getCartQuantity]);
+  
   // 수량 증가
   const increaseQuantity = () => {
-    setQuantity(prev => prev + 1);
+    const newQuantity = quantity + 1;
+    setQuantity(newQuantity);
+    updateCartItem(newQuantity);
   };
   
   // 수량 감소
   const decreaseQuantity = () => {
     if (quantity > 0) {
-      setQuantity(prev => prev - 1);
+      const newQuantity = quantity - 1;
+      setQuantity(newQuantity);
+      updateCartItem(newQuantity);
+    }
+  };
+  
+  // 장바구니 업데이트
+  const updateCartItem = (newQuantity: number) => {
+    if (newQuantity === 0) {
+      // 수량이 0이면 아이템 제거 (updateItemQuantity에서 자동으로 처리됨)
+      updateItemQuantity(menuItem.id, 0);
+    } else if (quantity === 0 && newQuantity > 0) {
+      // 처음 추가하는 경우
+      const cartItem: CartItem = {
+        id: menuItem.id,
+        name: displayName,
+        price: priceInUSD,
+        quantity: newQuantity,
+        options: [],
+        image: menuItem.image
+      };
+      
+      addToCart(restaurantId, restaurantName, cartItem);
+    } else {
+      // 기존 아이템 수량 업데이트
+      updateItemQuantity(menuItem.id, newQuantity);
     }
   };
   
@@ -59,7 +106,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem }) => {
             </div>
           </div>
           
-          {/* 가격, 수량 조절, Add 버튼 */}
+          {/* 가격, 수량 조절 */}
           <div className="mt-auto">
             <div className="flex items-center justify-between">
               {/* 가격 */}
@@ -79,18 +126,10 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem }) => {
                 </button>
                 <span className="mx-4 text-lg">{quantity}</span>
                 <button
-                  className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md"
+                  className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md bg-red-500 text-white"
                   onClick={increaseQuantity}
                 >
                   <span className="text-xl">+</span>
-                </button>
-                
-                {/* Add 버튼 */}
-                <button
-                  className={`ml-4 px-4 py-2 rounded-md ${quantity > 0 ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-500'}`}
-                  disabled={quantity === 0}
-                >
-                  Add
                 </button>
               </div>
             </div>
