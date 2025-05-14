@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, ReactNode, useState } from 'react';
 import { Cart, CartItem } from '../types/cart';
 
 // 카트 액션 타입 정의
@@ -20,6 +20,8 @@ interface CartContextType {
   getMinOrderAmount: () => number | null;
   isDeliveryAvailable: (minOrderAmount: number | null) => boolean;
   getAmountToMinOrder: (minOrderAmount: number | null) => number;
+  switchMessage: string | null;
+  clearSwitchMessage: () => void;
 }
 
 // 초기 카트 상태
@@ -42,8 +44,19 @@ const cartReducer = (state: Cart | null, action: CartAction): Cart | null => {
     case 'ADD_ITEM': {
       const { restaurantId, restaurantName, item } = action.payload;
       
-      // 카트가 비어있거나 다른 레스토랑의 메뉴를 추가하려는 경우 새 카트 생성
-      if (!state || state.restaurantId !== restaurantId) {
+      // 카트가 비어있는 경우 - 새 카트 생성
+      if (!state) {
+        return {
+          restaurantId,
+          restaurantName,
+          items: [item],
+        };
+      }
+      
+      // 다른 레스토랑의 메뉴를 추가하려는 경우 - 카트를 초기화하고 새 아이템으로 시작
+      if (state.restaurantId !== restaurantId) {
+        // 사용자에게 다른 레스토랑의 메뉴를 추가할 것임을 알릴 수 있음
+        console.log(`Clearing cart and adding item from ${restaurantName}`);
         return {
           restaurantId,
           restaurantName,
@@ -135,6 +148,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 // 카트 프로바이더 컴포넌트
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cart, dispatch] = useReducer(cartReducer, null, loadCartFromStorage);
+  const [switchMessage, setSwitchMessage] = useState<string | null>(null);
   
   // 카트 상태가 변경될 때마다 로컬 스토리지에 저장
   useEffect(() => {
@@ -147,10 +161,20 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   
   // 카트에 아이템 추가
   const addToCart = (restaurantId: string, restaurantName: string, item: CartItem) => {
+    // 다른 레스토랑 메뉴를 추가하려는 경우 메시지 설정
+    if (cart && cart.restaurantId !== restaurantId) {
+      setSwitchMessage(`Switched to ${restaurantName}. Your previous cart has been cleared.`);
+    }
+    
     dispatch({
       type: 'ADD_ITEM',
       payload: { restaurantId, restaurantName, item },
     });
+  };
+  
+  // 전환 메시지 초기화
+  const clearSwitchMessage = () => {
+    setSwitchMessage(null);
   };
   
   // 아이템 수량 업데이트
@@ -171,6 +195,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   
   // 카트 비우기
   const clearCart = () => {
+    setSwitchMessage(null);
     dispatch({ type: 'CLEAR_CART' });
   };
   
@@ -234,6 +259,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     getMinOrderAmount,
     isDeliveryAvailable,
     getAmountToMinOrder,
+    switchMessage,
+    clearSwitchMessage,
   };
   
   return (

@@ -7,8 +7,17 @@ interface CartBottomSheetProps {
 }
 
 const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onCheckout }) => {
-  const { cart, getTotalPrice, getTotalItems, isDeliveryAvailable, getAmountToMinOrder } = useCart();
+  const { 
+    cart, 
+    getTotalPrice, 
+    getTotalItems, 
+    isDeliveryAvailable, 
+    getAmountToMinOrder,
+    switchMessage,
+    clearSwitchMessage
+  } = useCart();
   const [isVisible, setIsVisible] = useState(false);
+  const [showSwitchMessage, setShowSwitchMessage] = useState(false);
   
   // 카트 상태가 변경될 때마다 애니메이션 효과를 위한 상태 업데이트
   useEffect(() => {
@@ -22,8 +31,20 @@ const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onChe
     }
   }, [cart]);
   
-  // 카트가 비어있으면 렌더링하지 않음
-  if (!cart || cart.items.length === 0) {
+  // 전환 메시지 표시 처리
+  useEffect(() => {
+    if (switchMessage) {
+      setShowSwitchMessage(true);
+      const timer = setTimeout(() => {
+        setShowSwitchMessage(false);
+        clearSwitchMessage();
+      }, 3000); // 3초 후 자동으로 닫힘
+      return () => clearTimeout(timer);
+    }
+  }, [switchMessage, clearSwitchMessage]);
+  
+  // 카트가 비어있고 메시지도 없으면 렌더링하지 않음
+  if ((!cart || cart.items.length === 0) && !showSwitchMessage) {
     return null;
   }
   
@@ -44,34 +65,57 @@ const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onChe
         boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06)'
       }}
     >
-      <div className="py-2.5 px-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex-shrink-0 w-1/3">
-            <span className="text-base font-medium text-gray-800 whitespace-nowrap">Delivery Available</span>
-          </div>
-          
-          <div className="flex-grow flex justify-end w-2/3">
-            {deliveryAvailable ? (
-              <button 
-                className="w-full bg-red-500 text-white py-3 px-4 rounded-lg font-semibold flex items-center justify-center"
-                onClick={onCheckout}
-              >
-                <div className="text-red-500 bg-white rounded-full w-5 h-5 flex items-center justify-center mr-3">
-                  <span className="text-sm font-bold">{totalItems}</span>
-                </div>
-                <span className="text-lg font-semibold text-white">{formatPrice(totalPrice)}</span>
-              </button>
-            ) : (
-              <button 
-                className="w-full bg-gray-300 text-gray-700 py-3 px-4 rounded-lg font-semibold flex items-center justify-center"
-                disabled
-              >
-                {formatPrice(amountToMinOrder)} 더 담으면 배달 가능
-              </button>
-            )}
+      {/* 전환 메시지 알림 */}
+      {showSwitchMessage && switchMessage && (
+        <div className="bg-yellow-100 text-yellow-700 px-4 py-2 border-b border-yellow-200">
+          <div className="flex justify-between items-center">
+            <p className="text-sm font-medium">{switchMessage}</p>
+            <button 
+              onClick={() => {
+                setShowSwitchMessage(false);
+                clearSwitchMessage();
+              }}
+              className="text-yellow-500 hover:text-yellow-700"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
           </div>
         </div>
-      </div>
+      )}
+      
+      {/* 카트 콘텐츠 */}
+      {cart && cart.items.length > 0 && (
+        <div className="py-2.5 px-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex-shrink-0 w-1/3">
+              <span className="text-base font-medium text-gray-800 whitespace-nowrap">Delivery Available</span>
+            </div>
+            
+            <div className="flex-grow flex justify-end w-2/3">
+              {deliveryAvailable ? (
+                <button 
+                  className="w-full bg-red-500 text-white py-3 px-4 rounded-lg font-semibold flex items-center justify-center"
+                  onClick={onCheckout}
+                >
+                  <div className="text-red-500 bg-white rounded-full w-5 h-5 flex items-center justify-center mr-3">
+                    <span className="text-sm font-bold">{totalItems}</span>
+                  </div>
+                  <span className="text-lg font-semibold text-white">{formatPrice(totalPrice)}</span>
+                </button>
+              ) : (
+                <button 
+                  className="w-full bg-gray-300 text-gray-700 py-3 px-4 rounded-lg font-semibold flex items-center justify-center"
+                  disabled
+                >
+                  {formatPrice(amountToMinOrder)} 더 담으면 배달 가능
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -26,9 +26,12 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
   const getCartQuantity = useCallback((): number => {
     if (!cart) return 0;
     
+    // 현재 표시중인 레스토랑과 카트에 저장된 레스토랑이 다르면 0 반환
+    if (cart.restaurantId !== restaurantId) return 0;
+    
     const cartItem = cart.items.find(item => item.id === menuItem.id);
     return cartItem ? cartItem.quantity : 0;
-  }, [cart, menuItem.id]);
+  }, [cart, menuItem.id, restaurantId]);
   
   // 현재 수량 상태 관리
   const [quantity, setQuantity] = useState<number>(getCartQuantity());
