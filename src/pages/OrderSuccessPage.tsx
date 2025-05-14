@@ -1,19 +1,24 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useCart } from '../contexts/CartContext';
 
 const OrderSuccessPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { clearCart } = useCart();
   const { orderId, paymentId } = location.state || {};
 
-  // 직접 접근 방지: location.state가 없으면 홈으로 리다이렉션
+  // Prevent direct access: redirect to home if no location state
   useEffect(() => {
     if (!location.state) {
       navigate('/', { replace: true });
+    } else {
+      // Clear the cart after successful payment
+      clearCart();
     }
-  }, [location.state, navigate]);
+  }, [location.state, navigate, clearCart]);
 
-  // location.state가 없으면 렌더링하지 않음
+  // Don't render if no location state
   if (!location.state) {
     return null;
   }
@@ -31,7 +36,12 @@ const OrderSuccessPage: React.FC = () => {
         </div>
         
         {/* Success Title */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-10">Payment Complete!</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">Payment Complete!</h1>
+        
+        {/* Order ID display */}
+        <p className="text-gray-600 mb-6">
+          Order ID: <span className="font-medium text-gray-900">{orderId}</span>
+        </p>
         
         {/* Order Status Info */}
         <div className="w-full bg-gray-100 rounded-lg p-6 mb-10">
@@ -71,14 +81,14 @@ const OrderSuccessPage: React.FC = () => {
       <div className="w-full max-w-md mx-auto mb-10">
         <button 
           onClick={() => navigate('/')}
-          className="w-full py-4 bg-red-500 text-white rounded-lg font-medium mb-4"
+          className="w-full py-4 bg-red-500 text-white rounded-lg font-medium mb-4 hover:bg-red-600 transition-colors"
         >
           Return to Home
         </button>
         
         <button 
           onClick={() => navigate('/browse')}
-          className="w-full py-4 border border-gray-300 text-gray-800 rounded-lg font-medium"
+          className="w-full py-4 border border-gray-300 text-gray-800 rounded-lg font-medium hover:bg-gray-50 transition-colors"
         >
           Explore More Restaurants
         </button>
