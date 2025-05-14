@@ -24,7 +24,7 @@ const NavigationBar: React.FC = () => {
   const goToCart = () => console.log('Cart clicked');
   
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-10">
       <div className="flex justify-around items-center py-2">
         <div 
           className="flex flex-col items-center cursor-pointer" 
