@@ -35,11 +35,6 @@ const CheckoutPage: React.FC = () => {
     return `$${price.toFixed(2)}`;
   };
   
-  // 한국 원화 포맷팅
-  const formatKRW = (price: number) => {
-    return `₩${Math.round(price / EXCHANGE_RATE).toLocaleString()}`;
-  };
-  
   // 이메일 유효성 검사
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -69,12 +64,12 @@ const CheckoutPage: React.FC = () => {
       <BackHeader title="Checkout" />
       
       <main className="px-4 py-4 pb-32">
-        <h1 className="text-xl font-bold text-gray-800 mb-4">Order Summary</h1>
+        <h1 className="text-xl font-bold text-gray-800 mb-4 text-left">Order Summary</h1>
         
         {/* 주문 정보 영역 */}
         <div className="bg-gray-100 rounded-lg p-4 mb-4">
           {/* 가게 정보 */}
-          <h2 className="text-lg font-medium text-gray-800 mb-3">{cart.restaurantName}</h2>
+          <h2 className="text-base text-gray-500 mb-3 text-left">{cart.restaurantName}</h2>
           
           {/* 메뉴 리스트 */}
           <div className="space-y-2 mb-2">
@@ -85,7 +80,7 @@ const CheckoutPage: React.FC = () => {
                   <span className="text-gray-800">{item.name}</span>
                 </div>
                 <span className="text-gray-800 font-medium">
-                  {formatKRW(item.price * item.quantity / EXCHANGE_RATE)}
+                  {formatPrice(item.price * item.quantity)}
                 </span>
               </div>
             ))}
@@ -97,29 +92,29 @@ const CheckoutPage: React.FC = () => {
           <div className="space-y-3 mb-3">
             <div className="flex justify-between items-center">
               <p className="text-gray-600">Subtotal</p>
-              <p className="font-medium text-gray-800">{formatKRW(subtotal / EXCHANGE_RATE)}</p>
+              <p className="font-medium text-gray-800">{formatPrice(subtotal)}</p>
             </div>
             
             <div className="flex justify-between items-center">
               <p className="text-gray-600">Delivery Fee</p>
-              <p className="font-medium text-gray-800">{formatKRW(DELIVERY_FEE / EXCHANGE_RATE)}</p>
+              <p className="font-medium text-gray-800">{formatPrice(DELIVERY_FEE)}</p>
             </div>
             
             <div className="flex justify-between items-center">
               <p className="text-gray-600">Proxy Ordering Fee</p>
-              <p className="font-medium text-gray-800">{formatKRW(PROXY_FEE / EXCHANGE_RATE)}</p>
+              <p className="font-medium text-gray-800">{formatPrice(PROXY_FEE)}</p>
             </div>
           </div>
           
           <div className="border-t border-gray-300 pt-3 flex justify-between items-center">
             <p className="font-medium text-lg text-gray-900">Total</p>
-            <p className="font-semibold text-lg text-gray-900">{formatKRW(total / EXCHANGE_RATE)}</p>
+            <p className="font-semibold text-lg text-gray-900">{formatPrice(total)}</p>
           </div>
         </div>
         
         {/* 이메일 입력 영역 */}
         <div className="mb-6">
-          <label htmlFor="email" className="block text-gray-800 font-medium mb-2">
+          <label htmlFor="email" className="block text-gray-800 font-medium mb-2 text-left">
             Email <span className="text-red-500">*</span>
           </label>
           <input
@@ -135,14 +130,14 @@ const CheckoutPage: React.FC = () => {
             }`}
           />
           {email && !emailValid && (
-            <p className="mt-1 text-sm text-red-500">Please enter a valid email address</p>
+            <p className="mt-1 text-sm text-red-500 text-left">Please enter a valid email address</p>
           )}
-          <p className="mt-1 text-sm text-gray-500">Order confirmation will be sent to this email</p>
+          <p className="mt-1 text-sm text-gray-500 text-left">Order confirmation will be sent to this email</p>
         </div>
         
         {/* 배송 요청사항 영역 */}
         <div className="mb-6">
-          <h2 className="text-gray-800 font-medium mb-3">Delivery Requests</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-3 text-left">Delivery Requests</h2>
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
@@ -208,7 +203,7 @@ const CheckoutPage: React.FC = () => {
         
         {/* 결제 방법 영역 (UI만) */}
         <div className="mb-6">
-          <h2 className="text-gray-800 font-medium mb-3">Payment Method</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-3 text-left">Payment Method</h2>
           
           {/* 결제 수단 선택 탭 */}
           <div className="flex mb-4 border-b border-gray-300">
@@ -283,7 +278,7 @@ const CheckoutPage: React.FC = () => {
             }`}
             disabled={!emailValid}
           >
-            Pay {formatKRW(total / EXCHANGE_RATE)}
+            Pay {formatPrice(total)}
           </button>
           
           {/* 약관 영역 */}
