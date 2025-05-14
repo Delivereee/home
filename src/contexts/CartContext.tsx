@@ -111,9 +111,16 @@ const cartReducer = (state: Cart | null, action: CartAction): Cart | null => {
       
       if (quantity <= 0) {
         // 수량이 0 이하면 아이템 제거
+        const updatedItems = state.items.filter(item => item.id !== itemId);
+        
+        // 카트에 아이템이 없으면 null 반환
+        if (updatedItems.length === 0) {
+          return null;
+        }
+        
         return {
           ...state,
-          items: state.items.filter(item => item.id !== itemId),
+          items: updatedItems,
         };
       }
       
@@ -168,19 +175,30 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [pendingCartItem, setPendingCartItem] = useState<{ restaurantId: string; restaurantName: string; item: CartItem } | null>(null);
   const [canceledItemId, setCanceledItemId] = useState<string | null>(null);
   
+  // 초기 마운트 시에 로컬 스토리지에서 불러온 cart와 currentRestaurantId를 동기화
+  useEffect(() => {
+    if (cart) {
+      setCurrentRestaurantId(cart.restaurantId);
+    } else {
+      setCurrentRestaurantId(null);
+    }
+  }, []); // 최초 마운트 시에만 실행
+  
   // 카트 상태가 변경될 때마다 로컬 스토리지에 저장
   useEffect(() => {
     if (cart) {
       localStorage.setItem('cart', JSON.stringify(cart));
     } else {
       localStorage.removeItem('cart');
+      // 카트가 비어있을 때 currentRestaurantId도 초기화
+      setCurrentRestaurantId(null);
     }
   }, [cart]);
   
   // 카트에 아이템 추가
   const addToCart = (restaurantId: string, restaurantName: string, item: CartItem) => {
-    // 카트가 비어있거나 같은 레스토랑의 아이템인 경우
-    if (!cart || cart.restaurantId === restaurantId) {
+    // 카트가 명확히 비어있거나, 같은 레스토랑의 아이템인 경우
+    if (cart === null || (cart && cart.restaurantId === restaurantId)) {
       dispatch({
         type: 'ADD_ITEM',
         payload: { restaurantId, restaurantName, item },
@@ -238,6 +256,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   
   // 아이템 수량 업데이트
   const updateItemQuantity = (itemId: string, quantity: number) => {
+    if (quantity <= 0) {
+      // 수량이 0 이하면 아이템 제거 처리
+      removeItem(itemId);
+      return;
+    }
+    
     dispatch({
       type: 'UPDATE_ITEM_QUANTITY',
       payload: { itemId, quantity },
@@ -246,6 +270,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   
   // 아이템 제거
   const removeItem = (itemId: string) => {
+    // 마지막 아이템을 제거하는 경우 현재 레스토랑 ID도 초기화하기 위해
+    // cart 아이템 수 확인
+    if (cart && cart.items.length === 1) {
+      setCurrentRestaurantId(null);
+    }
+    
     dispatch({
       type: 'REMOVE_ITEM',
       payload: { itemId },
@@ -255,6 +285,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // 카트 비우기
   const clearCart = () => {
     setSwitchMessage(null);
+    setCurrentRestaurantId(null); // 카트를 비울 때 현재 레스토랑 ID도 초기화
     dispatch({ type: 'CLEAR_CART' });
   };
   
