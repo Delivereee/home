@@ -104,19 +104,21 @@ const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onChe
               {deliveryAvailable ? (
                 <span className="text-base font-medium text-gray-800 whitespace-nowrap">Delivery Available</span>
               ) : (
-                <span className="text-base font-medium text-red-500 whitespace-nowrap">{formatPrice(amountToMinOrder)} 더 담으면 배달 가능</span>
+                <span className="text-base font-medium text-red-500 whitespace-nowrap">Add {formatPrice(amountToMinOrder)} more for delivery</span>
               )}
             </div>
             
             <div className="flex-grow flex justify-end w-3/5">
               <button 
                 className={`max-w-[200px] ml-auto text-white py-3 px-3 rounded-lg font-semibold flex items-center justify-center ${
-                  deliveryAvailable ? 'bg-red-500 hover:bg-red-600 active:bg-red-700' : 'bg-red-300 cursor-not-allowed'
+                  deliveryAvailable ? 'bg-red-500 hover:bg-red-600 active:bg-red-700' : 'bg-gray-300 cursor-not-allowed'
                 }`}
                 onClick={onCheckout}
                 disabled={!deliveryAvailable}
               >
-                <div className="text-red-500 bg-white rounded-full w-5 h-5 flex items-center justify-center mr-2">
+                <div className={`rounded-full w-5 h-5 flex items-center justify-center mr-2 ${
+                  deliveryAvailable ? 'bg-white text-red-500' : 'bg-white text-gray-400'
+                }`}>
                   <span className="text-sm font-bold">{totalItems}</span>
                 </div>
                 <span className="text-lg font-semibold text-white">{formatPrice(totalPrice)}</span>
