@@ -64,6 +64,11 @@ const MenuDetail: React.FC = () => {
     return `$${priceInUSD.toFixed(2)}`;
   }, [priceInUSD]);
   
+  // 총 가격 계산 (수량 × 가격)
+  const totalPrice = useMemo(() => {
+    return `$${(priceInUSD * quantity).toFixed(2)}`;
+  }, [priceInUSD, quantity]);
+  
   // 결제 페이지로 이동
   const handleCheckout = () => {
     console.log('Navigate to checkout page');
@@ -192,7 +197,9 @@ const MenuDetail: React.FC = () => {
     if (quantity === 0) {
       increaseQuantity();
     } else {
-      handleCheckout();
+      // 카트에 추가하고 가게 상세 페이지로 이동
+      updateCartItem(quantity);
+      navigate(`/restaurant/${restaurantId}`);
     }
   };
   
@@ -259,8 +266,11 @@ const MenuDetail: React.FC = () => {
           {/* 가격 정보 */}
           <div className="mb-8">
             <h2 className="text-xl font-bold text-left mb-1">{displayPrice}</h2>
-            <p className="text-sm text-gray-500">(per 1 piece)</p>
+            <p className="text-sm text-gray-500 text-left">(per 1 piece)</p>
           </div>
+          
+          {/* 구분선 */}
+          <div className="border-t border-gray-200 mb-6"></div>
           
           {/* 수량 조절 */}
           <div className="mb-8">
@@ -286,16 +296,6 @@ const MenuDetail: React.FC = () => {
               </div>
             </div>
           </div>
-          
-          {/* 추가 정보 섹션 */}
-          <div className="mb-8">
-            <h3 className="text-lg font-bold text-left mb-2">Additional Information</h3>
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <p className="text-gray-600 text-sm mb-2">• Made fresh daily</p>
-              <p className="text-gray-600 text-sm mb-2">• Premium ingredients</p>
-              <p className="text-gray-600 text-sm">• Allergens: wheat, dairy</p>
-            </div>
-          </div>
         </div>
         
         {/* 주문 버튼 */}
@@ -304,17 +304,12 @@ const MenuDetail: React.FC = () => {
             className="w-full py-4 rounded-lg font-bold text-white bg-red-500"
             onClick={addToCartHandler}
           >
-            {quantity > 0 ? `Order Now` : `Add to Cart`} - {displayPrice}
+            {quantity > 0 ? `Add to Cart - ${totalPrice}` : `Add to Cart - ${displayPrice}`}
           </button>
         </div>
       </main>
       
-      {/* 장바구니 바텀시트 */}
-      <CartBottomSheet 
-        minOrderAmount={minOrderAmount}
-        onCheckout={handleCheckout}
-        restaurantId={restaurantId}
-      />
+      {/* 바텀시트를 메뉴 상세 페이지에서는 제거 */}
       
       {/* 하단 네비게이션 바 */}
       <NavigationBar />
