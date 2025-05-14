@@ -16,6 +16,7 @@ interface CartContextType {
   setCurrentRestaurantId: (id: string | null) => void;
   showCartReplaceConfirm: boolean;
   pendingCartItem: { restaurantId: string; restaurantName: string; item: CartItem } | null;
+  canceledItemId: string | null;
   addToCart: (restaurantId: string, restaurantName: string, item: CartItem) => void;
   updateItemQuantity: (itemId: string, quantity: number) => void;
   removeItem: (itemId: string) => void;
@@ -29,6 +30,7 @@ interface CartContextType {
   clearSwitchMessage: () => void;
   confirmReplaceCart: () => void;
   cancelReplaceCart: () => void;
+  clearCanceledItem: () => void;
 }
 
 // 초기 카트 상태
@@ -164,6 +166,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [currentRestaurantId, setCurrentRestaurantId] = useState<string | null>(null);
   const [showCartReplaceConfirm, setShowCartReplaceConfirm] = useState<boolean>(false);
   const [pendingCartItem, setPendingCartItem] = useState<{ restaurantId: string; restaurantName: string; item: CartItem } | null>(null);
+  const [canceledItemId, setCanceledItemId] = useState<string | null>(null);
   
   // 카트 상태가 변경될 때마다 로컬 스토리지에 저장
   useEffect(() => {
@@ -209,8 +212,23 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   
   // 카트 교체 취소
   const cancelReplaceCart = () => {
+    // 취소된 아이템 ID 설정
+    if (pendingCartItem) {
+      setCanceledItemId(pendingCartItem.item.id);
+
+      // 잠시 후 취소된 아이템 ID 초기화 (컴포넌트가 반응할 시간 제공)
+      setTimeout(() => {
+        setCanceledItemId(null);
+      }, 100);
+    }
+    
     setShowCartReplaceConfirm(false);
     setPendingCartItem(null);
+  };
+  
+  // 취소된 아이템 초기화
+  const clearCanceledItem = () => {
+    setCanceledItemId(null);
   };
   
   // 전환 메시지 초기화
@@ -295,6 +313,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCurrentRestaurantId,
     showCartReplaceConfirm,
     pendingCartItem,
+    canceledItemId,
     addToCart,
     updateItemQuantity,
     removeItem,
@@ -307,7 +326,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     switchMessage,
     clearSwitchMessage,
     confirmReplaceCart,
-    cancelReplaceCart
+    cancelReplaceCart,
+    clearCanceledItem
   };
   
   return (

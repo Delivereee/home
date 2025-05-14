@@ -11,7 +11,7 @@ interface MenuItemProps {
 }
 
 const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantName }) => {
-  const { cart, addToCart, updateItemQuantity } = useCart();
+  const { cart, addToCart, updateItemQuantity, canceledItemId } = useCart();
   
   // 영문 이름과 설명을 우선 사용하고, 없을 경우 기본 필드 사용
   const displayName = menuItem.nameEn || menuItem.name || '[Menu Name]';
@@ -41,9 +41,22 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
     setQuantity(getCartQuantity());
   }, [cart, getCartQuantity]);
   
+  // 취소된 아이템 감지하여 수량 초기화
+  useEffect(() => {
+    if (canceledItemId && canceledItemId === menuItem.id) {
+      setQuantity(getCartQuantity());
+    }
+  }, [canceledItemId, menuItem.id, getCartQuantity]);
+  
   // 수량 증가
   const increaseQuantity = () => {
-    const newQuantity = quantity + 1;
+    // 현재 카트가 다른 레스토랑의 것이면 1로 시작
+    let startQuantity = quantity;
+    if (cart && cart.restaurantId !== restaurantId && quantity === 0) {
+      startQuantity = 0;
+    }
+    
+    const newQuantity = startQuantity + 1;
     setQuantity(newQuantity);
     updateCartItem(newQuantity);
   };
