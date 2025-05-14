@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import BackHeader from '../components/BackHeader';
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,6 +17,14 @@ const CheckoutPage: React.FC = () => {
   
   // 약관 펼치기/접기 상태
   const [termsExpanded, setTermsExpanded] = useState(false);
+  
+  // PayPal 초기 옵션
+  const paypalOptions = {
+    clientId: "AWiQrkfr-umMAIIyeiLWY_Dgx3PMSazp9iUDofAQeNeIUnZo8sZuzDZPCdHJEqM9BYIE99g8DgzLI7a6",
+    currency: "USD",
+    intent: "capture",
+    locale: "en_US",
+  };
   
   // 화폐 변환 상수
   const EXCHANGE_RATE = 0.00071; // 1원 = 0.00071달러
@@ -51,6 +60,76 @@ const CheckoutPage: React.FC = () => {
   // 배송 요청사항 변경 핸들러
   const handleDeliveryRequestChange = (request: string) => {
     setDeliveryRequest(request === deliveryRequest ? null : request);
+  };
+  
+  // PayPal 결제를 위한 주문 생성
+  const createOrder = (data: any, actions: any) => {
+    if (!emailValid || !cart) return;
+    
+    return actions.order.create({
+      purchase_units: [{
+        description: `Order from ${cart.restaurantName}`,
+        amount: {
+          currency_code: "USD",
+          value: total.toFixed(2),
+          breakdown: {
+            item_total: {
+              currency_code: "USD",
+              value: subtotal.toFixed(2)
+            },
+            shipping: {
+              currency_code: "USD",
+              value: DELIVERY_FEE.toFixed(2)
+            },
+            handling: {
+              currency_code: "USD",
+              value: PROXY_FEE.toFixed(2)
+            }
+          }
+        },
+        items: cart.items.map(item => ({
+          name: item.name,
+          unit_amount: {
+            currency_code: "USD",
+            value: item.price.toFixed(2)
+          },
+          quantity: item.quantity
+        }))
+      }],
+      application_context: {
+        shipping_preference: "NO_SHIPPING"
+      }
+    });
+  };
+  
+  // PayPal 결제 승인 처리
+  const onApprove = async (data: any, actions: any) => {
+    if (!cart) return;
+    
+    try {
+      const orderDetails = await actions.order.capture();
+      console.log('PayPal payment successful:', orderDetails);
+      
+      // 여기에 백엔드 API 호출하여 주문 정보 저장 로직 추가
+      const orderData = {
+        paypalOrderId: data.orderID,
+        paymentMethod: 'paypal',
+        email: email,
+        cart: cart,
+        deliveryRequest: deliveryRequest,
+        total: total
+      };
+      
+      console.log('Order data to send to backend:', orderData);
+      
+      // 임시 성공 메시지
+      alert(`Payment completed successfully! Order ID: ${data.orderID}`);
+      // TODO: 성공 페이지로 이동
+      // navigate('/order-success', { state: { orderId: data.orderID } });
+    } catch (error) {
+      console.error('PayPal payment error:', error);
+      alert('An error occurred during payment processing. Please try again.');
+    }
   };
   
   // 카트가 비어있을 때
@@ -201,131 +280,81 @@ const CheckoutPage: React.FC = () => {
           </div>
         </div>
         
-        {/* 결제 방법 영역 (UI만) */}
+        {/* 결제 방법 영역 */}
         <div className="mb-6">
           <h2 className="text-xl font-bold text-gray-800 mb-3 text-left">Payment Method</h2>
           
-          {/* 결제 수단 선택 탭 */}
-          <div className="flex mb-4 border-b border-gray-300">
-            <button
-              type="button"
-              className="flex-1 py-2 border-b-2 border-red-500 text-red-500 font-medium"
-            >
-              Credit Card
-            </button>
-            <button
-              type="button"
-              className="flex-1 py-2 text-gray-500"
-              disabled
-            >
-              PayPal
-            </button>
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
+            <p className="text-gray-700">Your payment will be securely processed by PayPal.</p>
+            <p className="text-sm text-gray-500 mt-1">You can pay using a PayPal account or credit/debit card.</p>
           </div>
           
-          {/* 신용카드 폼 (비활성화된 UI만) */}
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="cardNumber" className="block text-gray-700 mb-1">Card Number</label>
-              <input
-                type="text"
-                id="cardNumber"
-                className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
-                placeholder="1234 5678 9012 3456"
-                disabled
-              />
-            </div>
-            
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label htmlFor="expiryDate" className="block text-gray-700 mb-1">Expiry Date</label>
-                <input
-                  type="text"
-                  id="expiryDate"
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
-                  placeholder="MM/YY"
-                  disabled
+          {/* PayPal 버튼 영역 */}
+          {emailValid ? (
+            <div className="mt-4">
+              <PayPalScriptProvider options={paypalOptions}>
+                <PayPalButtons 
+                  style={{ layout: "vertical" }}
+                  createOrder={createOrder}
+                  onApprove={onApprove}
+                  onError={(err) => {
+                    console.error('PayPal error:', err);
+                    alert('An error occurred with PayPal. Please try again.');
+                  }}
                 />
-              </div>
-              <div className="flex-1">
-                <label htmlFor="cvv" className="block text-gray-700 mb-1">CVV</label>
-                <input
-                  type="text"
-                  id="cvv"
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
-                  placeholder="123"
-                  disabled
-                />
-              </div>
+              </PayPalScriptProvider>
             </div>
-            
-            {/* 지원 카드 이미지 */}
-            <div className="pt-2 flex items-center gap-2">
-              <div className="w-12 h-8 bg-blue-100 rounded flex items-center justify-center text-blue-700 font-bold text-xs">VISA</div>
-              <div className="w-12 h-8 bg-orange-100 rounded flex items-center justify-center text-orange-700 font-bold text-xs">MC</div>
-              <div className="w-12 h-8 bg-green-100 rounded flex items-center justify-center text-green-700 font-bold text-xs">JCB</div>
+          ) : (
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-100 rounded-lg text-center">
+              <p className="text-yellow-700">Please enter a valid email address to access the PayPal payment button.</p>
             </div>
-          </div>
+          )}
         </div>
         
-        {/* 결제 버튼 영역 */}
-        <div className="mt-8">
-          <button 
-            type="button" 
-            className={`w-full py-4 rounded-lg font-medium text-white text-lg tracking-wide shadow-md ${
-              emailValid 
-                ? 'bg-red-500 hover:bg-red-600 active:bg-red-700' 
-                : 'bg-gray-400 cursor-not-allowed'
-            }`}
-            disabled={!emailValid}
-          >
-            Pay {formatPrice(total)}
-          </button>
-          
-          {/* 약관 영역 */}
-          <div className="mt-4 text-center text-gray-500 text-sm">
-            <p className="mb-2">
-              By clicking Pay, 
-              <button 
-                type="button" 
-                className="text-gray-700 font-medium inline-flex items-center ml-1"
-                onClick={() => setTermsExpanded(!termsExpanded)}
+        {/* 약관 영역 */}
+        <div className="mt-4 text-center text-gray-500 text-sm">
+          <p className="mb-2">
+            By proceeding with payment, 
+            <button 
+              type="button" 
+              className="text-gray-700 font-medium inline-flex items-center ml-1"
+              onClick={() => setTermsExpanded(!termsExpanded)}
+            >
+              you agree to our Privacy Policy and Terms
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill="currentColor" 
+                className={`w-5 h-5 ml-1 transition-transform ${termsExpanded ? 'rotate-180' : ''}`}
               >
-                you agree to our Privacy Policy and Terms
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 24 24" 
-                  fill="currentColor" 
-                  className={`w-5 h-5 ml-1 transition-transform ${termsExpanded ? 'rotate-180' : ''}`}
-                >
-                  <path d="M7 10l5 5 5-5z" />
-                </svg>
-              </button>
-            </p>
-            
-            {termsExpanded && (
-              <div className="mt-3 text-left bg-gray-50 p-4 rounded-lg border border-gray-200 text-xs leading-relaxed">
-                <h3 className="font-bold mb-2 text-gray-700">Privacy Policy and Terms of Service</h3>
-                <p className="mb-2">
-                  <strong>1. Collection of Personal Information:</strong> We collect personal information such as your name, email address, phone number, and delivery address to process your order and provide you with a seamless food delivery experience.
-                </p>
-                <p className="mb-2">
-                  <strong>2. Use of Information:</strong> The information we collect is used to process your orders, manage your account, provide customer support, and improve our services.
-                </p>
-                <p className="mb-2">
-                  <strong>3. Payment Information:</strong> Your payment information is processed securely through our payment partners. We do not store your full credit card details on our servers.
-                </p>
-                <p className="mb-2">
-                  <strong>4. Refund Policy:</strong> Refunds are processed according to our refund policy, which may vary depending on the restaurant and the circumstances of the refund request.
-                </p>
-                <p className="mb-2">
-                  <strong>5. Delivery Terms:</strong> Delivery times are estimates and may vary depending on factors such as traffic, weather conditions, and restaurant preparation times.
-                </p>
-                <p>
-                  By clicking "Pay," you acknowledge that you have read and agree to these terms and conditions.
-                </p>
-              </div>
-            )}
-          </div>
+                <path d="M7 10l5 5 5-5z" />
+              </svg>
+            </button>
+          </p>
+          
+          {termsExpanded && (
+            <div className="mt-3 text-left bg-gray-50 p-4 rounded-lg border border-gray-200 text-xs leading-relaxed">
+              <h3 className="font-bold mb-2 text-gray-700">Privacy Policy and Terms of Service</h3>
+              <p className="mb-2">
+                <strong>1. Collection of Personal Information:</strong> We collect personal information such as your name, email address, phone number, and delivery address to process your order and provide you with a seamless food delivery experience.
+              </p>
+              <p className="mb-2">
+                <strong>2. Use of Information:</strong> The information we collect is used to process your orders, manage your account, provide customer support, and improve our services.
+              </p>
+              <p className="mb-2">
+                <strong>3. Payment Information:</strong> Your payment information is processed securely through our payment partners. We do not store your full credit card details on our servers.
+              </p>
+              <p className="mb-2">
+                <strong>4. Refund Policy:</strong> Refunds are processed according to our refund policy, which may vary depending on the restaurant and the circumstances of the refund request.
+              </p>
+              <p className="mb-2">
+                <strong>5. Delivery Terms:</strong> Delivery times are estimates and may vary depending on factors such as traffic, weather conditions, and restaurant preparation times.
+              </p>
+              <p>
+                By proceeding with payment, you acknowledge that you have read and agree to these terms and conditions.
+              </p>
+            </div>
+          )}
         </div>
       </main>
     </div>
