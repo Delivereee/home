@@ -331,14 +331,28 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // 배달 가능 여부 확인
   const isDeliveryAvailable = (minOrderAmount: number | null): boolean => {
     if (minOrderAmount === null) return true; // 최소 주문 금액이 없으면 배달 가능
-    return getTotalPrice() >= minOrderAmount;
+    
+    // 부동소수점 비교를 위한 작은 오차(epsilon) 허용 - 반올림 오류 방지
+    const epsilon = 0.01; // 1센트 이내의 차이는 허용
+    const totalPrice = getTotalPrice();
+    
+    return totalPrice + epsilon >= minOrderAmount;
   };
   
   // 최소 주문 금액까지 남은 금액 계산
   const getAmountToMinOrder = (minOrderAmount: number | null): number => {
     if (minOrderAmount === null) return 0;
+    
     const totalPrice = getTotalPrice();
-    return totalPrice >= minOrderAmount ? 0 : minOrderAmount - totalPrice;
+    // 반올림 오류 방지를 위한 작은 오차(epsilon) 허용
+    const epsilon = 0.01; // 1센트 이내의 차이는 허용
+    
+    // 이미 최소 주문 금액에 도달했거나 매우 근접한 경우
+    if (totalPrice + epsilon >= minOrderAmount) {
+      return 0;
+    }
+    
+    return minOrderAmount - totalPrice;
   };
   
   // 컨텍스트 값
