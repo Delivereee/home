@@ -34,7 +34,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem }) => {
     <div className="flex flex-col pb-4 mb-4 border-b border-gray-200">
       <div className="flex">
         {/* 메뉴 이미지 */}
-        <div className="w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 mr-4">
+        <div className="w-28 h-28 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 mr-4">
           <ImageWithFallback
             src={menuItem.image || ''}
             alt={displayName}
@@ -44,7 +44,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem }) => {
         </div>
         
         {/* 메뉴 정보 */}
-        <div className="flex-grow">
+        <div className="flex-grow flex flex-col justify-between">
           <div className="flex justify-between items-start">
             <div>
               <h3 className="text-lg font-semibold mb-1 text-left">{displayName}</h3>
@@ -60,7 +60,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem }) => {
           </div>
           
           {/* 가격, 수량 조절, Add 버튼 */}
-          <div className="mt-2">
+          <div className="mt-auto">
             <div className="flex items-center justify-between">
               {/* 가격 */}
               <div className="font-semibold text-lg flex flex-col">
