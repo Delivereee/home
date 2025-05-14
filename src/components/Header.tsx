@@ -7,7 +7,7 @@ const Header: React.FC = () => {
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center">
           <span className="text-2xl mr-2">🇰🇷</span>
-          <h1 className="text-2xl font-bold whitespace-nowrap">Deliver Eats Easy</h1>
+          <h1 className="text-3xl font-bold whitespace-nowrap">Deliver Eats Easy</h1>
         </div>
         <button className="p-2 text-gray-500">
           {/* Globe Icon */}
