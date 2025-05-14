@@ -12,7 +12,7 @@ const MenuSection: React.FC<MenuSectionProps> = ({ section }) => {
   
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-bold mb-4">{displayName}</h2>
+      <h2 className="text-lg font-bold mb-4 text-left">{displayName}</h2>
       
       {section.menuItems.length === 0 ? (
         <p className="text-gray-500 italic">No items available in this section</p>

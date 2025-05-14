@@ -33,12 +33,34 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem }) => {
   return (
     <div className="flex flex-col pb-6 mb-6 border-b border-gray-200">
       <div className="flex">
+        {/* 메뉴 이미지 */}
+        <div className="w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 mr-4">
+          <ImageWithFallback
+            src={menuItem.image || ''}
+            alt={displayName}
+            className="w-full h-full object-cover"
+            fallback="https://source.unsplash.com/random/300x300/?food"
+          />
+        </div>
+        
         {/* 메뉴 정보 */}
-        <div className="flex-grow pr-4">
-          <h3 className="text-lg font-semibold mb-1">{displayName}</h3>
-          <p className="text-gray-500 text-sm mb-2 line-clamp-2">{displayDescription}</p>
+        <div className="flex-grow">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-lg font-semibold mb-1 text-left">{displayName}</h3>
+              <p className="text-gray-500 text-sm mb-2 line-clamp-2 text-left">{displayDescription}</p>
+            </div>
+            
+            {/* 메뉴 상세보기 버튼 아이콘 */}
+            <div className="ml-2 text-gray-400">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+              </svg>
+            </div>
+          </div>
           
-          <div className="mt-auto">
+          {/* 가격, 수량 조절, Add 버튼 */}
+          <div className="mt-2">
             <div className="flex items-center justify-between">
               {/* 가격 */}
               <div className="font-semibold text-lg">
@@ -73,16 +95,6 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem }) => {
               </div>
             </div>
           </div>
-        </div>
-        
-        {/* 메뉴 이미지 */}
-        <div className="w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-          <ImageWithFallback
-            src={menuItem.image || ''}
-            alt={displayName}
-            className="w-full h-full object-cover"
-            fallback="https://source.unsplash.com/random/300x300/?food"
-          />
         </div>
       </div>
     </div>
