@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { CartProvider } from './contexts/CartContext';
@@ -16,8 +16,52 @@ import CheckoutPage from './pages/CheckoutPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
 import NotFoundPage from './pages/NotFoundPage';
 import AddressSetupPage from './pages/AddressSetupPage';
+import { bootChannelTalk, setChannelTalkPage, updateChannelTalkUser } from './services/ChannelService';
 
 function App() {
+  // 채널톡 페이지 추적
+  useEffect(() => {
+    // 현재 페이지 설정
+    setChannelTalkPage('Home');
+    
+    // 페이지 변경 감지
+    const handleRouteChange = () => {
+      const currentPath = window.location.hash.replace('#', '');
+      let pageName = 'Home';
+      
+      if (currentPath.includes('restaurant')) {
+        pageName = 'Restaurant Detail';
+      } else if (currentPath.includes('cart')) {
+        pageName = 'Cart';
+      } else if (currentPath.includes('checkout')) {
+        pageName = 'Checkout';
+      } else if (currentPath.includes('address')) {
+        pageName = 'Address Setup';
+      }
+      
+      setChannelTalkPage(pageName);
+    };
+    
+    // 해시 변경 이벤트 리스너 추가
+    window.addEventListener('hashchange', handleRouteChange);
+    
+    // 사용자 정보 업데이트 (선택 사항)
+    if (window.ChannelIO) {
+      try {
+        window.ChannelIO('updateUser', {
+          name: 'Guest User'
+        });
+      } catch (error) {
+        console.error('Failed to update ChannelIO user:', error);
+      }
+    }
+    
+    // 컴포넌트 언마운트 시 이벤트 리스너 제거
+    return () => {
+      window.removeEventListener('hashchange', handleRouteChange);
+    };
+  }, []);
+  
   return (
     <CartProvider>
       <AddressProvider>

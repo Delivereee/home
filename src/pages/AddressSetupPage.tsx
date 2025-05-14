@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import BackHeader from '../components/BackHeader';
 import { useAddress } from '../contexts/AddressContext';
 import { getCurrentPosition, reverseGeocode, getIpBasedLocation } from '../services/LocationService';
+import { showChannelTalk, trackChannelTalkEvent } from '../services/ChannelService';
 
 const AddressSetupPage: React.FC = () => {
   const navigate = useNavigate();
@@ -195,6 +196,15 @@ const AddressSetupPage: React.FC = () => {
     navigate('/');
   };
 
+  // 채널톡 도움말 열기
+  const handleOpenHelp = () => {
+    trackChannelTalkEvent('address_help_requested', {
+      mainAddress: mainAddress,
+      hasDetailAddress: !!detailAddress.trim()
+    });
+    showChannelTalk();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header with back button */}
@@ -319,6 +329,20 @@ const AddressSetupPage: React.FC = () => {
           <p className="text-center text-gray-500 text-sm">
             Upload your hotel booking confirmation to extract address automatically
           </p>
+        </div>
+        
+        {/* 도움말 링크 추가 */}
+        <div className="text-center mb-6">
+          <button 
+            type="button" 
+            onClick={handleOpenHelp}
+            className="text-blue-500 text-sm font-medium hover:underline flex items-center justify-center mx-auto"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Having trouble with your address? Chat with our support!
+          </button>
         </div>
         
         {/* Save Address Button - Updated to Material Design style */}
