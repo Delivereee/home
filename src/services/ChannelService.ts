@@ -60,7 +60,7 @@ export const bootChannelTalk = (settings?: Partial<ChannelIOSettings>) => {
   const defaultSettings: ChannelIOSettings = {
     pluginKey: CHANNEL_IO_PLUGIN_KEY,
     accessSecret: CHANNEL_IO_ACCESS_SECRET, // 액세스 시크릿 추가
-    language: 'ko', // 또는 'en'
+    language: 'en', // 영어로 변경 (이전: 'ko')
     mobileMessengerMode: 'slideup',
     // 하단 중앙에 위치하도록 커스텀 CSS 설정
     customLauncherSelector: '#custom-channel-button',
