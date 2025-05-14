@@ -7,12 +7,7 @@ const Header: React.FC = () => {
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center">
           <span className="text-2xl mr-2">🇰🇷</span>
-          <h1 className="text-2xl font-bold">Deliver Eats Easy</h1>
-          <div className="w-full max-w-[120px] mx-auto">
-            <svg viewBox="0 0 100 10" className="w-full">
-              <path d="M0,5 Q25,0 50,5 T100,5" fill="none" stroke="#e74c3c" strokeWidth="2" />
-            </svg>
-          </div>
+          <h1 className="text-2xl font-bold whitespace-nowrap">Deliver Eats Easy</h1>
         </div>
         <button className="p-2 text-gray-500">
           {/* Globe Icon */}
