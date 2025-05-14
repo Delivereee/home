@@ -17,8 +17,8 @@ const NavigationBar: React.FC = () => {
   // 전체 레스토랑 목록으로 이동 (Browse)
   const goToBrowse = () => navigate('/restaurants');
   
-  // 주소 페이지로 이동 (미구현)
-  const goToAddress = () => console.log('Address clicked');
+  // 주소 페이지로 이동
+  const goToAddress = () => navigate('/address');
   
   // 장바구니로 이동
   const goToCart = () => navigate('/cart');
@@ -55,10 +55,11 @@ const NavigationBar: React.FC = () => {
           onClick={goToAddress}
         >
           {/* Address/Location Icon */}
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" 
+            className={`w-6 h-6 ${isActive('/address') ? 'text-red-400' : 'text-gray-500'}`}>
             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
           </svg>
-          <span className="text-xs mt-1 text-gray-500">Address</span>
+          <span className={`text-xs mt-1 ${isActive('/address') ? 'text-red-400' : 'text-gray-500'}`}>Address</span>
         </div>
         
         <div 

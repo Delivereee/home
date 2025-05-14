@@ -14,6 +14,7 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
 import NotFoundPage from './pages/NotFoundPage';
+import AddressSetupPage from './pages/AddressSetupPage';
 
 function App() {
   return (
@@ -69,6 +70,9 @@ function App() {
             
             {/* 주문 성공 페이지 */}
             <Route path="/order-success" element={<OrderSuccessPage />} />
+            
+            {/* 주소 설정 페이지 */}
+            <Route path="/address" element={<AddressSetupPage />} />
             
             {/* 404 에러 페이지 - 항상 모든 라우트의 마지막에 배치 */}
             <Route path="*" element={<NotFoundPage />} />
