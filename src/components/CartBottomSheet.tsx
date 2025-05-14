@@ -99,30 +99,28 @@ const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onChe
       {/* 카트 콘텐츠 - 현재 레스토랑과 카트의 레스토랑이 같을 때만 표시 */}
       {cart && cart.items.length > 0 && cart.restaurantId === restaurantId && (
         <div className="py-2.5 px-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex-shrink-0 w-1/3">
-              <span className="text-base font-medium text-gray-800 whitespace-nowrap">Delivery Available</span>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-shrink-0 w-2/5">
+              {deliveryAvailable ? (
+                <span className="text-base font-medium text-gray-800 whitespace-nowrap">Delivery Available</span>
+              ) : (
+                <span className="text-base font-medium text-red-500 whitespace-nowrap">{formatPrice(amountToMinOrder)} 더 담으면 배달 가능</span>
+              )}
             </div>
             
-            <div className="flex-grow flex justify-end w-2/3">
-              {deliveryAvailable ? (
-                <button 
-                  className="w-full bg-red-500 text-white py-3 px-4 rounded-lg font-semibold flex items-center justify-center"
-                  onClick={onCheckout}
-                >
-                  <div className="text-red-500 bg-white rounded-full w-5 h-5 flex items-center justify-center mr-3">
-                    <span className="text-sm font-bold">{totalItems}</span>
-                  </div>
-                  <span className="text-lg font-semibold text-white">{formatPrice(totalPrice)}</span>
-                </button>
-              ) : (
-                <button 
-                  className="w-full bg-gray-300 text-gray-700 py-3 px-4 rounded-lg font-semibold flex items-center justify-center"
-                  disabled
-                >
-                  {formatPrice(amountToMinOrder)} 더 담으면 배달 가능
-                </button>
-              )}
+            <div className="flex-grow flex justify-end w-3/5">
+              <button 
+                className={`max-w-[200px] ml-auto text-white py-3 px-3 rounded-lg font-semibold flex items-center justify-center ${
+                  deliveryAvailable ? 'bg-red-500 hover:bg-red-600 active:bg-red-700' : 'bg-red-300 cursor-not-allowed'
+                }`}
+                onClick={onCheckout}
+                disabled={!deliveryAvailable}
+              >
+                <div className="text-red-500 bg-white rounded-full w-5 h-5 flex items-center justify-center mr-2">
+                  <span className="text-sm font-bold">{totalItems}</span>
+                </div>
+                <span className="text-lg font-semibold text-white">{formatPrice(totalPrice)}</span>
+              </button>
             </div>
           </div>
         </div>
