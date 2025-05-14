@@ -1,7 +1,15 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import DEE2Logo from '../assets/logos/DEE2.svg';
 
 const Header: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleAddressClick = () => {
+    // 주소 설정 페이지로 이동
+    navigate('/address');
+  };
+
   return (
     <div className="bg-white border-b">
       {/* GNB 영역 - Material Design 가이드라인에 맞게 조정 */}
@@ -28,7 +36,10 @@ const Header: React.FC = () => {
       </div>
 
       {/* 위치 정보 영역 - Material Design 가이드라인에 맞게 조정 */}
-      <div className="px-4 pb-3">
+      <div 
+        className="px-4 pb-3 cursor-pointer"
+        onClick={handleAddressClick}
+      >
         <div className="flex items-center text-gray-700 mb-2">
           {/* Map Marker Icon - Material 스타일 적용 */}
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-red-400 mr-3">
