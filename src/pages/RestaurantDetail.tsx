@@ -119,7 +119,7 @@ const RestaurantDetail: React.FC = () => {
         <div className="border-b border-gray-200 my-4"></div>
         
         {/* 메뉴 타이틀 */}
-        <h1 className="text-lg font-bold mb-4 text-left">Menu</h1>
+        {/* <h1 className="text-lg font-bold mb-4 text-left">Menu</h1> */}
         
         {/* 메뉴 섹션 */}
         {menuLoading ? (
@@ -138,7 +138,7 @@ const RestaurantDetail: React.FC = () => {
             hideIcon={true}
           />
         ) : (
-          <div>
+          <div className="space-y-2">
             {menuSections.map(section => (
               <MenuSection 
                 key={section.id} 

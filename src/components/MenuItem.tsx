@@ -103,10 +103,10 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
   };
   
   return (
-    <div className="flex flex-col pb-4 mb-4 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+    <div className="flex flex-col py-2 hover:bg-gray-50 transition-colors">
       <div className="flex items-stretch relative">
         {/* 메뉴 이미지 */}
-        <div className="w-24 h-24 sm:w-28 sm:h-28 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 mr-3 my-auto">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 mr-3 my-auto">
           <ImageWithFallback
             src={menuItem.image || ''}
             alt={displayName}
@@ -118,15 +118,15 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
         {/* 메뉴 정보 */}
         <div className="flex-grow flex flex-col justify-between py-1 pr-10">
           <div>
-            <h3 className="text-base sm:text-lg font-semibold mb-1 text-left line-clamp-1">{displayName}</h3>
-            <p className="text-gray-500 text-xs sm:text-sm mb-2 line-clamp-2 text-left">{displayDescription}</p>
+            <h3 className="text-base font-semibold mb-1 text-left line-clamp-1">{displayName}</h3>
+            <p className="text-gray-500 text-xs mb-2 line-clamp-2 text-left">{displayDescription}</p>
           </div>
           
           {/* 가격, 수량 조절 */}
           <div className="mt-auto">
             <div className="flex items-center justify-between">
               {/* 가격 */}
-              <div className="font-semibold text-base sm:text-lg flex flex-col">
+              <div className="font-semibold text-base flex flex-col">
                 {displayPrice}
                 <span className="text-xs text-gray-500">(per 1 piece)</span>
               </div>
