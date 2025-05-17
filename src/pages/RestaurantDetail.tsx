@@ -130,7 +130,13 @@ const RestaurantDetail: React.FC = () => {
         ) : menuError ? (
           <ErrorState message={menuError} onRetry={refetchMenus} />
         ) : menuSections.length === 0 ? (
-          <EmptyState message={STATUS_MESSAGES.empty.menus} />
+          <EmptyState 
+            message={STATUS_MESSAGES.empty.menus} 
+            subtitle="This restaurant hasn't added any menu items yet. Please check back later."
+            actionText="Refresh"
+            onAction={refetchMenus}
+            hideIcon={true}
+          />
         ) : (
           <div>
             {menuSections.map(section => (

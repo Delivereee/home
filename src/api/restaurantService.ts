@@ -109,7 +109,7 @@ const convertApiResponseToRestaurants = (apiResponse: any[]): Restaurant[] => {
  * @returns 음식점 상세 정보
  */
 export const getRestaurantDetails = async (id: string): Promise<Restaurant> => {
-  const endpoint = `/api/restaurant-details/${id}`;
+  const endpoint = `/api/v1/stores/${id}`;
   
   try {
     const response = await apiClient.get(endpoint);

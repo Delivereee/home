@@ -1,5 +1,5 @@
 import apiClient from './config';
-import { MenuSection, MenuResponse } from '../types/menu';
+import { MenuSection, MenuResponse, MenuItem } from '../types/menu';
 import { buildQueryString, handleApiError, logApiResponse } from './utils';
 
 /**
@@ -12,30 +12,104 @@ export const getRestaurantMenus = async (
   restaurantId: string | number,
   lang: string = 'en'
 ): Promise<MenuSection[]> => {
-  // 개발 환경이 아니면 샘플 데이터 반환
-  if (process.env.NODE_ENV !== 'development') {
-    console.info('Production environment: using sample menu data');
-    return getSampleMenus();
-  }
-
-  const endpoint = `/api/restaurants/${restaurantId}/menu`;
+  const endpoint = `/api/v1/stores/${restaurantId}/menus`;
   
   try {
-    const queryString = buildQueryString({ lang });
-    const response = await apiClient.get(`${endpoint}${queryString}`);
+    const response = await apiClient.get(endpoint);
     logApiResponse(endpoint, response.data);
     
-    // API 응답에서 섹션 배열 반환
-    return response.data.sections || response.data;
+    // API 응답을 애플리케이션 데이터 구조로 변환
+    return transformMenuData(response.data);
   } catch (error) {
     const apiError = handleApiError(error);
     console.error(`Error fetching restaurant menus: ${apiError.message}`, apiError);
     
-    // 에러 발생 시 샘플 데이터 반환
-    console.info('Using sample menu data');
-    return getSampleMenus();
+    // 에러 발생 시 빈 배열 반환
+    return [];
   }
 };
+
+/**
+ * API 응답 데이터를 애플리케이션에서 사용하는 MenuSection 형식으로 변환
+ * @param apiMenus API에서 반환된 메뉴 데이터
+ * @returns 변환된 MenuSection 배열
+ */
+function transformMenuData(apiMenus: any[]): MenuSection[] {
+  if (!Array.isArray(apiMenus) || apiMenus.length === 0) {
+    return [];
+  }
+  
+  // 메뉴 타입별로 그룹화
+  const menusByType: Record<string, MenuItem[]> = {};
+  
+  // API 응답의 각 메뉴 아이템을 변환하여 타입별로 그룹화
+  apiMenus.forEach(item => {
+    const menuType = item.type || 'Other';
+    
+    if (!menusByType[menuType]) {
+      menusByType[menuType] = [];
+    }
+    
+    // 옵션 변환
+    const options = Array.isArray(item.options) ? item.options.map((opt: { id: string; name: string; description?: string }) => ({
+      id: opt.id,
+      name: opt.name,
+      slug: opt.id,
+      sourceId: 0,
+      mandatory: false,
+      multiple: false,
+      multipleCount: 1,
+      isAvailableQuantity: false,
+      menuOptionItems: [{
+        id: opt.id,
+        name: opt.name,
+        slug: opt.id,
+        sourceId: 0,
+        price: 0,
+        description: opt.description || '',
+        soldout: false,
+        isDeposit: false,
+        depositPrice: 0,
+        depositDescription: ''
+      }]
+    })) : [];
+    
+    // 메뉴 아이템 변환
+    const menuItem: MenuItem = {
+      id: item.id,
+      name: item.name,
+      subtitle: "",
+      price: item.price || 0,
+      description: item.description || "",
+      image: item.image || null,
+      originalImage: item.image || null,
+      slug: item.id,
+      sourceId: 0,
+      reviewCount: 0,
+      soldout: false,
+      oneDish: false,
+      menuOptions: options,
+      nameEn: item.name, // API에 영문 이름이 없는 경우 기본 이름 사용
+      descriptionEn: item.description // API에 영문 설명이 없는 경우 기본 설명 사용
+    };
+    
+    menusByType[menuType].push(menuItem);
+  });
+  
+  // 그룹화된 메뉴를 MenuSection 배열로 변환
+  const menuSections: MenuSection[] = Object.entries(menusByType).map(([type, items], index) => ({
+    id: `section-${index}`,
+    name: type,
+    nameEn: type,
+    image: null,
+    msType: null,
+    slug: type.toLowerCase().replace(/\s+/g, '-'),
+    sourceId: index,
+    menuItems: items
+  }));
+  
+  return menuSections;
+}
 
 /**
  * 샘플 메뉴 데이터 (API 호출 실패 시 사용)

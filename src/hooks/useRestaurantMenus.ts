@@ -13,11 +13,22 @@ export const useRestaurantMenus = (restaurantId: string | number) => {
   const [error, setError] = useState<string | null>(null);
   
   const fetchMenus = useCallback(async () => {
+    if (!restaurantId) {
+      setError('Restaurant ID is required');
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       setError(null);
       
       const data = await getRestaurantMenus(restaurantId);
+      
+      if (Array.isArray(data) && data.length === 0) {
+        console.warn(`No menu items found for restaurant ${restaurantId}`);
+      }
+      
       setMenuSections(data);
     } catch (err) {
       console.error('Error fetching restaurant menus:', err);
