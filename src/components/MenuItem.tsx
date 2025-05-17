@@ -17,7 +17,17 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
   
   // 영문 이름과 설명을 우선 사용하고, 없을 경우 기본 필드 사용
   const displayName = menuItem.nameEn || menuItem.name || '[Menu Name]';
-  const displayDescription = menuItem.descriptionEn || menuItem.description || '[menu description]';
+  
+  // 설명 텍스트에서 대괄호 제거
+  let displayDescription = menuItem.descriptionEn || menuItem.description || '';
+  
+  // 대괄호로 감싸진 형태인 경우 대괄호를 제거하고 안의 내용만 추출
+  if (displayDescription.match(/^\[(.*)\]$/)) {
+    displayDescription = displayDescription.replace(/^\[(.*)\]$/, '$1');
+  }
+  
+  // 유효한 설명인지 확인 (빈 문자열이거나 [] 형태가 아닌 경우)
+  const hasValidDescription = displayDescription && !displayDescription.match(/^\[]$/);
   
   // 달러로 변환된 가격
   const EXCHANGE_RATE = 0.00071; // 1원 = 0.00071달러
@@ -119,7 +129,9 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
         <div className="flex-grow flex flex-col justify-between py-1 pr-10">
           <div>
             <h3 className="text-base font-semibold mb-1 text-left line-clamp-1">{displayName}</h3>
-            <p className="text-gray-500 text-xs mb-2 line-clamp-2 text-left">{displayDescription}</p>
+            {hasValidDescription && (
+              <p className="text-gray-500 text-xs mb-2 line-clamp-2 text-left">{displayDescription}</p>
+            )}
           </div>
           
           {/* 가격, 수량 조절 */}
