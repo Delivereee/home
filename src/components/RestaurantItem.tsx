@@ -12,7 +12,7 @@ const RestaurantItem: React.FC<RestaurantItemProps> = ({ restaurant, disableNavi
   
   // 영문 이름과 설명을 우선 사용하고, 없을 경우 기본 필드 사용
   const displayName = restaurant.nameEn || restaurant.name || '[Shop Name]';
-  const displayDescription = restaurant.introductionTitleEn || restaurant.introductionTitle || '[shop description]';
+  const displayDescription = restaurant.introductionTitleEn || restaurant.introductionTitle || '';
   
   // 환율 정보 (1원 = 0.00071달러)
   const EXCHANGE_RATE = 0.00071;
@@ -59,7 +59,7 @@ const RestaurantItem: React.FC<RestaurantItemProps> = ({ restaurant, disableNavi
         <div className="flex justify-between items-center mt-2">
           {/* 배달 시간 추정 (좌측 하단) */}
           <div className="inline-block bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-700">
-            1시간 이내
+          Within 1 hour
           </div>
           
           {/* 최소 주문 금액 (우측 하단) - 달러로 표시 */}
