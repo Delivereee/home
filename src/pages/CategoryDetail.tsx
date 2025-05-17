@@ -19,7 +19,7 @@ const CategoryDetail: React.FC = () => {
   const location = useLocation();
   
   // 현재 어떤 타입의 요청인지 확인
-  const isAllRestaurants = location.pathname === '/restaurants';
+  const isAllRestaurants = location.pathname === '/restaurants' || location.pathname === '/browse';
   
   // 검색 조건 구성
   const searchParams = useMemo(() => {
@@ -55,20 +55,31 @@ const CategoryDetail: React.FC = () => {
       <BackHeader title={displayTitle} />
       
       <main className="p-4 pb-20">
-        {/* 로딩 상태 */}
-        {loading && <LoadingState message={STATUS_MESSAGES.loading.restaurants} />}
-        
-        {/* 에러 상태 */}
-        {!loading && error && <ErrorState message={error} onRetry={refetch} />}
-        
-        {/* 결과 없음 */}
-        {!loading && !error && restaurants.length === 0 && (
-          <EmptyState message={STATUS_MESSAGES.empty.restaurants} />
-        )}
-        
-        {/* 음식점 목록 */}
-        {!loading && !error && restaurants.length > 0 && (
+        {/* 콘텐츠 영역: 로딩/에러/빈 결과/목록 중 하나만 표시 */}
+        {loading ? (
+          <LoadingState 
+            message={STATUS_MESSAGES.loading.restaurants} 
+            id={`category-${isAllRestaurants ? 'all-restaurants' : categoryName || 'unknown'}`}
+          />
+        ) : error ? (
+          <ErrorState 
+            message={error} 
+            onRetry={refetch} 
+            subtitle="We couldn't connect to our restaurant service. Please check your connection and try again."
+          />
+        ) : restaurants.length === 0 ? (
+          <EmptyState 
+            message={STATUS_MESSAGES.empty.restaurants} 
+            subtitle="Try changing your location or exploring different categories."
+            actionText="Refresh"
+            onAction={refetch}
+            hideIcon={true}
+          />
+        ) : (
           <div>
+            <p className="text-gray-600 mb-4">
+              {restaurants.length} {restaurants.length === 1 ? 'restaurant' : 'restaurants'} available
+            </p>
             {restaurants.map((restaurant) => (
               <RestaurantItem key={restaurant.id} restaurant={restaurant} />
             ))}

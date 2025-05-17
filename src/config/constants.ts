@@ -2,8 +2,8 @@
 
 // 기본 위치 좌표 (서울 강남)
 export const DEFAULT_COORDINATES = {
-  lat: 37.4994321012109,
-  lng: 127.043914628076
+  lat: 37.472755394457,
+  lng: 126.937075001133
 };
 
 // API 요청 시 사용되는 기본 값
@@ -16,20 +16,21 @@ export const API_DEFAULTS = {
 export const STATUS_MESSAGES = {
   loading: {
     categories: 'Loading categories...',
-    restaurants: 'Loading restaurants...',
-    chains: 'Loading popular chains...',
-    menus: 'Loading menus...'
+    restaurants: 'Finding restaurants near you...',
+    chains: 'Loading popular restaurants...',
+    menus: 'Loading menu options...'
   },
   error: {
-    categories: 'Failed to load categories. Please try again later.',
-    restaurants: 'Failed to load restaurants. Please try again later.',
-    chains: 'Failed to load popular chains. Please try again later.',
-    menus: 'Failed to load menus. Please try again later.',
-    default: 'Something went wrong. Please try again later.'
+    categories: 'We had trouble loading categories. Please try again.',
+    restaurants: 'We couldn\'t load restaurants at this time. Please try again.',
+    chains: 'We couldn\'t load popular restaurants at this time. Please try again.',
+    menus: 'We couldn\'t load the menu at this time. Please try again.',
+    default: 'Something went wrong. Please try again.',
+    network: 'Network connection issue. Please check your internet connection.'
   },
   empty: {
-    restaurants: 'No restaurants found for this category.',
-    chains: 'No popular chains found.',
-    menus: 'No menus available for this restaurant.'
+    restaurants: 'No restaurants found in this area.',
+    chains: 'No popular restaurants available at this time.',
+    menus: 'This restaurant has no available menu items.'
   }
 }; 

@@ -68,7 +68,10 @@ const RestaurantDetail: React.FC = () => {
       <div className="min-h-screen bg-gray-50">
         <BackHeader title={displayName} />
         <div className="p-4">
-          <LoadingState message={STATUS_MESSAGES.loading.restaurants} />
+          <LoadingState 
+            message={STATUS_MESSAGES.loading.restaurants} 
+            id={`restaurant-detail-${restaurantId}`}
+          />
         </div>
         <NavigationBar />
       </div>
@@ -120,7 +123,10 @@ const RestaurantDetail: React.FC = () => {
         
         {/* 메뉴 섹션 */}
         {menuLoading ? (
-          <LoadingState message={STATUS_MESSAGES.loading.menus} />
+          <LoadingState 
+            message={STATUS_MESSAGES.loading.menus} 
+            id={`restaurant-menus-${restaurantId}`}
+          />
         ) : menuError ? (
           <ErrorState message={menuError} onRetry={refetchMenus} />
         ) : menuSections.length === 0 ? (

@@ -59,7 +59,7 @@ const RestaurantItem: React.FC<RestaurantItemProps> = ({ restaurant, disableNavi
         <div className="flex justify-between items-center mt-2">
           {/* 배달 시간 추정 (좌측 하단) */}
           <div className="inline-block bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-700">
-            20-30 min
+            1시간 이내
           </div>
           
           {/* 최소 주문 금액 (우측 하단) - 달러로 표시 */}

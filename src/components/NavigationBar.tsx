@@ -8,14 +8,15 @@ const NavigationBar: React.FC = () => {
   // 현재 활성화된 탭 확인
   const isActive = (path: string) => {
     return location.pathname === path || 
-      (path === '/' && (location.pathname === '/' || location.pathname === '/home'));
+      (path === '/' && (location.pathname === '/' || location.pathname === '/home')) ||
+      (path === '/browse' && location.pathname === '/restaurants');
   };
   
   // 홈으로 이동
   const goToHome = () => navigate('/');
   
   // 전체 레스토랑 목록으로 이동 (Browse)
-  const goToBrowse = () => navigate('/restaurants');
+  const goToBrowse = () => navigate('/browse');
   
   // 주소 페이지로 이동
   const goToAddress = () => navigate('/address');
@@ -44,10 +45,10 @@ const NavigationBar: React.FC = () => {
         >
           {/* Compass/Browse Icon */}
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" 
-            className={`w-6 h-6 ${isActive('/restaurants') ? 'text-red-400' : 'text-gray-500'}`}>
+            className={`w-6 h-6 ${isActive('/browse') ? 'text-red-400' : 'text-gray-500'}`}>
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.49L17.5 6.5 9.99 9.99 6.5 17.5zm5.5-6.6c.61 0 1.1.49 1.1 1.1s-.49 1.1-1.1 1.1-1.1-.49-1.1-1.1.49-1.1 1.1-1.1z" />
           </svg>
-          <span className={`text-xs mt-1 ${isActive('/restaurants') ? 'text-red-400' : 'text-gray-500'}`}>Browse</span>
+          <span className={`text-xs mt-1 ${isActive('/browse') ? 'text-red-400' : 'text-gray-500'}`}>Browse</span>
         </div>
         
         <div 

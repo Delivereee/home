@@ -58,6 +58,14 @@ export function handleApiError(error: unknown): ApiError {
  */
 export function logApiResponse(endpoint: string, response: any): void {
   if (process.env.NODE_ENV === 'development') {
-    console.log(`API Response [${endpoint}]:`, response);
+    console.group(`📡 API Response [${endpoint}]`);
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('Data:', response);
+    
+    if (Array.isArray(response)) {
+      console.log('Items count:', response.length);
+    }
+    
+    console.groupEnd();
   }
 } 

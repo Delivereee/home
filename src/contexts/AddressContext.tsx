@@ -1,9 +1,12 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { DEFAULT_COORDINATES } from '../config/constants';
 
 interface Address {
   mainAddress: string;
   detailAddress: string;
   isComplete: boolean;
+  lat?: number;
+  lng?: number;
 }
 
 interface AddressContextType {

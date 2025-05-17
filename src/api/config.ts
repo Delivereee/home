@@ -20,16 +20,28 @@ const apiClient = axios.create({
 if (isDevelopment) {
   console.log(`API Client configured with base URL: ${API_BASE_URL}`);
   console.log(`Current environment: ${ENVIRONMENT}`);
+  
+  // 서버 상태 확인
+  checkServerStatus();
+}
+
+/**
+ * API 서버 상태 확인
+ */
+async function checkServerStatus() {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/v1/stores?lat=37.4743358&lng=126.93812149`, { timeout: 5000 });
+    console.log('✅ API 서버 연결 성공:', response.status);
+    console.log('📊 응답 데이터 항목 수:', Array.isArray(response.data) ? response.data.length : 'N/A');
+  } catch (error) {
+    console.error('❌ API 서버 연결 실패:', error);
+  }
 }
 
 // 요청 인터셉터 - 요청 전에 실행됨
 apiClient.interceptors.request.use(
   (config) => {
-    // 배포 환경에서는 요청을 중단하고 샘플 데이터를 사용하기 위해 오류 발생
-    if (!isDevelopment) {
-      return Promise.reject(new Error('Using sample data in production'));
-    }
-    // 필요한 경우 여기에 인증 토큰 등 추가
+    // 개발/배포 환경 모두에서 API 요청 허용
     return config;
   },
   (error) => {

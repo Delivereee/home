@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { getNearbyRestaurants } from '../api/restaurantService';
 import { Restaurant } from '../types/restaurant';
 import { DEFAULT_COORDINATES, STATUS_MESSAGES } from '../config/constants';
+import { useAddress } from '../contexts/AddressContext';
 
 interface UseRestaurantsProps {
   categoryName?: string;
@@ -21,6 +22,7 @@ export const useRestaurants = (
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { address } = useAddress();
   
   // 파라미터 처리: 문자열 또는 객체
   let options: UseRestaurantsProps = {};
@@ -38,13 +40,16 @@ export const useRestaurants = (
       setLoading(true);
       setError(null);
       
-      // 환경 설정에서 위치 정보 가져오기
-      const { lat, lng } = DEFAULT_COORDINATES;
+      // 주소 컨텍스트에서 좌표 정보 가져오기, 없으면 기본 좌표 사용
+      const coordinates = {
+        lat: address?.lat ?? DEFAULT_COORDINATES.lat,
+        lng: address?.lng ?? DEFAULT_COORDINATES.lng
+      };
       
       // 요청 파라미터 구성
       const params = {
-        lat,
-        lng
+        lat: coordinates.lat,
+        lng: coordinates.lng
       };
       
       // 카테고리가 있는 경우, 요청 파라미터에 추가
@@ -67,7 +72,7 @@ export const useRestaurants = (
     } finally {
       setLoading(false);
     }
-  }, [categoryName, franchiseId, allRestaurants]);
+  }, [categoryName, franchiseId, allRestaurants, address]);
   
   useEffect(() => {
     fetchRestaurants();

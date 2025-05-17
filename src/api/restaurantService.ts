@@ -8,13 +8,7 @@ import { buildQueryString, handleApiError, logApiResponse } from './utils';
  * @returns 음식점 목록
  */
 export const getNearbyRestaurants = async (params: RestaurantSearchParams): Promise<Restaurant[]> => {
-  // 배포 환경에서는 즉시 샘플 데이터 반환
-  if (process.env.NODE_ENV !== 'development') {
-    console.info('Production environment: using sample restaurant data');
-    return getSampleRestaurants(params);
-  }
-
-  const endpoint = '/api/restaurant-details/nearby';
+  const endpoint = '/api/v1/stores';
   
   try {
     const queryString = buildQueryString({
@@ -25,17 +19,87 @@ export const getNearbyRestaurants = async (params: RestaurantSearchParams): Prom
       lang: params.lang || 'en'
     });
     
+    console.log(`API 요청: ${endpoint}${queryString}`);
     const response = await apiClient.get(`${endpoint}${queryString}`);
+    console.log('API 응답 원본 데이터:', response.data);
+    
+    // 응답이 빈 배열인 경우에도 그대로 반환
+    if (Array.isArray(response.data) && response.data.length === 0) {
+      console.log('API에서 빈 배열 응답을 받았습니다. 빈 목록을 반환합니다.');
+      return [];
+    }
+    
     logApiResponse(endpoint, response.data);
     
-    return response.data;
+    // API 응답을 Restaurant 인터페이스에 맞게 변환
+    return convertApiResponseToRestaurants(response.data);
   } catch (error) {
     const apiError = handleApiError(error);
     console.error(`Error fetching nearby restaurants: ${apiError.message}`, apiError);
     
-    // 에러 발생 시 샘플 데이터 반환
-    console.info('Using sample restaurant data');
-    return getSampleRestaurants(params);
+    // 에러 발생 시 빈 배열 반환 (샘플 데이터 대신)
+    console.error('API 요청 실패. 빈 배열을 반환합니다.');
+    return [];
+  }
+};
+
+/**
+ * API 응답을 Restaurant 인터페이스에 맞게 변환
+ * @param apiResponse API 응답 데이터
+ * @returns Restaurant 배열
+ */
+const convertApiResponseToRestaurants = (apiResponse: any[]): Restaurant[] => {
+  console.log('Converting API response to Restaurant objects:', apiResponse);
+  
+  if (!Array.isArray(apiResponse)) {
+    console.error('API 응답이 배열 형식이 아닙니다:', apiResponse);
+    throw new Error('API 응답이 배열 형식이 아닙니다');
+  }
+  
+  try {
+    return apiResponse.map(item => {
+      // 필수 필드 검증
+      if (!item.id) {
+        console.warn('아이템에 id 필드가 없습니다:', item);
+      }
+      
+      return {
+        id: item.id || '',
+        restaurantId: parseInt(item.id) || 0,
+        name: item.name || '',
+        nameEn: item.name || null,
+        nameJa: null,
+        nameZhCn: null,
+        nameZhTw: null,
+        phone: item.phone || '',
+        serviceCenterNumber: item.phone || '',
+        address: item.address || '',
+        addressEn: item.address || null,
+        addressJa: null,
+        addressZhCn: null,
+        addressZhTw: null,
+        lat: item.lat || 0,
+        lng: item.lng || 0,
+        logoUrl: item.logoUrl || '',
+        backgroundUrl: item.backgroundUrl || '',
+        introductionTitle: item.description || '',
+        introductionTitleEn: item.description || null,
+        introductionTitleJa: null,
+        introductionTitleZhCn: null,
+        introductionTitleZhTw: null,
+        reviewAvg: 0,
+        reviewCount: 0,
+        distance: item.distance || 0,
+        isOpen: item.isOpen !== undefined ? item.isOpen : true,
+        minOrderAmount: item.minOrderAmount || 0,
+        categories: item.categories || [],
+        servingType: 'delivery',
+        hasTranslation: false
+      };
+    });
+  } catch (error) {
+    console.error('Error converting API response:', error);
+    throw error;
   }
 };
 
@@ -45,13 +109,6 @@ export const getNearbyRestaurants = async (params: RestaurantSearchParams): Prom
  * @returns 음식점 상세 정보
  */
 export const getRestaurantDetails = async (id: string): Promise<Restaurant> => {
-  // 배포 환경에서는 즉시 샘플 데이터 반환
-  if (process.env.NODE_ENV !== 'development') {
-    console.info('Production environment: using sample restaurant data');
-    const samples = getSampleRestaurants();
-    return samples.find(r => r.id === id) || samples[0];
-  }
-
   const endpoint = `/api/restaurant-details/${id}`;
   
   try {
@@ -63,196 +120,7 @@ export const getRestaurantDetails = async (id: string): Promise<Restaurant> => {
     const apiError = handleApiError(error);
     console.error(`Error fetching restaurant details: ${apiError.message}`, apiError);
     
-    // 에러 발생 시 샘플 데이터 반환
-    console.info('Using sample restaurant data');
-    const samples = getSampleRestaurants();
-    return samples.find(r => r.id === id) || samples[0];
+    // 에러를 던져서 상위 컴포넌트에서 처리하도록 함
+    throw new Error(`Failed to load restaurant details: ${apiError.message}`);
   }
-};
-
-/**
- * 샘플 음식점 데이터 (API 호출 실패 시 사용)
- * @param params 요청 파라미터 (필터링용)
- * @returns 음식점 목록
- */
-const getSampleRestaurants = (params?: RestaurantSearchParams): Restaurant[] => {
-  const allRestaurants = [
-    {
-      "id": "WIySQB3n",
-      "restaurantId": 1082519,
-      "name": "번쩍피자-강남점",
-      "nameEn": "Flash Pizza - Gangnam",
-      "nameJa": null,
-      "nameZhCn": null,
-      "nameZhTw": null,
-      "phone": "050372623793",
-      "serviceCenterNumber": "1661-5270",
-      "address": "서울특별시 강남구 역삼동 730-4 지상1층 102호",
-      "addressEn": "102, 1st floor, 730-4, Yeoksam-dong, Gangnam-gu, Seoul",
-      "addressJa": null,
-      "addressZhCn": null,
-      "addressZhTw": null,
-      "lat": 37.4994325486862,
-      "lng": 127.043914450039,
-      "logoUrl": "https://rev-static.yogiyo.co.kr/restaurant_logos/20230524171053185852_20220412153032589854_업체자체_20220412_1082519_번쩍피자-강남점_대표사진_300x300.jpg",
-      "backgroundUrl": "https://rev-static.yogiyo.co.kr/public/franchise/background/20240424101206_13bc178e12adda2f03bc717e0e65292b_tn.jpg",
-      "introductionTitle": "📢리뷰이벤트 참여 방법📢",
-      "introductionTitleEn": "📢How to Participate in Review Event📢",
-      "introductionTitleJa": null,
-      "introductionTitleZhCn": null,
-      "introductionTitleZhTw": null,
-      "reviewAvg": 4.91920238249385,
-      "reviewCount": 7723,
-      "distance": 5.0E-5,
-      "isOpen": true,
-      "minOrderAmount": 0,
-      "categories": [
-        "치킨",
-        "피자양식",
-        "테이크아웃",
-        "프랜차이즈",
-        "야식"
-      ],
-      "servingType": "delivery",
-      "hasTranslation": true
-    },
-    {
-      "id": "WIySQB3n-2",
-      "restaurantId": 1082520,
-      "name": "번쩍피자-서초점",
-      "nameEn": "Flash Pizza - Seocho",
-      "nameJa": null,
-      "nameZhCn": null,
-      "nameZhTw": null,
-      "phone": "050372623794",
-      "serviceCenterNumber": "1661-5270",
-      "address": "서울특별시 서초구 서초동 1303-22 1층",
-      "addressEn": "1st floor, 1303-22, Seocho-dong, Seocho-gu, Seoul",
-      "addressJa": null,
-      "addressZhCn": null,
-      "addressZhTw": null,
-      "lat": 37.4897325486862,
-      "lng": 127.033914450039,
-      "logoUrl": "https://rev-static.yogiyo.co.kr/restaurant_logos/20230524171053185852_20220412153032589854_업체자체_20220412_1082519_번쩍피자-강남점_대표사진_300x300.jpg",
-      "backgroundUrl": "https://rev-static.yogiyo.co.kr/public/franchise/background/20240424101206_13bc178e12adda2f03bc717e0e65292b_tn.jpg",
-      "introductionTitle": "📢리뷰이벤트 참여 방법📢",
-      "introductionTitleEn": "📢How to Participate in Review Event📢",
-      "introductionTitleJa": null,
-      "introductionTitleZhCn": null,
-      "introductionTitleZhTw": null,
-      "reviewAvg": 4.8,
-      "reviewCount": 5420,
-      "distance": 1.2E-4,
-      "isOpen": true,
-      "minOrderAmount": 0,
-      "categories": [
-        "치킨",
-        "피자양식",
-        "테이크아웃",
-        "프랜차이즈",
-        "야식"
-      ],
-      "servingType": "delivery",
-      "hasTranslation": true
-    },
-    {
-      "id": "KJhTdR4m",
-      "restaurantId": 1082523,
-      "name": "김스키친-강남점",
-      "nameEn": "Kim's Kitchen",
-      "nameJa": null,
-      "nameZhCn": null,
-      "nameZhTw": null,
-      "phone": "050372635793",
-      "serviceCenterNumber": "1661-5271",
-      "address": "서울특별시 강남구 역삼동 825-4 지상1층",
-      "addressEn": "1st floor, 825-4, Yeoksam-dong, Gangnam-gu, Seoul",
-      "addressJa": null,
-      "addressZhCn": null,
-      "addressZhTw": null,
-      "lat": 37.4995325486862,
-      "lng": 127.043914450039,
-      "logoUrl": "https://source.unsplash.com/random/300x300/?korean-food",
-      "backgroundUrl": "https://source.unsplash.com/random/800x400/?korean-restaurant",
-      "introductionTitle": "정통 한식의 맛을 느껴보세요",
-      "introductionTitleEn": "Experience authentic Korean taste",
-      "introductionTitleJa": null,
-      "introductionTitleZhCn": null,
-      "introductionTitleZhTw": null,
-      "reviewAvg": 4.8,
-      "reviewCount": 5280,
-      "distance": 1.2E-4,
-      "isOpen": true,
-      "minOrderAmount": 10000,
-      "categories": [
-        "한식",
-        "비빔밥",
-        "김치찌개",
-        "프랜차이즈"
-      ],
-      "servingType": "delivery",
-      "hasTranslation": true
-    },
-    {
-      "id": "KJhTdR4m-2",
-      "restaurantId": 1082524,
-      "name": "김스키친-서초점",
-      "nameEn": "Kim's Kitchen - Seocho",
-      "nameJa": null,
-      "nameZhCn": null,
-      "nameZhTw": null,
-      "phone": "050372635794",
-      "serviceCenterNumber": "1661-5271",
-      "address": "서울특별시 서초구 서초동 1303-37 1층",
-      "addressEn": "1st floor, 1303-37, Seocho-dong, Seocho-gu, Seoul",
-      "addressJa": null,
-      "addressZhCn": null,
-      "addressZhTw": null,
-      "lat": 37.4896325486862,
-      "lng": 127.034914450039,
-      "logoUrl": "https://source.unsplash.com/random/300x300/?korean-food",
-      "backgroundUrl": "https://source.unsplash.com/random/800x400/?korean-restaurant",
-      "introductionTitle": "정통 한식의 맛을 느껴보세요",
-      "introductionTitleEn": "Experience authentic Korean taste",
-      "introductionTitleJa": null,
-      "introductionTitleZhCn": null,
-      "introductionTitleZhTw": null,
-      "reviewAvg": 4.7,
-      "reviewCount": 4820,
-      "distance": 1.8E-4,
-      "isOpen": true,
-      "minOrderAmount": 10000,
-      "categories": [
-        "한식",
-        "비빔밥",
-        "김치찌개",
-        "프랜차이즈"
-      ],
-      "servingType": "delivery",
-      "hasTranslation": true
-    }
-  ];
-
-  // 파라미터가 없는 경우 모든 레스토랑 반환
-  if (!params) return allRestaurants;
-
-  // 파라미터에 따라 필터링
-  return allRestaurants.filter(restaurant => {
-    // 체인점 ID로 필터링
-    if (params.franchiseId) {
-      // franchiseId는 체인점 ID의 일부 (ex: 'WIySQB3n'으로 검색하면 'WIySQB3n', 'WIySQB3n-2' 등이 필터링됨)
-      if (!restaurant.id.startsWith(params.franchiseId)) {
-        return false;
-      }
-    }
-    
-    // 카테고리로 필터링
-    if (params.category) {
-      if (!restaurant.categories.includes(params.category)) {
-        return false;
-      }
-    }
-    
-    return true;
-  });
 }; 
