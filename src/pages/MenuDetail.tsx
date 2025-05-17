@@ -46,7 +46,20 @@ const MenuDetail: React.FC = () => {
   
   const displayDescription = useMemo(() => {
     if (!menuItem) return '';
-    return menuItem.descriptionEn || menuItem.description;
+    
+    let description = menuItem.descriptionEn || menuItem.description || '';
+    
+    // 대괄호로 감싸진 형태인 경우 대괄호를 제거하고 안의 내용만 추출
+    if (description.match(/^\[(.*)\]$/)) {
+      description = description.replace(/^\[(.*)\]$/, '$1');
+    }
+    
+    // 유효한 설명인지 확인 (빈 문자열이거나 [] 형태가 아닌 경우)
+    if (!description || description.match(/^\[]$/)) {
+      return '';
+    }
+    
+    return description;
   }, [menuItem]);
   
   // 가격 포맷팅
