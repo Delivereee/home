@@ -147,6 +147,8 @@ const RestaurantDetail: React.FC = () => {
                 restaurantName={displayName}
               />
             ))}
+            {/* 바텀 시트와의 간격을 확보하기 위한 여백 */}
+            <div className="h-20"></div>
           </div>
         )}
       </main>
