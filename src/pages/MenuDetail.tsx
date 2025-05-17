@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { CartItem } from '../types/cart';
+import { MenuItem as MenuItemType } from '../types/menu';
+import { getMenuDetail } from '../api/menuService';
 import BackHeader from '../components/BackHeader';
 import NavigationBar from '../components/NavigationBar';
 import CartBottomSheet from '../components/CartBottomSheet';
@@ -10,25 +12,13 @@ import ErrorState from '../components/ErrorState';
 import ImageWithFallback from '../components/ImageWithFallback';
 import { STATUS_MESSAGES } from '../config/constants';
 
-// 임시 타입 정의 (실제로는 types 폴더에 정의하는 것이 좋습니다)
-interface MenuDetailItem {
-  id: string;
-  name: string;
-  nameEn: string | null;
-  description: string;
-  descriptionEn: string | null;
-  price: number;
-  image: string | null;
-  options: any[]; // 옵션이 있다면 추가할 수 있습니다
-}
-
 const MenuDetail: React.FC = () => {
   const { restaurantId = '', menuId = '' } = useParams<{ restaurantId: string; menuId: string }>();
   const navigate = useNavigate();
   const { cart, addToCart, updateItemQuantity, canceledItemId } = useCart();
   
   // 메뉴 데이터 상태
-  const [menuItem, setMenuItem] = useState<MenuDetailItem | null>(null);
+  const [menuItem, setMenuItem] = useState<MenuItemType | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -75,33 +65,30 @@ const MenuDetail: React.FC = () => {
     // navigate('/checkout');
   };
   
-  // 메뉴 데이터 가져오기 (실제로는 API 호출)
+  // 메뉴 데이터 가져오기
   useEffect(() => {
     const fetchMenuData = async () => {
+      if (!restaurantId || !menuId) {
+        setError('Invalid restaurant or menu ID');
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       try {
-        // 실제로는 API 호출
-        // const response = await fetch(`/api/restaurants/${restaurantId}/menus/${menuId}`);
-        // const data = await response.json();
+        const menuData = await getMenuDetail(restaurantId, menuId);
         
-        // 임시 데이터 (실제로는 API에서 가져와야 함)
-        setTimeout(() => {
-          const mockData: MenuDetailItem = {
-            id: menuId,
-            name: '리얼페페로니',
-            nameEn: 'Real Pepperoni',
-            description: '고메밀크도우와 짭조름한 페페로니의 만남. 매일 맥주와 함께 생각나는 피자',
-            descriptionEn: 'Gourmet milk dough with savory pepperoni. The perfect pizza to enjoy with beer. Our dough is made fresh daily with high-quality ingredients, topped with premium pepperoni slices and our signature tomato sauce. Baked to perfection in our stone oven.',
-            price: 18900,
-            image: 'https://images.yogiyo.co.kr/image/yogiyo/PARTNER_FR_IMG/%EC%B2%AD%EB%85%84%ED%94%BC%EC%9E%90/2024-07-09/%EC%A0%9C%ED%9C%B4FR_20240709_%EC%B2%AD%EB%85%84%ED%94%BC%EC%9E%90_%EB%A6%AC%EC%96%BC%ED%8E%98%ED%8E%98%EB%A1%9C%EB%8B%88_1080x640.jpg',
-            options: []
-          };
-          
-          setMenuItem(mockData);
-          setRestaurantName('청년피자');
-          setMinOrderAmount(10000 * EXCHANGE_RATE); // 예시: 최소 주문 금액 10,000원
+        if (!menuData) {
+          setError('Menu not found');
           setLoading(false);
-        }, 500);
+          return;
+        }
+        
+        setMenuItem(menuData);
+        setRestaurantName(menuData.name);
+        // TODO: 레스토랑 정보에서 최소 주문 금액을 가져와야 함
+        setMinOrderAmount(10000 * EXCHANGE_RATE); // 예시: 최소 주문 금액 10,000원
+        setLoading(false);
       } catch (err) {
         console.error('Error fetching menu details:', err);
         setError(STATUS_MESSAGES.error.menus || 'Failed to load menu details. Please try again later.');
@@ -109,12 +96,7 @@ const MenuDetail: React.FC = () => {
       }
     };
     
-    if (restaurantId && menuId) {
-      fetchMenuData();
-    } else {
-      setError('Invalid restaurant or menu ID');
-      setLoading(false);
-    }
+    fetchMenuData();
   }, [restaurantId, menuId]);
   
   // 카트에서 현재 아이템의 수량 가져오기
