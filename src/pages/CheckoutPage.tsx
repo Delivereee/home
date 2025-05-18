@@ -217,14 +217,29 @@ const CheckoutPage: React.FC = () => {
           <h2 className="text-base text-gray-500 mb-3 text-left">{cart.restaurantName}</h2>
           
           {/* Menu list */}
-          <div className="space-y-2 mb-2">
+          <div className="space-y-3 mb-2">
             {cart.items.map(item => (
               <div key={item.id} className="flex justify-between">
-                <div className="flex items-start">
-                  <span className="text-gray-600 mr-2">{item.quantity}×</span>
-                  <span className="text-gray-800">{item.name}</span>
+                <div className="flex-1 flex flex-col">
+                  <div className="flex items-start">
+                    <span className="text-gray-600 mr-2">{item.quantity}×</span>
+                    <span className="text-gray-800">{item.name}</span>
+                  </div>
+                  {/* 옵션 아이템 정보 추가 */}
+                  {item.options.length > 0 && item.options.some(opt => opt.optionItems.length > 0) && (
+                    <div className="ml-6 mt-1 text-xs text-gray-500 text-left">
+                      {item.options
+                        .filter(option => option.optionItems.length > 0)
+                        .map((option, index, filteredOptions) => (
+                          <span key={option.id} className="block">
+                            {option.optionItems.map(optItem => optItem.name).join(', ')}
+                            {index < filteredOptions.length - 1 ? '' : ''}
+                          </span>
+                        ))}
+                    </div>
+                  )}
                 </div>
-                <span className="text-gray-800 font-medium">
+                <span className="text-gray-800 font-medium ml-4">
                   {formatPrice(item.price * item.quantity)}
                 </span>
               </div>
