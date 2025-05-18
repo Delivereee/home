@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
+import { useAddress } from '../contexts/AddressContext';
 import BackHeader from '../components/BackHeader';
 import NavigationBar from '../components/NavigationBar';
 import EmptyState from '../components/EmptyState';
 import ImageWithFallback from '../components/ImageWithFallback';
+import { createCart, getCart, transformCartToRequest } from '../api/cartService';
 
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
+  const { address } = useAddress();
   const { 
     cart, 
     removeItem, 
@@ -17,6 +20,10 @@ const CartPage: React.FC = () => {
     isDeliveryAvailable,
     getAmountToMinOrder
   } = useCart();
+  
+  // 로딩 상태 추가
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
   // 화폐 변환 상수
   const EXCHANGE_RATE = 0.00071; // 1원 = 0.00071달러
@@ -75,8 +82,46 @@ const CartPage: React.FC = () => {
   };
   
   // 체크아웃 진행
-  const handleCheckout = () => {
-    navigate('/checkout');
+  const handleCheckout = async () => {
+    if (!cart || !deliveryAvailable) return;
+    
+    try {
+      // 로딩 상태 설정
+      setIsLoading(true);
+      setErrorMsg(null);
+      
+      // 주소 ID 가져오기 (현재는 임시값 사용)
+      const addressId = address?.isComplete ? 'address123' : 'address123'; // 실제 주소 ID로 대체해야 함
+      
+      // 1. 장바구니 생성 요청
+      const cartRequest = transformCartToRequest(cart, addressId);
+      const cartResponse = await createCart(cartRequest);
+      
+      if (!cartResponse || !cartResponse.id) {
+        throw new Error('Failed to create cart');
+      }
+      
+      console.log('Cart created successfully:', cartResponse);
+      
+      // 2. 생성된 장바구니 정보로 주문 ID 조회
+      const cartId = cartResponse.id;
+      const cartDetail = await getCart(cartId);
+      
+      if (!cartDetail || !cartDetail.orderId) {
+        throw new Error('Failed to get order ID');
+      }
+      
+      console.log('Order ID retrieved successfully:', cartDetail.orderId);
+      
+      // 주문 ID를 사용하여 결제 페이지로 이동
+      navigate(`/checkout?orderId=${cartDetail.orderId}`);
+    } catch (error) {
+      // 에러 처리
+      console.error('Checkout error:', error);
+      setErrorMsg(error instanceof Error ? error.message : 'Failed to proceed to checkout');
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   // 카트가 비어있을 때
@@ -214,16 +259,21 @@ const CartPage: React.FC = () => {
             Add {formatPrice(amountToMinOrder)} more to order
           </div>
         )}
+        {errorMsg && (
+          <div className="mb-2 text-center text-sm text-red-500 font-medium">
+            {errorMsg}
+          </div>
+        )}
         <button
           className={`w-full py-4 rounded-lg font-medium text-white text-base tracking-wide shadow-md transition-colors ${
-            deliveryAvailable 
+            deliveryAvailable && !isLoading
               ? 'bg-red-500 hover:bg-red-600 active:bg-red-700' 
               : 'bg-gray-400 cursor-not-allowed'
           }`}
           onClick={handleCheckout}
-          disabled={!deliveryAvailable}
+          disabled={!deliveryAvailable || isLoading}
         >
-          Proceed to Checkout
+          {isLoading ? 'Processing...' : 'Proceed to Checkout'}
         </button>
       </div>
       

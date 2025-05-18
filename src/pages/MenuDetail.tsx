@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
-import { CartItem } from '../types/cart';
-import { MenuItem as MenuItemType } from '../types/menu';
+import { CartItem, CartOption, CartOptionItem } from '../types/cart';
+import { MenuItem as MenuItemType, MenuOption, MenuOptionItem } from '../types/menu';
 import { getMenuDetail } from '../api/menuService';
 import BackHeader from '../components/BackHeader';
 import NavigationBar from '../components/NavigationBar';
@@ -11,6 +11,22 @@ import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
 import ImageWithFallback from '../components/ImageWithFallback';
 import { STATUS_MESSAGES } from '../config/constants';
+
+// 메뉴 옵션을 장바구니 옵션으로 변환하는 함수 추가
+const convertMenuOptionToCartOption = (menuOption: MenuOption): CartOption => {
+  const optionItems: CartOptionItem[] = menuOption.menuOptionItems.map(item => ({
+    id: item.id,
+    name: item.name,
+    price: item.price * 0.00071 // 원화를 USD로 변환
+  }));
+
+  return {
+    id: menuOption.id,
+    name: menuOption.name,
+    price: 0, // 옵션 자체 가격은 0으로 설정
+    optionItems: optionItems
+  };
+};
 
 const MenuDetail: React.FC = () => {
   const { restaurantId = '', menuId = '' } = useParams<{ restaurantId: string; menuId: string }>();
@@ -171,12 +187,18 @@ const MenuDetail: React.FC = () => {
       updateItemQuantity(menuId, 0);
     } else if (quantity === 0 && newQuantity > 0) {
       // 처음 추가하는 경우
+      
+      // 메뉴 옵션을 장바구니 옵션으로 변환
+      const cartOptions: CartOption[] = menuItem.menuOptions.map(option => 
+        convertMenuOptionToCartOption(option)
+      );
+      
       const cartItem: CartItem = {
         id: menuId,
         name: displayName,
         price: priceInUSD,
         quantity: newQuantity,
-        options: [],
+        options: cartOptions,
         image: menuItem.image
       };
       
