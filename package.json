@@ -50,6 +50,7 @@
     ]
   },
   "devDependencies": {
+    "@types/navermaps": "^3.7.10",
     "autoprefixer": "^10.4.16",
     "gh-pages": "^6.3.0",
     "postcss": "^8.4.31",
