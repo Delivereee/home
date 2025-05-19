@@ -26,14 +26,99 @@
     -->
     <title>Deliver Eats Easy</title>
     
-    <!-- 채널톡 스크립트 -->
+    <!-- 채널톡 스크립트 - 홈 페이지에서만 초기화 -->
     <script>
-      (function(){var w=window;if(w.ChannelIO){return w.console.error("ChannelIO script included twice.");}var ch=function(){ch.c(arguments);};ch.q=[];ch.c=function(args){ch.q.push(args);};w.ChannelIO=ch;function l(){if(w.ChannelIOInitialized){return;}w.ChannelIOInitialized=true;var s=document.createElement("script");s.type="text/javascript";s.async=true;s.src="https://cdn.channel.io/plugin/ch-plugin-web.js";var x=document.getElementsByTagName("script")[0];if(x.parentNode){x.parentNode.insertBefore(s,x);}}if(document.readyState==="complete"){l();}else{w.addEventListener("DOMContentLoaded",l);w.addEventListener("load",l);}})();
-
-      ChannelIO('boot', {
-        "pluginKey": "4de468b6-e6bf-4446-a6d0-fb3ccb1132a6",
-        "language": "en"
-      });
+      (function(){
+        var w = window;
+        if(w.ChannelIO) {
+          return w.console.error("ChannelIO script included twice.");
+        }
+        
+        // 채널톡 객체 초기 설정
+        var ch = function(){ch.c(arguments);};
+        ch.q = [];
+        ch.c = function(args){ch.q.push(args);};
+        w.ChannelIO = ch;
+        
+        // 채널톡 스크립트 로드 함수
+        function loadChannelScript() {
+          if(w.ChannelIOInitialized) {
+            return;
+          }
+          w.ChannelIOInitialized = true;
+          var s = document.createElement("script");
+          s.type = "text/javascript";
+          s.async = true;
+          s.src = "https://cdn.channel.io/plugin/ch-plugin-web.js";
+          var x = document.getElementsByTagName("script")[0];
+          if(x.parentNode) {
+            x.parentNode.insertBefore(s,x);
+          }
+        }
+        
+        // 현재 경로가 홈인지 확인하는 함수
+        function isHomePage() {
+          var hash = window.location.hash.replace('#', '');
+          return hash === '/' || hash === '/home' || hash === '' || window.location.pathname === '/home';
+        }
+        
+        // 채널톡 초기화/종료 함수
+        function toggleChannelTalk() {
+          if(isHomePage()) {
+            // 홈 페이지면 채널톡 초기화
+            if(w.ChannelIO && typeof w.ChannelIO === 'function') {
+              w.ChannelIO('boot', {
+                "pluginKey": "4de468b6-e6bf-4446-a6d0-fb3ccb1132a6",
+                "language": "en",
+                "hideDefaultLauncher": true,
+                "customLauncherSelector": "#custom-channel-button"
+              });
+              console.log('ChannelIO initialized on home page');
+            } else {
+              // 채널톡이 로드되지 않았으면 로드 후 초기화
+              loadChannelScript();
+              setTimeout(function() {
+                toggleChannelTalk();
+              }, 1000);
+            }
+          } else {
+            // 홈 페이지가 아니면 채널톡 종료
+            if(w.ChannelIO && typeof w.ChannelIO === 'function') {
+              w.ChannelIO('shutdown');
+              console.log('ChannelIO shutdown on non-home page');
+              
+              // DOM에서 채널톡 요소 찾아서 숨기기
+              setTimeout(function() {
+                var buttons = document.querySelectorAll('[class*="channel-"], #custom-channel-button');
+                buttons.forEach(function(btn) {
+                  if(btn) btn.style.display = 'none';
+                });
+              }, 100);
+            }
+          }
+        }
+        
+        // 페이지 로드 시 채널톡 초기화 여부 결정
+        if(document.readyState === "complete") {
+          loadChannelScript();
+          setTimeout(toggleChannelTalk, 500);
+        } else {
+          w.addEventListener("DOMContentLoaded", function() {
+            loadChannelScript();
+            setTimeout(toggleChannelTalk, 500);
+          });
+          
+          w.addEventListener("load", function() {
+            setTimeout(toggleChannelTalk, 1000);
+          });
+        }
+        
+        // 해시 변경 감지 (SPA 내부 라우팅)
+        w.addEventListener("hashchange", function() {
+          console.log("Hash changed:", window.location.hash);
+          setTimeout(toggleChannelTalk, 300);
+        });
+      })();
     </script>
     
     <!-- 네이버 지도 API 디버그 모드 스크립트 -->

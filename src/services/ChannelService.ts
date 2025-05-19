@@ -40,10 +40,21 @@ const CHANNEL_IO_ACCESS_SECRET = '20157795b28f1efefb6415a2686cca15';
 /**
  * 채널톡 초기화
  * @param settings 채널톡 설정
+ * @param forceInit 홈 페이지가 아니더라도 강제 초기화할지 여부
  */
-export const bootChannelTalk = (settings?: Partial<ChannelIOSettings>) => {
+export const bootChannelTalk = (settings?: Partial<ChannelIOSettings>, forceInit: boolean = false) => {
   if (!window.ChannelIO) {
     console.error('ChannelIO is not loaded yet');
+    return;
+  }
+
+  // 현재 경로가 홈인지 확인
+  const currentPath = window.location.hash.replace('#', '');
+  const isHomePage = currentPath === '/' || currentPath === '/home' || currentPath === '';
+  
+  // 홈 페이지가 아니고, 강제 초기화도 아니면 초기화하지 않음
+  if (!isHomePage && !forceInit) {
+    console.log('Not home page, skipping ChannelTalk initialization');
     return;
   }
 
@@ -81,12 +92,17 @@ export const bootChannelTalk = (settings?: Partial<ChannelIOSettings>) => {
 
 /**
  * 채널톡 종료
+ * 종료 후 관련 DOM 요소도 함께 제거
  */
 export const shutdownChannelTalk = () => {
   if (window.ChannelIO) {
     try {
+      // 채널톡 종료
       window.ChannelIO('shutdown');
       console.log('ChannelTalk shutdown');
+      
+      // DOM에서 채널톡 관련 요소 제거
+      hideAllChannelTalkElements();
     } catch (error) {
       console.error('Failed to shutdown ChannelTalk:', error);
     }
@@ -117,6 +133,56 @@ export const hideChannelTalk = () => {
       console.error('Failed to hide ChannelTalk messenger:', error);
     }
   }
+};
+
+/**
+ * DOM에서 모든 채널톡 관련 요소를 찾아 숨기는 함수
+ * 채널톡 API를 통한 shutdown이 즉시 반영되지 않는 경우 대비
+ */
+export const hideAllChannelTalkElements = () => {
+  // 유사한 클래스나 ID를 가진 모든 채널톡 관련 요소 찾기
+  const findAndHideElements = (selector: string) => {
+    const elements = document.querySelectorAll(selector);
+    elements.forEach(el => {
+      const element = el as HTMLElement;
+      if (element) {
+        element.style.display = 'none';
+        element.style.visibility = 'hidden';
+        element.style.opacity = '0';
+        element.style.pointerEvents = 'none';
+      }
+    });
+  };
+  
+  // 1. 채널톡의 커스텀 버튼
+  const customButton = document.getElementById('custom-channel-button');
+  if (customButton) {
+    customButton.style.display = 'none';
+  }
+  
+  // 2. 'channel-' 접두사를 가진 클래스 요소
+  findAndHideElements('[class*="channel-"]');
+  
+  // 3. 채널톡 iframe 요소
+  const iframes = document.querySelectorAll('iframe');
+  iframes.forEach(iframe => {
+    if (iframe.src.includes('channel.io')) {
+      iframe.style.display = 'none';
+    }
+  });
+  
+  // 4. position: fixed를 가진 요소들 중 채널톡으로 의심되는 요소
+  const fixedElements = document.querySelectorAll('div[style*="position: fixed"], button[style*="position: fixed"]');
+  fixedElements.forEach(el => {
+    const element = el as HTMLElement;
+    // 채널톡 버튼으로 의심되는 요소만 처리
+    if (element.style.zIndex && parseInt(element.style.zIndex) > 100 && 
+        (element.style.borderRadius === '50%' || element.classList.contains('launcher'))) {
+      element.style.display = 'none';
+    }
+  });
+  
+  console.log('All ChannelTalk elements hidden');
 };
 
 /**
@@ -177,6 +243,10 @@ const createCustomChannelButton = () => {
     existingButton.remove();
   }
   
+  // 현재 경로 확인
+  const currentPath = window.location.hash.replace('#', '');
+  const isHomePage = currentPath === '/' || currentPath === '/home';
+  
   // 새 버튼 생성
   const button = document.createElement('button');
   button.id = 'custom-channel-button';
@@ -202,7 +272,7 @@ const createCustomChannelButton = () => {
     borderRadius: '50%', // 원형 버튼으로 변경
     width: '50px',       // 고정 너비
     height: '50px',      // 고정 높이
-    display: 'flex',
+    display: isHomePage ? 'flex' : 'none', // 홈 페이지일 때만 표시
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: '0 4px 12px rgba(255, 59, 48, 0.3)', // 그림자 강화
