@@ -70,7 +70,7 @@ const AddressSetupPage: React.FC = () => {
     setTouched(prev => ({ ...prev, mainAddress: true }));
   };
 
-  const handleDetailAddressChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleDetailAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDetailAddress(e.target.value);
     setTouched(prev => ({ ...prev, detailAddress: true }));
   };
@@ -217,36 +217,10 @@ const AddressSetupPage: React.FC = () => {
         <div className="rounded-lg border border-gray-200 p-5 mb-4 bg-white shadow-sm">
           {/* Main Address Section */}
           <div className="mb-5">
-            <div className="flex justify-between items-center mb-2">
-              <label htmlFor="mainAddress" className="text-base font-medium text-gray-700 flex items-center">
-                Main Address
-                <span className="text-red-500 ml-1">*</span>
-              </label>
-              
-              <button
-                type="button"
-                onClick={handleUseGPS}
-                disabled={isLoading}
-                className={`flex items-center justify-center gap-1 py-1.5 px-3 ${
-                  isLoading 
-                    ? 'bg-gray-200 cursor-not-allowed' 
-                    : 'bg-gray-100 hover:bg-gray-200 active:bg-gray-300 cursor-pointer'
-                } rounded-full transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-300`}
-              >
-                {isLoading ? (
-                  <svg className="animate-spin h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                )}
-                <span className="text-gray-700">{isLoading ? 'Loading...' : 'Use GPS'}</span>
-              </button>
-            </div>
+            <label htmlFor="mainAddress" className="text-base font-medium text-gray-700 flex items-center mb-2">
+              Main Address
+              <span className="text-red-500 ml-1">*</span>
+            </label>
             
             <input
               type="text"
@@ -272,11 +246,62 @@ const AddressSetupPage: React.FC = () => {
             )}
           </div>
           
+          {/* Detail Address Section */}
+          <div className="mb-5">
+            <label htmlFor="detailAddress" className="text-base font-medium text-gray-700 flex items-center mb-2">
+              Detail Address
+              <span className="text-red-500 ml-1">*</span>
+            </label>
+            
+            <input
+              type="text"
+              id="detailAddress"
+              value={detailAddress}
+              onChange={handleDetailAddressChange}
+              className={`w-full border ${
+                touched.detailAddress && !isDetailAddressValid
+                  ? 'border-red-500 focus:ring-red-200'
+                  : 'border-gray-300 focus:ring-blue-200'
+              } rounded-lg p-3 text-gray-800 focus:outline-none focus:ring-2 transition-all duration-200`}
+              placeholder="Enter apartment number, building name, floor, etc."
+            />
+            
+            {touched.detailAddress && !isDetailAddressValid && (
+              <p className="text-red-500 text-sm mt-1">Detail address is required</p>
+            )}
+          </div>
+          
+          {/* Use GPS Button */}
+          <div className="mb-5">
+            <button
+              type="button"
+              onClick={handleUseGPS}
+              disabled={isLoading}
+              className={`w-full flex items-center justify-center gap-1 py-3 rounded-lg ${
+                isLoading 
+                  ? 'bg-gray-200 cursor-not-allowed' 
+                  : 'bg-gray-100 hover:bg-gray-200 active:bg-gray-300 cursor-pointer'
+              } transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-300`}
+            >
+              {isLoading ? (
+                <svg className="animate-spin h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              )}
+              <span className="text-gray-700">{isLoading ? 'Loading...' : 'Use GPS'}</span>
+            </button>
+          </div>
+          
           {/* 지도 표시 */}
           {showMap && currentLocation && (
-            <div className="mt-4">
-              <div className="rounded-lg border border-gray-200 p-4 mb-4 bg-white shadow-sm">
-                <h3 className="text-base font-medium text-gray-700 mb-3">위치 확인</h3>
+            <div className="mb-5">
+              <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
                 <div className="relative" style={{ minHeight: '300px' }}>
                   <NaverMap
                     initialCenter={currentLocation}
@@ -288,31 +313,6 @@ const AddressSetupPage: React.FC = () => {
               </div>
             </div>
           )}
-          
-          {/* Detail Address Section */}
-          <div className="mb-5">
-            <label htmlFor="detailAddress" className="text-base font-medium text-gray-700 flex items-center mb-2">
-              Detail Address
-              <span className="text-red-500 ml-1">*</span>
-            </label>
-            
-            <textarea
-              id="detailAddress"
-              value={detailAddress}
-              onChange={handleDetailAddressChange}
-              rows={3}
-              className={`w-full border ${
-                touched.detailAddress && !isDetailAddressValid
-                  ? 'border-red-500 focus:ring-red-200'
-                  : 'border-gray-300 focus:ring-blue-200'
-              } rounded-lg p-3 text-gray-800 focus:outline-none focus:ring-2 transition-all duration-200`}
-              placeholder="Enter apartment number, building name, floor, etc."
-            ></textarea>
-            
-            {touched.detailAddress && !isDetailAddressValid && (
-              <p className="text-red-500 text-sm mt-1">Detail address is required</p>
-            )}
-          </div>
           
           {/* 대체 주소 입력 방법 
           <div className="flex flex-col mb-5">
