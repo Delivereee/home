@@ -42,7 +42,8 @@ async function checkServerStatus() {
     console.log('✅ API 서버 연결 성공:', response.status);
     console.log('📊 응답 데이터 항목 수:', Array.isArray(response.data) ? response.data.length : 'N/A');
     
-    // 샘플 메뉴 API 연결 확인
+    // 메뉴 API 연결 확인은 제거 - 문제 발생으로 인해 제거
+    /* 
     try {
       const menuResponse = await axios.get(`${API_BASE_URL}/api/v1/stores/LZXaAODk/menus`, { timeout: 5000 });
       console.log('✅ 메뉴 API 연결 성공:', menuResponse.status);
@@ -50,6 +51,7 @@ async function checkServerStatus() {
     } catch (menuError) {
       console.warn('⚠️ 메뉴 API 연결 실패:', menuError);
     }
+    */
   } catch (error) {
     console.error('❌ API 서버 연결 실패:', error);
   }

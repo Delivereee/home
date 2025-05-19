@@ -80,7 +80,6 @@ const AddressSetupPage: React.FC = () => {
     try {
       setIsLoading(true);
       setLocationError(null);
-      console.log('GPS 위치 정보 요청 시작');
       
       // 브라우저의 Geolocation API를 사용하여 현재 위치 좌표 가져오기
       const position = await getCurrentPosition().catch(async (error) => {
@@ -104,8 +103,6 @@ const AddressSetupPage: React.FC = () => {
         }
       });
       
-      console.log('위치 정보 가져오기 성공:', position);
-      
       // 위치 정보 저장
       setCurrentLocation(position);
       
@@ -116,12 +113,10 @@ const AddressSetupPage: React.FC = () => {
       
       // OpenStreetMap Nominatim API를 사용하여 좌표를 주소로 변환
       const geoAddress = await reverseGeocode(position.lng, position.lat);
-      console.log('변환된 주소:', geoAddress);
       
       if (geoAddress) {
         setMainAddress(geoAddress);
         setTouched(prev => ({ ...prev, mainAddress: true }));
-        console.log('주소 입력 필드 업데이트 완료');
       } else {
         // 주소 변환 실패 시 좌표 표시
         setMainAddress(`Latitude: ${position.lat.toFixed(6)}, Longitude: ${position.lng.toFixed(6)}`);
@@ -131,13 +126,11 @@ const AddressSetupPage: React.FC = () => {
       setLocationError('위치 정보를 가져오는 데 실패했습니다. 직접 주소를 입력해주세요.');
     } finally {
       setIsLoading(false);
-      console.log('GPS 위치 정보 요청 완료');
     }
   };
 
   // 지도에서 위치가 선택되었을 때 호출되는 핸들러
   const handleLocationSelect = async (location: { lat: number; lng: number }) => {
-    console.log('지도에서 위치 선택:', location);
     setCurrentLocation(location);
     
     // 선택된 위치의 주소 변환

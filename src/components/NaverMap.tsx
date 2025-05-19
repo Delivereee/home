@@ -29,13 +29,7 @@ const NaverMap: React.FC<NaverMapProps> = ({
 
   // 디버그 정보 출력 - 현재 URL 및 포트 확인
   useEffect(() => {
-    console.log('===== 네이버 지도 디버그 정보 =====');
-    console.log('현재 URL:', window.location.href);
-    console.log('현재 호스트:', window.location.host);
-    console.log('현재 포트:', window.location.port);
-    console.log('현재 경로:', window.location.pathname);
-    console.log('naver 객체 존재 여부:', typeof window.naver !== 'undefined');
-    console.log('================================');
+    // 디버그 로그 제거
   }, []);
 
   // 네이버 맵 스크립트 로드 확인
@@ -44,24 +38,10 @@ const NaverMap: React.FC<NaverMapProps> = ({
     const maxChecks = 50;
     
     const checkNaverMapLoaded = () => {
-      // 네이버 객체 상태 확인을 위한 디버그 출력
-      if (checkCount % 10 === 0) {
-        console.log(`네이버 맵 스크립트 로드 확인 중... (${checkCount}번째 시도)`);
-        console.log('window.naver 상태:', typeof window.naver !== 'undefined' ? '존재함' : '존재하지 않음');
-        
-        if (typeof window.naver !== 'undefined') {
-          console.log('naver.maps 상태:', window.naver.maps !== undefined ? '존재함' : '존재하지 않음');
-          
-          if (window.naver.maps !== undefined) {
-            console.log('naver.maps.Map 상태:', window.naver.maps.Map !== undefined ? '존재함' : '존재하지 않음');
-          }
-        }
-      }
-      
+      // 네이버 객체 상태 확인을 위한 디버그 출력 제거
       if (typeof window.naver !== 'undefined' && 
           window.naver.maps !== undefined && 
           window.naver.maps.Map !== undefined) {
-        console.log('네이버 맵 스크립트 로드 완료');
         setIsScriptLoaded(true);
         return;
       }
@@ -88,14 +68,7 @@ const NaverMap: React.FC<NaverMapProps> = ({
     
     // 맵 생성 전 인증 상태 확인
     try {
-      console.log('맵 생성 전 인증 상태 확인');
       const naverAvailable = typeof window.naver !== 'undefined' && window.naver.maps !== undefined;
-      console.log('네이버 객체 사용 가능:', naverAvailable);
-      
-      if (naverAvailable) {
-        // 인증 오류 여부 확인을 위한 테스트
-        console.log('네이버 맵 API 버전:', window.naver.maps.version || '버전 정보 없음');
-      }
     } catch (error) {
       console.error('인증 상태 확인 중 오류:', error);
     }
@@ -104,8 +77,6 @@ const NaverMap: React.FC<NaverMapProps> = ({
     let mapMarker: any = null;
 
     try {
-      console.log('지도 생성 시작:', initialCenter);
-
       // 지도 생성
       map = new window.naver.maps.Map(mapRef.current, {
         center: new window.naver.maps.LatLng(initialCenter.lat, initialCenter.lng),
@@ -117,16 +88,13 @@ const NaverMap: React.FC<NaverMapProps> = ({
         }
       });
       
-      console.log('지도 생성 완료');
-      
       // 마커 생성
       mapMarker = new window.naver.maps.Marker({
         position: new window.naver.maps.LatLng(initialCenter.lat, initialCenter.lng),
         map: map,
         draggable: markerDraggable,
+        language: 'en' // 영어로 설정
       });
-      
-      console.log('마커 생성 완료');
       
       // 마커 드래그 이벤트
       if (markerDraggable && onLocationSelect) {
@@ -138,7 +106,6 @@ const NaverMap: React.FC<NaverMapProps> = ({
                 lat: position.lat(),
                 lng: position.lng()
               };
-              console.log('마커 드래그:', location);
               onLocationSelect(location);
             }
           } catch (error) {
@@ -153,10 +120,6 @@ const NaverMap: React.FC<NaverMapProps> = ({
           if (!mapMarker) return;
           
           const clickedPos = e.coord;
-          console.log('지도 클릭:', {
-            lat: clickedPos.lat(),
-            lng: clickedPos.lng()
-          });
           
           mapMarker.setPosition(clickedPos);
           
