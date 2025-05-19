@@ -2,6 +2,19 @@ import apiClient from './config';
 import { Category } from '../types/category';
 
 /**
+ * 이미지 경로를 환경에 맞게 변환하는 함수
+ * @param relativePath 상대 경로
+ * @returns 완전한 이미지 URL
+ */
+const getCategoryImageUrl = (relativePath: string): string => {
+  if (process.env.NODE_ENV === 'development') {
+    return `${process.env.PUBLIC_URL}${relativePath}`;
+  }
+  // GitHub Pages 배포 경로
+  return `https://delivereee.github.io/home${relativePath}`;
+};
+
+/**
  * 모든 카테고리 가져오기
  * @returns 카테고리 목록
  */
@@ -17,7 +30,7 @@ export const getCategories = async (): Promise<Category[]> => {
         name: item.nameKo || item.name, // 한국어 이름을 우선 사용
         nameKo: item.nameKo,
         nameEn: item.nameEn,
-        imageUrl: item.imageUrl
+        imageUrl: getCategoryImageUrl(item.imageUrl) // 환경에 맞게 이미지 경로 변환
       }));
     }
     
