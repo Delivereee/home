@@ -24,11 +24,17 @@ const CheckoutPage: React.FC = () => {
   
   // PayPal initial options
   const paypalOptions = {
-    clientId: "AWiQrkfr-umMAIIyeiLWY_Dgx3PMSazp9iUDofAQeNeIUnZo8sZuzDZPCdHJEqM9BYIE99g8DgzLI7a6",
+    clientId: process.env.REACT_APP_PAYPAL_CLIENT_ID || "AWiQrkfr-umMAIIyeiLWY_Dgx3PMSazp9iUDofAQeNeIUnZo8sZuzDZPCdHJEqM9BYIE99g8DgzLI7a6",
     currency: "USD",
     intent: "capture",
     locale: "en_US",
   };
+  
+  // 개발 환경에서만 페이팔 설정 로그
+  if (process.env.NODE_ENV === 'development') {
+    console.log('페이팔 설정 환경:', process.env.NODE_ENV);
+    console.log('페이팔 Client ID:', process.env.REACT_APP_PAYPAL_CLIENT_ID ? '환경 변수에서 로드됨' : '기본값 사용');
+  }
   
   // Currency conversion constant
   const EXCHANGE_RATE = 0.00071; // 1 KRW = 0.00071 USD
