@@ -3,6 +3,7 @@ import { getNearbyRestaurants } from '../api/restaurantService';
 import { Restaurant } from '../types/restaurant';
 import { DEFAULT_COORDINATES, getStatusMessages } from '../config/constants';
 import { useAddress } from '../contexts/AddressContext';
+import { getCurrentLanguage } from '../config/languageConfig';
 
 interface UseRestaurantsProps {
   categoryName?: string;
@@ -42,6 +43,9 @@ export const useRestaurants = (
       setLoading(true);
       setError(null);
       
+      // 현재 설정된 언어 가져오기
+      const currentLang = getCurrentLanguage();
+      
       // 주소 컨텍스트에서 좌표 정보 가져오기, 없으면 기본 좌표 사용
       const coordinates = {
         lat: address?.lat ?? DEFAULT_COORDINATES.lat,
@@ -51,7 +55,8 @@ export const useRestaurants = (
       // 요청 파라미터 구성
       const params = {
         lat: coordinates.lat,
-        lng: coordinates.lng
+        lng: coordinates.lng,
+        lang: currentLang // 언어 파라미터 추가
       };
       
       // 카테고리 ID가 있는 경우, 요청 파라미터에 추가 (우선순위)

@@ -1,5 +1,7 @@
 import apiClient from './config';
 import { Category } from '../types/category';
+import { getCurrentLanguage } from '../config/languageConfig';
+import { buildQueryString } from './utils';
 
 /**
  * 이미지 경로를 환경에 맞게 변환하는 함수
@@ -20,8 +22,15 @@ const getCategoryImageUrl = (relativePath: string): string => {
  */
 export const getCategories = async (): Promise<Category[]> => {
   try {
-    // API에서 카테고리 데이터 가져오기
-    const response = await apiClient.get('/api/dee-categories');
+    // 현재 설정된 언어 가져오기
+    const currentLang = getCurrentLanguage();
+    
+    // 쿼리 파라미터 생성
+    const queryString = buildQueryString({ lang: currentLang });
+    
+    // API에서 카테고리 데이터 가져오기 (언어 설정 포함)
+    const response = await apiClient.get(`/api/dee-categories${queryString}`);
+    console.log(`카테고리 요청: /api/dee-categories${queryString}`);
     
     if (response.data && Array.isArray(response.data)) {
       // API 응답 데이터를 Category 인터페이스에 맞게 변환

@@ -1,6 +1,7 @@
 import apiClient from './config';
 import { Restaurant, RestaurantSearchParams } from '../types/restaurant';
 import { buildQueryString, handleApiError, logApiResponse } from './utils';
+import { getCurrentLanguage } from '../config/languageConfig';
 
 /**
  * 근처 음식점 조회
@@ -112,10 +113,17 @@ const convertApiResponseToRestaurants = (apiResponse: any[]): Restaurant[] => {
  * @returns 음식점 상세 정보
  */
 export const getRestaurantDetails = async (id: string): Promise<Restaurant> => {
+  // 현재 설정된 언어 가져오기
+  const currentLang = getCurrentLanguage();
+  
+  // 쿼리 파라미터 생성
+  const queryString = buildQueryString({ lang: currentLang });
+  
   const endpoint = `/api/v1/stores/${id}`;
   
   try {
-    const response = await apiClient.get(endpoint);
+    const response = await apiClient.get(`${endpoint}${queryString}`);
+    console.log(`음식점 상세 요청: ${endpoint}${queryString}`);
     logApiResponse(endpoint, response.data);
     
     return response.data;
