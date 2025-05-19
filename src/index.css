@@ -28,3 +28,14 @@ code {
     display: none;  /* Chrome, Safari, Opera */
   }
 }
+
+/* 네비게이션 바를 위한 공통 스타일 */
+@layer components {
+  .page-with-navbar {
+    padding-bottom: 68px; /* 네비게이션 바를 위한 공간 확보 */
+  }
+  
+  .header-with-shadow {
+    @apply sticky top-0 bg-white shadow-md z-10;
+  }
+}
