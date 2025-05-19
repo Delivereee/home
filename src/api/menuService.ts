@@ -1,21 +1,25 @@
 import apiClient from './config';
 import { MenuSection, MenuResponse, MenuItem } from '../types/menu';
 import { buildQueryString, handleApiError, logApiResponse } from './utils';
+import { getCurrentLanguage } from '../config/languageConfig';
 
 /**
  * 가게의 메뉴 목록 조회
  * @param restaurantId 가게 ID
- * @param lang 언어 설정 (기본값: 'en')
+ * @param lang 언어 설정 (기본값: 현재 설정된 언어)
  * @returns 메뉴 섹션 목록
  */
 export const getRestaurantMenus = async (
   restaurantId: string | number,
-  lang: string = 'en'
+  lang?: string
 ): Promise<MenuSection[]> => {
   const endpoint = `/api/v1/stores/${restaurantId}/menus`;
+  const currentLang = lang || getCurrentLanguage();
   
   try {
-    const response = await apiClient.get(endpoint);
+    // 언어 설정 쿼리 파라미터 추가
+    const queryString = buildQueryString({ lang: currentLang });
+    const response = await apiClient.get(`${endpoint}${queryString}`);
     logApiResponse(endpoint, response.data);
     
     // API 응답을 애플리케이션 데이터 구조로 변환
@@ -33,16 +37,21 @@ export const getRestaurantMenus = async (
  * 메뉴 상세 정보 조회
  * @param restaurantId 가게 ID
  * @param menuId 메뉴 ID
+ * @param lang 언어 설정 (기본값: 현재 설정된 언어)
  * @returns 메뉴 상세 정보
  */
 export const getMenuDetail = async (
   restaurantId: string | number,
-  menuId: string | number
+  menuId: string | number,
+  lang?: string
 ): Promise<MenuItem | null> => {
   const endpoint = `/api/v1/stores/${restaurantId}/menus/${menuId}`;
+  const currentLang = lang || getCurrentLanguage();
   
   try {
-    const response = await apiClient.get(endpoint);
+    // 언어 설정 쿼리 파라미터 추가
+    const queryString = buildQueryString({ lang: currentLang });
+    const response = await apiClient.get(`${endpoint}${queryString}`);
     logApiResponse(endpoint, response.data);
     
     // API 응답을 애플리케이션 데이터 구조로 변환
@@ -105,8 +114,8 @@ function transformMenuItemData(apiMenuItem: any): MenuItem {
     soldout: false,
     oneDish: false,
     menuOptions: options,
-    nameEn: apiMenuItem.name, // API에 영문 이름이 없는 경우 기본 이름 사용
-    descriptionEn: apiMenuItem.description // API에 영문 설명이 없는 경우 기본 설명 사용
+    nameEn: apiMenuItem.nameEn || apiMenuItem.name, // 영문 이름이 없는 경우 기본 이름 사용
+    descriptionEn: apiMenuItem.descriptionEn || apiMenuItem.description // 영문 설명이 없는 경우 기본 설명 사용
   };
 }
 
@@ -170,8 +179,8 @@ function transformMenuData(apiMenus: any[]): MenuSection[] {
       soldout: false,
       oneDish: false,
       menuOptions: options,
-      nameEn: item.name, // API에 영문 이름이 없는 경우 기본 이름 사용
-      descriptionEn: item.description // API에 영문 설명이 없는 경우 기본 설명 사용
+      nameEn: item.nameEn || item.name, // 영문 이름이 없는 경우 기본 이름 사용
+      descriptionEn: item.descriptionEn || item.description // 영문 설명이 없는 경우 기본 설명 사용
     };
     
     menusByType[menuType].push(menuItem);

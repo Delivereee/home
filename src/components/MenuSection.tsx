@@ -1,6 +1,7 @@
 import React from 'react';
 import { MenuSection as MenuSectionType } from '../types/menu';
 import MenuItem from './MenuItem';
+import { getLocalizedValue } from '../config/languageConfig';
 
 interface MenuSectionProps {
   section: MenuSectionType;
@@ -9,11 +10,12 @@ interface MenuSectionProps {
 }
 
 const MenuSection: React.FC<MenuSectionProps> = ({ section, restaurantId, restaurantName }) => {
-  // 영문 이름을 우선 사용하고, 없을 경우 기본 필드 사용
-  const displayName = section.nameEn || section.name || 'Menu Section';
+  // 현재 언어에 맞는 섹션 이름 가져오기
+  const displayName = getLocalizedValue(section.name, {
+    en: section.nameEn
+  });
   
-  // 타입 정보를 영문으로 변
-  
+  // 타입 정보를 영문으로 변환
   const typeDisplayInEnglish = section.msType;
   
   return (

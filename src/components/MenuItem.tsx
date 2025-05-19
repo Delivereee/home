@@ -4,6 +4,7 @@ import { useCart } from '../contexts/CartContext';
 import { CartItem, CartOption, CartOptionItem } from '../types/cart';
 import ImageWithFallback from './ImageWithFallback';
 import { useNavigate } from 'react-router-dom';
+import { getLocalizedValue, getCurrentLanguage } from '../config/languageConfig';
 
 interface MenuItemProps {
   menuItem: MenuItemType;
@@ -31,12 +32,20 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
   const { cart, addToCart, updateItemQuantity, canceledItemId } = useCart();
   const navigate = useNavigate();
   
-  // 영문 이름과 설명을 우선 사용하고, 없을 경우 기본 필드 사용
-  const displayName = menuItem.nameEn || menuItem.name || '[Menu Name]';
+  // 현재 언어 설정에 따라 이름과 설명 처리
+  const currentLang = getCurrentLanguage();
+  
+  // 현재 언어에 맞는 메뉴 이름 가져오기
+  const displayName = getLocalizedValue(menuItem.name, {
+    en: menuItem.nameEn
+  });
+  
+  // 현재 언어에 맞는 설명 가져오기
+  let displayDescription = getLocalizedValue(menuItem.description, {
+    en: menuItem.descriptionEn
+  });
   
   // 설명 텍스트에서 대괄호 제거
-  let displayDescription = menuItem.descriptionEn || menuItem.description || '';
-  
   // 대괄호로 감싸진 형태인 경우 대괄호를 제거하고 안의 내용만 추출
   if (displayDescription.match(/^\[(.*)\]$/)) {
     displayDescription = displayDescription.replace(/^\[(.*)\]$/, '$1');
