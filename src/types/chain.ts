@@ -4,7 +4,7 @@
 export interface Chain {
   id: string;
   name: string;
-  logo: string;
+  imageUrl: string;
 }
 
 /**
@@ -26,26 +26,26 @@ export const SAMPLE_CHAINS: Chain[] = [
   { 
     id: 'mcdonalds', 
     name: "McDonald's", 
-    logo: getLogoPath('mcdonalds.png')
+    imageUrl: getLogoPath('mcdonalds.png')
   },
   { 
     id: 'kfc', 
     name: 'KFC', 
-    logo: getLogoPath('kfc.png')
+    imageUrl: getLogoPath('kfc.png')
   },
   { 
     id: 'burger-king', 
     name: 'Burger King', 
-    logo: getLogoPath('burger-king.png')
+    imageUrl: getLogoPath('burger-king.png')
   },
   { 
     id: 'starbucks', 
     name: 'Starbucks', 
-    logo: getLogoPath('starbucks.png')
+    imageUrl: getLogoPath('starbucks.png')
   },
   { 
     id: 'pizza-hut', 
     name: 'Pizza Hut', 
-    logo: getLogoPath('pizza-hut.png')
+    imageUrl: getLogoPath('pizza-hut.png')
   }
 ]; 

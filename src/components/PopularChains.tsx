@@ -59,7 +59,7 @@ const PopularChains: React.FC = () => {
             >
               <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md border mb-2">
                 <ImageWithFallback 
-                  src={chain.logo} 
+                  src={chain.imageUrl} 
                   alt={chain.name} 
                   className="w-12 h-12 object-contain"
                   fallback="https://delivereee.github.io/home/images/chains/default-logo.png"
