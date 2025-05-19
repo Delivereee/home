@@ -27,15 +27,41 @@ const NaverMap: React.FC<NaverMapProps> = ({
   const clickListenerRef = useRef<any>(null);
   const markerDragListenerRef = useRef<any>(null);
 
+  // 디버그 정보 출력 - 현재 URL 및 포트 확인
+  useEffect(() => {
+    console.log('===== 네이버 지도 디버그 정보 =====');
+    console.log('현재 URL:', window.location.href);
+    console.log('현재 호스트:', window.location.host);
+    console.log('현재 포트:', window.location.port);
+    console.log('현재 경로:', window.location.pathname);
+    console.log('naver 객체 존재 여부:', typeof window.naver !== 'undefined');
+    console.log('================================');
+  }, []);
+
   // 네이버 맵 스크립트 로드 확인
   useEffect(() => {
     let checkCount = 0;
     const maxChecks = 50;
     
     const checkNaverMapLoaded = () => {
+      // 네이버 객체 상태 확인을 위한 디버그 출력
+      if (checkCount % 10 === 0) {
+        console.log(`네이버 맵 스크립트 로드 확인 중... (${checkCount}번째 시도)`);
+        console.log('window.naver 상태:', typeof window.naver !== 'undefined' ? '존재함' : '존재하지 않음');
+        
+        if (typeof window.naver !== 'undefined') {
+          console.log('naver.maps 상태:', window.naver.maps !== undefined ? '존재함' : '존재하지 않음');
+          
+          if (window.naver.maps !== undefined) {
+            console.log('naver.maps.Map 상태:', window.naver.maps.Map !== undefined ? '존재함' : '존재하지 않음');
+          }
+        }
+      }
+      
       if (typeof window.naver !== 'undefined' && 
           window.naver.maps !== undefined && 
           window.naver.maps.Map !== undefined) {
+        console.log('네이버 맵 스크립트 로드 완료');
         setIsScriptLoaded(true);
         return;
       }
@@ -59,6 +85,20 @@ const NaverMap: React.FC<NaverMapProps> = ({
   // 맵 초기화 - 스크립트가 로드된 후에만 실행
   useEffect(() => {
     if (!isScriptLoaded || !mapRef.current) return;
+    
+    // 맵 생성 전 인증 상태 확인
+    try {
+      console.log('맵 생성 전 인증 상태 확인');
+      const naverAvailable = typeof window.naver !== 'undefined' && window.naver.maps !== undefined;
+      console.log('네이버 객체 사용 가능:', naverAvailable);
+      
+      if (naverAvailable) {
+        // 인증 오류 여부 확인을 위한 테스트
+        console.log('네이버 맵 API 버전:', window.naver.maps.version || '버전 정보 없음');
+      }
+    } catch (error) {
+      console.error('인증 상태 확인 중 오류:', error);
+    }
     
     let map: any = null;
     let mapMarker: any = null;

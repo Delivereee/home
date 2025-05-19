@@ -36,8 +36,27 @@
       });
     </script>
     
+    <!-- 네이버 지도 API 디버그 모드 스크립트 -->
+    <script>
+      // 네이버 지도 API 오류 모니터링
+      window.naverMapErrorCallback = function(error) {
+        console.error('네이버 지도 API 로드 오류:', error);
+      };
+      
+      // 네이버 지도 API 로드 완료 콜백
+      window.naverMapLoadCallback = function() {
+        console.log('네이버 지도 API 로드 완료');
+        window.naverMapLoaded = true;
+      };
+    </script>
+    
     <!-- 네이버 지도 API 스크립트 -->
-    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=t9urh3v0l9&submodules=geocoder" async defer></script>
+    <script 
+      type="text/javascript" 
+      src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=t9urh3v0l9&submodules=geocoder&callback=naverMapLoadCallback&language=en" 
+      onerror="naverMapErrorCallback(event)"
+      async
+    ></script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
