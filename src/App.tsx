@@ -93,6 +93,9 @@ function App() {
               } />
               
               {/* 카테고리 상세 페이지 */}
+              <Route path="/categories/:categoryId" element={<CategoryDetail />} />
+              
+              {/* 이전 라우트 유지 (하위 호환성) */}
               <Route path="/categories/:categoryId/:categoryName" element={<CategoryDetail />} />
               
               {/* 전체 레스토랑 목록 (Browse) */}

@@ -1,7 +1,18 @@
 import axios from 'axios';
 
 // 환경 변수에서 API 기본 URL 가져오기
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8084';
+const getApiBaseUrl = () => {
+  if (process.env.REACT_APP_API_BASE_URL) {
+    return process.env.REACT_APP_API_BASE_URL;
+  }
+  
+  // 환경에 따른 기본 URL 설정
+  return process.env.NODE_ENV === 'production'
+    ? 'https://api.brainbackdoor.com'
+    : 'http://localhost:8084';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 const ENVIRONMENT = process.env.REACT_APP_ENV || process.env.NODE_ENV || 'development';
 const isDevelopment = process.env.NODE_ENV === 'development';
 

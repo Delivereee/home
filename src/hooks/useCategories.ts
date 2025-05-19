@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getCategories } from '../api/categoryService';
-import { Category, CATEGORIES } from '../types/category';
+import { Category } from '../types/category';
 import { STATUS_MESSAGES } from '../config/constants';
 
 /**
@@ -19,20 +19,19 @@ export const useCategories = () => {
       // API에서 데이터 가져오기 시도
       const data = await getCategories();
       
-      // API 호출 실패 시 로컬 데이터 사용 (개발 편의를 위해)
+      // 데이터 설정
+      setCategories(data);
+      
+      // 데이터가 비어있으면 사용자에게 알림
       if (data.length === 0) {
-        // 로컬 샘플 데이터 사용
-        setCategories(CATEGORIES);
-        console.log('Using sample data for categories');
-      } else {
-        setCategories(data);
+        console.log('가져온 카테고리 데이터가 없습니다.');
       }
     } catch (err) {
-      console.error('Failed to fetch categories:', err);
+      console.error('카테고리 데이터를 가져오는데 실패했습니다:', err);
       setError(STATUS_MESSAGES.error.categories);
       
-      // 에러 발생 시에도 기본 카테고리 데이터 사용
-      setCategories(CATEGORIES);
+      // 에러 발생 시 빈 배열 설정
+      setCategories([]);
     } finally {
       setLoading(false);
     }

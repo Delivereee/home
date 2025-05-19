@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import BackHeader from '../components/BackHeader';
 import RestaurantItem from '../components/RestaurantItem';
@@ -7,8 +7,9 @@ import ErrorState from '../components/ErrorState';
 import EmptyState from '../components/EmptyState';
 import NavigationBar from '../components/NavigationBar';
 import { useRestaurants } from '../hooks/useRestaurants';
+import { getCategories } from '../api/categoryService';
 import { STATUS_MESSAGES } from '../config/constants';
-import { CATEGORIES } from '../types/category';
+import { Category } from '../types/category';
 
 const CategoryDetail: React.FC = () => {
   const { categoryId, categoryName, chainName, chainId } = useParams<{ 
@@ -18,6 +19,32 @@ const CategoryDetail: React.FC = () => {
     chainName?: string
   }>();
   const location = useLocation();
+  const [allCategories, setAllCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  
+  // API에서 카테고리 데이터 가져오기
+  useEffect(() => {
+    const fetchCategoriesData = async () => {
+      try {
+        const categories = await getCategories();
+        if (categories.length > 0) {
+          setAllCategories(categories);
+          
+          // categoryId로 현재 카테고리 찾기
+          if (categoryId) {
+            const category = categories.find(cat => cat.id === categoryId);
+            if (category) {
+              setSelectedCategory(category);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('카테고리 데이터를 가져오는데 실패했습니다:', error);
+      }
+    };
+    
+    fetchCategoriesData();
+  }, [categoryId]);
   
   // 현재 어떤 타입의 요청인지 확인
   const isAllRestaurants = location.pathname === '/restaurants' || location.pathname === '/browse';
@@ -32,31 +59,16 @@ const CategoryDetail: React.FC = () => {
       return { franchiseId: chainId };
     }
     
+    // 선택된 카테고리가 있으면 그 이름을 사용, 없으면 URL의 categoryName 사용
+    if (selectedCategory) {
+      return { categoryName: selectedCategory.name };
+    }
+    
     return { categoryName };
-  }, [categoryName, chainId, chainName, isAllRestaurants]);
+  }, [categoryName, chainId, chainName, isAllRestaurants, selectedCategory]);
   
   // API 요청
   const { restaurants, loading, error, refetch } = useRestaurants(searchParams);
-  
-  // 카테고리ID로 영문 카테고리명 찾기
-  const findCategoryEnglishName = (id?: string, decodedName?: string): string => {
-    if (!id && !decodedName) return 'Restaurants';
-    
-    // ID로 카테고리 찾기
-    if (id) {
-      const category = CATEGORIES.find(cat => cat.id === id);
-      if (category) return category.nameEn;
-    }
-    
-    // 이름으로 카테고리 찾기
-    if (decodedName) {
-      const category = CATEGORIES.find(cat => cat.name === decodedName);
-      if (category) return category.nameEn;
-    }
-    
-    // 찾지 못한 경우 디코딩된 이름 또는 기본값 반환
-    return decodedName || 'Restaurants';
-  };
   
   // 표시할 타이틀 결정
   const displayTitle = useMemo(() => {
@@ -69,11 +81,33 @@ const CategoryDetail: React.FC = () => {
       return decodeURIComponent(chainName);
     }
     
-    // 카테고리인 경우 영문명 찾기
-    const decodedCategoryName = categoryName ? decodeURIComponent(categoryName) : '';
-    return findCategoryEnglishName(categoryId, decodedCategoryName);
+    // 선택된 카테고리가 있으면 그 이름을 표시
+    if (selectedCategory) {
+      return selectedCategory.nameEn;
+    }
     
-  }, [categoryId, categoryName, chainName, isAllRestaurants]);
+    // ID로 카테고리 찾기
+    if (categoryId) {
+      const category = allCategories.find(cat => cat.id === categoryId);
+      if (category) {
+        return category.nameEn;
+      }
+    }
+    
+    // 카테고리명으로 찾기 (하위 호환성)
+    if (categoryName) {
+      const decodedName = decodeURIComponent(categoryName);
+      const category = allCategories.find(cat => 
+        cat.nameKo === decodedName || cat.name === decodedName
+      );
+      if (category) {
+        return category.nameEn;
+      }
+      return decodedName;
+    }
+    
+    return 'Restaurants';
+  }, [categoryId, categoryName, chainName, isAllRestaurants, allCategories, selectedCategory]);
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -84,7 +118,7 @@ const CategoryDetail: React.FC = () => {
         {loading ? (
           <LoadingState 
             message={STATUS_MESSAGES.loading.restaurants} 
-            id={`category-${isAllRestaurants ? 'all-restaurants' : categoryName || 'unknown'}`}
+            id={`category-${isAllRestaurants ? 'all-restaurants' : categoryId || 'unknown'}`}
           />
         ) : error ? (
           <ErrorState 

@@ -13,8 +13,8 @@ const CategorySection: React.FC = () => {
 
   // 카테고리 클릭 핸들러
   const handleCategoryClick = (category: Category) => {
-    // 카테고리 상세 페이지로 이동
-    navigate(`/categories/${category.id}/${encodeURIComponent(category.name)}`);
+    // 카테고리 상세 페이지로 이동 (ID만 사용)
+    navigate(`/categories/${category.id}`);
   };
 
   // 로딩 상태 표시
@@ -48,7 +48,7 @@ const CategorySection: React.FC = () => {
             onClick={() => handleCategoryClick(category)}
           >
             <ImageWithFallback 
-              src={category.image} 
+              src={category.imageUrl} 
               alt={category.name}
               className="w-full h-full object-cover"
               fallback="https://delivereee.github.io/home/images/categories/default-food.jpg"
