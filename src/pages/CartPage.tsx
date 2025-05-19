@@ -90,8 +90,19 @@ const CartPage: React.FC = () => {
       setIsLoading(true);
       setErrorMsg(null);
       
-      // 주소 ID 가져오기 (현재는 임시값 사용)
-      const addressId = address?.isComplete ? 'address123' : 'address123'; // 실제 주소 ID로 대체해야 함
+      // 주소 ID 가져오기
+      const addressId = address?.addressId || ''; // 저장된 주소 ID 또는 임시 ID 사용
+      
+      if (!address?.isComplete) {
+        setErrorMsg('Please set up your delivery address first');
+        setIsLoading(false);
+        navigate('/address-setup');
+        return;
+      }
+
+      if (!addressId) {
+        console.warn('Address ID is missing. Using temporary ID.');
+      }
       
       // 1. 장바구니 생성 요청
       const cartRequest = transformCartToRequest(cart, addressId);

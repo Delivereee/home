@@ -2,14 +2,27 @@ import axios from 'axios';
 
 // 환경 변수에서 API 기본 URL 가져오기
 const getApiBaseUrl = () => {
+  // 1. 환경 변수에서 직접 API URL 설정 가져오기
   if (process.env.REACT_APP_API_BASE_URL) {
+    console.log(`Using API URL from env var: ${process.env.REACT_APP_API_BASE_URL}`);
     return process.env.REACT_APP_API_BASE_URL;
   }
   
-  // 환경에 따른 기본 URL 설정
-  return process.env.NODE_ENV === 'production'
-    ? 'https://api.brainbackdoor.com'
-    : 'http://localhost:8084';
+  // 2. 현재 URL 기반으로 프로덕션 여부 체크 (GitHub Pages 환경 감지)
+  const isGitHubPages = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
+  
+  // 3. NODE_ENV 환경 변수 확인
+  const isProdEnv = process.env.NODE_ENV === 'production';
+  
+  // 프로덕션 또는 GitHub Pages에서 실행 중이면 운영 API URL 사용
+  if (isProdEnv || isGitHubPages) {
+    console.log('Detected production environment, using production API URL');
+    return 'https://api.brainbackdoor.com';
+  }
+  
+  // 개발 환경에서는 로컬 URL 사용
+  console.log('Using development API URL');
+  return 'http://localhost:8084';
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -24,12 +37,12 @@ const apiClient = axios.create({
   },
 });
 
-// 환경 정보 콘솔에 출력 (개발 중에만)
+// 환경 정보 콘솔에 출력
+console.log(`API Client configured with base URL: ${API_BASE_URL}`);
+console.log(`Current environment: ${ENVIRONMENT}`);
+
+// 개발 환경에서만 서버 상태 확인
 if (isDevelopment) {
-  console.log(`API Client configured with base URL: ${API_BASE_URL}`);
-  console.log(`Current environment: ${ENVIRONMENT}`);
-  
-  // 서버 상태 확인
   checkServerStatus();
 }
 

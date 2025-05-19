@@ -5,10 +5,11 @@ import { useAddress } from '../contexts/AddressContext';
 import { getCurrentPosition, reverseGeocode, getIpBasedLocation } from '../services/LocationService';
 import { showChannelTalk, trackChannelTalkEvent } from '../services/ChannelService';
 import NaverMap from '../components/NaverMap';
+import { createAddress, CreateAddressRequest } from '../api/addressService';
 
 const AddressSetupPage: React.FC = () => {
   const navigate = useNavigate();
-  const { address, setAddress } = useAddress();
+  const { address, setAddress, setAddressId } = useAddress();
   
   const [mainAddress, setMainAddress] = useState('');
   const [detailAddress, setDetailAddress] = useState('');
@@ -38,11 +39,6 @@ const AddressSetupPage: React.FC = () => {
     // 숫자가 포함되어 있는지 확인 (대부분의 주소에는 숫자가 포함됨)
     if (!/\d/.test(trimmedAddress)) {
       return { isValid: false, message: 'Address should include a number (building or street number)' };
-    }
-    
-    // 쉼표가 있는지 확인 (올바른 주소 형식인지)
-    if (!trimmedAddress.includes(',')) {
-      return { isValid: false, message: 'Please use commas to separate address components' };
     }
     
     return { isValid: true, message: null };
@@ -157,7 +153,7 @@ const AddressSetupPage: React.FC = () => {
     alert("This feature would extract address from a booking confirmation in a real implementation.");
   };
 
-  const handleSaveAddress = () => {
+  const handleSaveAddress = async () => {
     // 모든 필드를 터치된 상태로 설정 (검증 에러 표시를 위해)
     setTouched({ mainAddress: true, detailAddress: true });
 
@@ -179,16 +175,49 @@ const AddressSetupPage: React.FC = () => {
       return;
     }
 
-    // 주소 정보 저장 (위도/경도 정보 추가)
-    setAddress({
-      mainAddress: mainAddress.trim(),
-      detailAddress: detailAddress.trim(),
-      isComplete: true,
-      ...(currentLocation && { lat: currentLocation.lat, lng: currentLocation.lng })
-    });
+    // 로딩 상태 설정
+    setIsLoading(true);
 
-    // 홈으로 이동
-    navigate('/');
+    try {
+      // 1. 위치 정보가 있으면 API 호출하여 주소 저장
+      if (currentLocation) {
+        const addressRequest: CreateAddressRequest = {
+          address: mainAddress.trim(),
+          detail_address: detailAddress.trim(),
+          lat: currentLocation.lat.toString(),
+          lng: currentLocation.lng.toString()
+        };
+
+        // API 호출
+        const response = await createAddress(addressRequest);
+        console.log('Address saved successfully:', response);
+
+        // 주소 정보와 ID 저장
+        setAddress({
+          mainAddress: mainAddress.trim(),
+          detailAddress: detailAddress.trim(),
+          isComplete: true,
+          lat: currentLocation.lat,
+          lng: currentLocation.lng,
+          addressId: response.id
+        });
+      } else {
+        // 위치 정보가 없는 경우, 기존 방식으로 저장
+        setAddress({
+          mainAddress: mainAddress.trim(),
+          detailAddress: detailAddress.trim(),
+          isComplete: true
+        });
+      }
+
+      // 홈으로 이동
+      navigate('/');
+    } catch (error) {
+      console.error('Error saving address:', error);
+      alert('Failed to save address. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // 채널톡 도움말 열기

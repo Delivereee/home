@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import BackHeader from '../components/BackHeader';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import apiClient from '../api/config';
 
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
@@ -23,8 +24,23 @@ const CheckoutPage: React.FC = () => {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   
   // PayPal initial options
+  const getPayPalClientId = () => {
+    // 환경변수에서 Client ID 가져오기
+    if (process.env.REACT_APP_PAYPAL_CLIENT_ID) {
+      return process.env.REACT_APP_PAYPAL_CLIENT_ID;
+    }
+    
+    // GitHub Pages 환경 감지
+    const isGitHubPages = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
+    
+    // 환경에 따른 Client ID 설정
+    return isGitHubPages
+      ? "Af62TVjm80kRjCCyhj-EUa-fUjLoyWc8lbYyTvrVH8qdRetwc2Dk9sT4gxvCrKFBONJMB1fHnJYW0nYg" // 운영용
+      : "AWiQrkfr-umMAIIyeiLWY_Dgx3PMSazp9iUDofAQeNeIUnZo8sZuzDZPCdHJEqM9BYIE99g8DgzLI7a6"; // 개발용
+  };
+  
   const paypalOptions = {
-    clientId: process.env.REACT_APP_PAYPAL_CLIENT_ID || "AWiQrkfr-umMAIIyeiLWY_Dgx3PMSazp9iUDofAQeNeIUnZo8sZuzDZPCdHJEqM9BYIE99g8DgzLI7a6",
+    clientId: getPayPalClientId(),
     currency: "USD",
     intent: "capture",
     locale: "en_US",
@@ -33,7 +49,7 @@ const CheckoutPage: React.FC = () => {
   // 개발 환경에서만 페이팔 설정 로그
   if (process.env.NODE_ENV === 'development') {
     console.log('페이팔 설정 환경:', process.env.NODE_ENV);
-    console.log('페이팔 Client ID:', process.env.REACT_APP_PAYPAL_CLIENT_ID ? '환경 변수에서 로드됨' : '기본값 사용');
+    console.log('페이팔 Client ID:', getPayPalClientId());
   }
   
   // Currency conversion constant
@@ -155,18 +171,14 @@ const CheckoutPage: React.FC = () => {
       };
       
       try {
-        // Call backend API
-        const response = await fetch(`http://localhost:8084/api/orders/${orderId}/payment?paymentId=${data.orderID}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(requestBody)
-        });
+        // Call backend API using apiClient instead of fetch
+        const response = await apiClient.post(
+          `/api/orders/${orderId}/payment?paymentId=${data.orderID}`, 
+          requestBody
+        );
         
-        if (response.ok) {
-          const result = await response.json();
-          console.log('Order successfully processed:', result);
+        if (response.status >= 200 && response.status < 300) {
+          console.log('Order successfully processed:', response.data);
           
           // Navigate to success page
           navigate('/order-success', { 
@@ -176,7 +188,7 @@ const CheckoutPage: React.FC = () => {
             } 
           });
         } else {
-          console.error('Failed to process order:', await response.text());
+          console.error('Failed to process order:', response.statusText);
           // Even if there's a backend communication error, payment was completed, so navigate to success page
           navigate('/order-success', { 
             state: { 
