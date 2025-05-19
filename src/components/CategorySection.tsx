@@ -4,7 +4,7 @@ import { Category } from '../types/category';
 import LoadingState from './LoadingState';
 import ErrorState from './ErrorState';
 import { useCategories } from '../hooks/useCategories';
-import { STATUS_MESSAGES } from '../config/constants';
+import { getStatusMessages } from '../config/constants';
 import ImageWithFallback from './ImageWithFallback';
 import useTranslation from '../hooks/useTranslation';
 import { getLocalizedValue } from '../config/languageConfig';

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getCategories } from '../api/categoryService';
 import { Category } from '../types/category';
-import { STATUS_MESSAGES } from '../config/constants';
+import { getStatusMessages } from '../config/constants';
 
 /**
  * 카테고리 목록을 가져오는 커스텀 훅
@@ -28,6 +28,7 @@ export const useCategories = () => {
       }
     } catch (err) {
       console.error('카테고리 데이터를 가져오는데 실패했습니다:', err);
+      const STATUS_MESSAGES = getStatusMessages();
       setError(STATUS_MESSAGES.error.categories);
       
       // 에러 발생 시 빈 배열 설정

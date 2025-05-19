@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getNearbyRestaurants } from '../api/restaurantService';
 import { Restaurant } from '../types/restaurant';
-import { DEFAULT_COORDINATES, STATUS_MESSAGES } from '../config/constants';
+import { DEFAULT_COORDINATES, getStatusMessages } from '../config/constants';
 import { useAddress } from '../contexts/AddressContext';
 
 interface UseRestaurantsProps {
@@ -74,6 +74,7 @@ export const useRestaurants = (
       setRestaurants(data);
     } catch (err) {
       console.error('Error fetching restaurants:', err);
+      const STATUS_MESSAGES = getStatusMessages();
       setError(STATUS_MESSAGES.error.restaurants);
     } finally {
       setLoading(false);

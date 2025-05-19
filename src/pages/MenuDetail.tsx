@@ -10,7 +10,8 @@ import CartBottomSheet from '../components/CartBottomSheet';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
 import ImageWithFallback from '../components/ImageWithFallback';
-import { STATUS_MESSAGES } from '../config/constants';
+import { getStatusMessages } from '../config/constants';
+import useTranslation from '../hooks/useTranslation';
 
 // 메뉴 옵션을 장바구니 옵션으로 변환하는 함수 추가
 const convertMenuOptionToCartOption = (menuOption: MenuOption): CartOption => {
@@ -32,6 +33,10 @@ const MenuDetail: React.FC = () => {
   const { restaurantId = '', menuId = '' } = useParams<{ restaurantId: string; menuId: string }>();
   const navigate = useNavigate();
   const { cart, addToCart, updateItemQuantity, canceledItemId } = useCart();
+  const { t } = useTranslation();
+  
+  // 다국어 상태 메시지 가져오기
+  const STATUS_MESSAGES = getStatusMessages();
   
   // 메뉴 데이터 상태
   const [menuItem, setMenuItem] = useState<MenuItemType | null>(null);
@@ -98,7 +103,7 @@ const MenuDetail: React.FC = () => {
   useEffect(() => {
     const fetchMenuData = async () => {
       if (!restaurantId || !menuId) {
-        setError('Invalid restaurant or menu ID');
+        setError(t('menu.invalidId'));
         setLoading(false);
         return;
       }
@@ -108,7 +113,7 @@ const MenuDetail: React.FC = () => {
         const menuData = await getMenuDetail(restaurantId, menuId);
         
         if (!menuData) {
-          setError('Menu not found');
+          setError(t('menu.notFound'));
           setLoading(false);
           return;
         }
@@ -120,13 +125,13 @@ const MenuDetail: React.FC = () => {
         setLoading(false);
       } catch (err) {
         console.error('Error fetching menu details:', err);
-        setError(STATUS_MESSAGES.error.menus || 'Failed to load menu details. Please try again later.');
+        setError(STATUS_MESSAGES.error.menus || t('menu.fetchFailed'));
         setLoading(false);
       }
     };
     
     fetchMenuData();
-  }, [restaurantId, menuId]);
+  }, [restaurantId, menuId, t]);
   
   // 카트에서 현재 아이템의 수량 가져오기
   useEffect(() => {
@@ -224,7 +229,7 @@ const MenuDetail: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <BackHeader title="Menu Item" />
+        <BackHeader title={t('menu.item')} />
         <div className="p-4">
           <LoadingState message={STATUS_MESSAGES.loading.menus} />
         </div>
@@ -237,7 +242,7 @@ const MenuDetail: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <BackHeader title="Error" />
+        <BackHeader title={t('error.title')} />
         <div className="p-4">
           <ErrorState message={error} onRetry={() => window.location.reload()} />
         </div>
@@ -250,9 +255,9 @@ const MenuDetail: React.FC = () => {
   if (!menuItem) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <BackHeader title="Not Found" />
+        <BackHeader title={t('error.notFound')} />
         <div className="p-4">
-          <ErrorState message="Menu item not found" onRetry={() => navigate(-1)} />
+          <ErrorState message={t('menu.notFound')} onRetry={() => navigate(`/restaurant/${restaurantId}`)} />
         </div>
         <NavigationBar />
       </div>

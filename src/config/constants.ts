@@ -1,4 +1,5 @@
 // 애플리케이션 전반에서 사용되는 상수 값들
+import { t } from './translations';
 
 // 기본 위치 좌표 (서울 강남)
 export const DEFAULT_COORDINATES = {
@@ -12,25 +13,29 @@ export const API_DEFAULTS = {
   resultsPerPage: 20
 };
 
-// 상태 메시지
-export const STATUS_MESSAGES = {
+/**
+ * 다국어 상태 메시지를 반환하는 함수
+ * 현재 설정된 언어에 맞는 상태 메시지를 반환합니다.
+ * @returns 다국어 상태 메시지 객체
+ */
+export const getStatusMessages = () => ({
   loading: {
-    categories: 'Loading categories...',
-    restaurants: 'Finding restaurants near you...',
-    chains: 'Loading popular restaurants...',
-    menus: 'Loading menu options...'
+    categories: t('status.loading.categories'),
+    restaurants: t('status.loading.restaurants'),
+    chains: t('status.loading.chains'),
+    menus: t('status.loading.menus')
   },
   error: {
-    categories: 'We had trouble loading categories. Please try again.',
-    restaurants: 'We couldn\'t load restaurants at this time. Please try again.',
-    chains: 'We couldn\'t load popular restaurants at this time. Please try again.',
-    menus: 'We couldn\'t load the menu at this time. Please try again.',
-    default: 'Something went wrong. Please try again.',
-    network: 'Network connection issue. Please check your internet connection.'
+    categories: t('status.error.categories'),
+    restaurants: t('status.error.restaurants'),
+    chains: t('status.error.chains'),
+    menus: t('status.error.menus'),
+    default: t('status.error.default'),
+    network: t('status.error.network')
   },
   empty: {
-    restaurants: 'No restaurants found in this area.',
-    chains: 'No popular restaurants available at this time.',
-    menus: 'This restaurant has no available menu items.'
+    restaurants: t('status.empty.restaurants'),
+    chains: t('status.empty.chains'),
+    menus: t('status.empty.menus')
   }
-}; 
+}); 

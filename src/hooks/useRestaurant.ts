@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getRestaurantDetails } from '../api/restaurantService';
 import { Restaurant } from '../types/restaurant';
-import { STATUS_MESSAGES } from '../config/constants';
+import { getStatusMessages } from '../config/constants';
 
 /**
  * 개별 레스토랑 정보를 가져오는 커스텀 훅
@@ -21,6 +21,7 @@ export const useRestaurant = (restaurantId: string | number) => {
       setRestaurant(data);
     } catch (err) {
       console.error('Error fetching restaurant details:', err);
+      const STATUS_MESSAGES = getStatusMessages();
       setError(STATUS_MESSAGES.error.restaurants);
     } finally {
       setLoading(false);

@@ -8,9 +8,10 @@ import EmptyState from '../components/EmptyState';
 import NavigationBar from '../components/NavigationBar';
 import { useRestaurants } from '../hooks/useRestaurants';
 import { getCategories } from '../api/categoryService';
-import { STATUS_MESSAGES } from '../config/constants';
+import { getStatusMessages } from '../config/constants';
 import { Category } from '../types/category';
 import { getCurrentLanguage } from '../config/languageConfig';
+import useTranslation from '../hooks/useTranslation';
 
 const CategoryDetail: React.FC = () => {
   const { categoryId, categoryName, chainName, chainId } = useParams<{ 
@@ -22,6 +23,10 @@ const CategoryDetail: React.FC = () => {
   const location = useLocation();
   const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const { t } = useTranslation();
+  
+  // 다국어 상태 메시지 가져오기
+  const STATUS_MESSAGES = getStatusMessages();
   
   // API에서 카테고리 데이터 가져오기
   useEffect(() => {
@@ -117,7 +122,7 @@ const CategoryDetail: React.FC = () => {
   // 표시할 타이틀 결정
   const displayTitle = useMemo((): string => {
     if (isAllRestaurants) {
-      return 'All Restaurants Near You';
+      return t('browse.allRestaurants');
     }
     
     if (chainName) {
@@ -150,8 +155,8 @@ const CategoryDetail: React.FC = () => {
       return decodedName;
     }
     
-    return 'Restaurants';
-  }, [categoryId, categoryName, chainName, isAllRestaurants, allCategories, selectedCategory, currentLang]);
+    return t('browse.restaurants');
+  }, [categoryId, categoryName, chainName, isAllRestaurants, allCategories, selectedCategory, currentLang, t]);
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -166,22 +171,24 @@ const CategoryDetail: React.FC = () => {
           />
         ) : error ? (
           <ErrorState 
-            message={error} 
+            message={t('status.error.restaurants')} 
             onRetry={refetch} 
-            subtitle="We couldn't connect to our restaurant service. Please check your connection and try again."
+            subtitle={t('error.connectionIssue')}
           />
         ) : restaurants.length === 0 ? (
           <EmptyState 
             message={STATUS_MESSAGES.empty.restaurants} 
-            subtitle="Try changing your location or exploring different categories."
-            actionText="Refresh"
+            subtitle={t('empty.changeLocationOrCategory')}
+            actionText={t('action.refresh')}
             onAction={refetch}
             hideIcon={true}
           />
         ) : (
           <div>
             <p className="text-gray-600 mb-4">
-              {restaurants.length} {restaurants.length === 1 ? 'restaurant' : 'restaurants'} available
+              {restaurants.length} {restaurants.length === 1 
+                ? t('browse.restaurantSingular') 
+                : t('browse.restaurantPlural')} {t('browse.available')}
             </p>
             {restaurants.map((restaurant) => (
               <RestaurantItem key={restaurant.id} restaurant={restaurant} />

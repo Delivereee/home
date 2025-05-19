@@ -11,12 +11,17 @@ import CartBottomSheet from '../components/CartBottomSheet';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
 import EmptyState from '../components/EmptyState';
-import { STATUS_MESSAGES } from '../config/constants';
+import { getStatusMessages } from '../config/constants';
+import useTranslation from '../hooks/useTranslation';
 
 const RestaurantDetail: React.FC = () => {
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
   const navigate = useNavigate();
   const { setRestaurantMinOrderAmount } = useCart();
+  const { t } = useTranslation();
+  
+  // 다국어 상태 메시지 가져오기
+  const STATUS_MESSAGES = getStatusMessages();
   
   // 가게 정보 가져오기
   const { restaurant, loading: restaurantLoading, error: restaurantError } = useRestaurant(restaurantId);
@@ -53,9 +58,9 @@ const RestaurantDetail: React.FC = () => {
   if (!restaurantId) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <BackHeader title="Error" />
+        <BackHeader title={t('error.title')} />
         <div className="p-4">
-          <ErrorState message="Invalid restaurant ID" onRetry={() => window.location.reload()} />
+          <ErrorState message={t('restaurant.invalidId')} onRetry={() => window.location.reload()} />
         </div>
         <NavigationBar />
       </div>
@@ -82,7 +87,7 @@ const RestaurantDetail: React.FC = () => {
   if (restaurantError) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <BackHeader title="Error" />
+        <BackHeader title={t('error.title')} />
         <div className="p-4">
           <ErrorState message={restaurantError} onRetry={() => window.location.reload()} />
         </div>
@@ -95,9 +100,9 @@ const RestaurantDetail: React.FC = () => {
   if (!restaurant) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <BackHeader title="Not Found" />
+        <BackHeader title={t('error.notFound')} />
         <div className="p-4">
-          <EmptyState message="Restaurant not found" />
+          <EmptyState message={t('restaurant.notFound')} />
         </div>
         <NavigationBar />
       </div>
@@ -132,8 +137,8 @@ const RestaurantDetail: React.FC = () => {
         ) : menuSections.length === 0 ? (
           <EmptyState 
             message={STATUS_MESSAGES.empty.menus} 
-            subtitle="This restaurant hasn't added any menu items yet. Please check back later."
-            actionText="Refresh"
+            subtitle={t('restaurant.noMenuItems')}
+            actionText={t('action.refresh')}
             onAction={refetchMenus}
             hideIcon={true}
           />

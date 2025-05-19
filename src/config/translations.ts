@@ -222,6 +222,307 @@ const translations: Record<string, TranslationItem> = {
     'zh-CN': '保存地址失败。请重试。',
     'zh-TW': '保存地址失敗。請重試。'
   },
+  
+  // 상태 메시지 - 로딩
+  'status.loading.restaurants': {
+    en: 'Finding restaurants near you...',
+    ko: '주변 음식점을 찾는 중...',
+    ja: '近くのレストランを検索中...',
+    'zh-CN': '正在查找附近的餐厅...',
+    'zh-TW': '正在查找附近的餐廳...'
+  },
+  'status.loading.menus': {
+    en: 'Loading menu options...',
+    ko: '메뉴 옵션을 불러오는 중...',
+    ja: 'メニューオプションを読み込んでいます...',
+    'zh-CN': '正在加载菜单选项...',
+    'zh-TW': '正在加載菜單選項...'
+  },
+  
+  // 상태 메시지 - 에러
+  'status.error.categories': {
+    en: 'We had trouble loading categories. Please try again.',
+    ko: '카테고리를 불러오는 데 문제가 발생했습니다. 다시 시도해주세요.',
+    ja: 'カテゴリーの読み込み中に問題が発生しました。もう一度お試しください。',
+    'zh-CN': '加载类别时出现问题。请重试。',
+    'zh-TW': '加載類別時出現問題。請重試。'
+  },
+  'status.error.restaurants': {
+    en: 'We couldn\'t load restaurants at this time. Please try again.',
+    ko: '현재 음식점 정보를 불러올 수 없습니다. 다시 시도해주세요.',
+    ja: '現在、レストラン情報を読み込むことができません。もう一度お試しください。',
+    'zh-CN': '目前无法加载餐厅信息。请重试。',
+    'zh-TW': '目前無法加載餐廳信息。請重試。'
+  },
+  'status.error.chains': {
+    en: 'We couldn\'t load popular restaurants at this time. Please try again.',
+    ko: '현재 인기 음식점을 불러올 수 없습니다. 다시 시도해주세요.',
+    ja: '現在、人気のレストランを読み込むことができません。もう一度お試しください。',
+    'zh-CN': '目前无法加载热门餐厅。请重试。',
+    'zh-TW': '目前無法加載熱門餐廳。請重試。'
+  },
+  'status.error.menus': {
+    en: 'We couldn\'t load the menu at this time. Please try again.',
+    ko: '현재 메뉴를 불러올 수 없습니다. 다시 시도해주세요.',
+    ja: '現在、メニューを読み込むことができません。もう一度お試しください。',
+    'zh-CN': '目前无法加载菜单。请重试。',
+    'zh-TW': '目前無法加載菜單。請重試。'
+  },
+  'status.error.default': {
+    en: 'Something went wrong. Please try again.',
+    ko: '문제가 발생했습니다. 다시 시도해주세요.',
+    ja: '問題が発生しました。もう一度お試しください。',
+    'zh-CN': '出现问题。请重试。',
+    'zh-TW': '出現問題。請重試。'
+  },
+  'status.error.network': {
+    en: 'Network connection issue. Please check your internet connection.',
+    ko: '네트워크 연결 문제. 인터넷 연결을 확인해주세요.',
+    ja: 'ネットワーク接続の問題です。インターネット接続を確認してください。',
+    'zh-CN': '网络连接问题。请检查您的互联网连接。',
+    'zh-TW': '網絡連接問題。請檢查您的互聯網連接。'
+  },
+  
+  // 상태 메시지 - 비어있음
+  'status.empty.restaurants': {
+    en: 'No restaurants found in this area.',
+    ko: '이 지역에서 음식점을 찾을 수 없습니다.',
+    ja: 'この地域にレストランが見つかりません。',
+    'zh-CN': '在此区域找不到餐厅。',
+    'zh-TW': '在此區域找不到餐廳。'
+  },
+  'status.empty.menus': {
+    en: 'This restaurant has no available menu items.',
+    ko: '이 음식점에는 이용 가능한 메뉴 항목이 없습니다.',
+    ja: 'このレストランには利用可能なメニュー項目がありません。',
+    'zh-CN': '该餐厅没有可用的菜单项。',
+    'zh-TW': '該餐廳沒有可用的菜單項。'
+  },
+  
+  // 레스토랑 정보
+  'restaurant.minimumOrder': {
+    en: 'Minimum Order',
+    ko: '최소 주문 금액',
+    ja: '最低注文金額',
+    'zh-CN': '最低订单金额',
+    'zh-TW': '最低訂單金額'
+  },
+  'restaurant.noMinimumOrder': {
+    en: 'No Minimum Order',
+    ko: '최소 주문 금액 없음',
+    ja: '最低注文金額なし',
+    'zh-CN': '无最低订单金额',
+    'zh-TW': '無最低訂單金額'
+  },
+  'restaurant.deliveryTime': {
+    en: 'Within 1 hour',
+    ko: '1시간 이내',
+    ja: '1時間以内',
+    'zh-CN': '1小时内',
+    'zh-TW': '1小時內'
+  },
+  
+  // Browse 페이지
+  'browse.allRestaurants': {
+    en: 'All Restaurants',
+    ko: '모든 음식점',
+    ja: 'すべてのレストラン',
+    'zh-CN': '所有餐厅',
+    'zh-TW': '所有餐廳'
+  },
+  'browse.restaurants': {
+    en: 'Restaurants',
+    ko: '음식점',
+    ja: 'レストラン',
+    'zh-CN': '餐厅',
+    'zh-TW': '餐廳'
+  },
+  'browse.restaurantSingular': {
+    en: 'restaurant',
+    ko: '음식점',
+    ja: 'レストラン',
+    'zh-CN': '餐厅',
+    'zh-TW': '餐廳'
+  },
+  'browse.restaurantPlural': {
+    en: 'restaurants',
+    ko: '음식점',
+    ja: 'レストラン',
+    'zh-CN': '餐厅',
+    'zh-TW': '餐廳'
+  },
+  'browse.available': {
+    en: 'available',
+    ko: '이용 가능',
+    ja: '利用可能',
+    'zh-CN': '可用',
+    'zh-TW': '可用'
+  },
+
+  // 에러/상태 메시지
+  'error.connectionIssue': {
+    en: 'Please check your internet connection and try again',
+    ko: '인터넷 연결을 확인하고 다시 시도해주세요',
+    ja: 'インターネット接続を確認して、もう一度お試しください',
+    'zh-CN': '请检查您的互联网连接，然后重试',
+    'zh-TW': '請檢查您的互聯網連接，然後重試'
+  },
+  'empty.changeLocationOrCategory': {
+    en: 'Try changing your location or category',
+    ko: '위치나 카테고리를 변경해 보세요',
+    ja: '場所やカテゴリを変更してみてください',
+    'zh-CN': '尝试更改您的位置或类别',
+    'zh-TW': '嘗試更改您的位置或類別'
+  },
+  'action.refresh': {
+    en: 'Refresh',
+    ko: '새로고침',
+    ja: '更新',
+    'zh-CN': '刷新',
+    'zh-TW': '刷新'
+  },
+  
+  // 장바구니 페이지
+  'cart.empty': {
+    en: 'Your cart is empty',
+    ko: '장바구니가 비어 있습니다',
+    ja: 'カートが空です',
+    'zh-CN': '您的购物车是空的',
+    'zh-TW': '您的購物車是空的'
+  },
+  'cart.addItems': {
+    en: 'Add some delicious items from our restaurants!',
+    ko: '맛있는 음식을 장바구니에 담아보세요!',
+    ja: '美味しい料理をカートに追加してください！',
+    'zh-CN': '从我们的餐厅添加一些美味的食品！',
+    'zh-TW': '從我們的餐廳添加一些美味的食品！'
+  },
+  'cart.browseRestaurants': {
+    en: 'Browse Restaurants',
+    ko: '음식점 둘러보기',
+    ja: 'レストランを見る',
+    'zh-CN': '浏览餐厅',
+    'zh-TW': '瀏覽餐廳'
+  },
+  'cart.perPiece': {
+    en: '(per 1 piece)',
+    ko: '(1개당)',
+    ja: '(1個あたり)',
+    'zh-CN': '(每件)',
+    'zh-TW': '(每件)'
+  },
+  'cart.remove': {
+    en: 'Remove',
+    ko: '삭제',
+    ja: '削除',
+    'zh-CN': '删除',
+    'zh-TW': '刪除'
+  },
+  'cart.decrease': {
+    en: 'Decrease quantity of',
+    ko: '수량 감소',
+    ja: '数量を減らす',
+    'zh-CN': '减少数量',
+    'zh-TW': '減少數量'
+  },
+  'cart.increase': {
+    en: 'Increase quantity of',
+    ko: '수량 증가',
+    ja: '数量を増やす',
+    'zh-CN': '增加数量',
+    'zh-TW': '增加數量'
+  },
+  'cart.orderSummary': {
+    en: 'Order Summary',
+    ko: '주문 요약',
+    ja: '注文の概要',
+    'zh-CN': '订单摘要',
+    'zh-TW': '訂單摘要'
+  },
+  'cart.subtotal': {
+    en: 'Subtotal',
+    ko: '소계',
+    ja: '小計',
+    'zh-CN': '小计',
+    'zh-TW': '小計'
+  },
+  'cart.deliveryFee': {
+    en: 'Delivery Fee',
+    ko: '배달료',
+    ja: '配送料',
+    'zh-CN': '配送费',
+    'zh-TW': '配送費'
+  },
+  'cart.proxyFee': {
+    en: 'Proxy Ordering Fee',
+    ko: '대리 주문 수수료',
+    ja: '代理注文手数料',
+    'zh-CN': '代理订购费',
+    'zh-TW': '代理訂購費'
+  },
+  'cart.total': {
+    en: 'Total',
+    ko: '합계',
+    ja: '合計',
+    'zh-CN': '总计',
+    'zh-TW': '總計'
+  },
+  'cart.addMore': {
+    en: 'Add',
+    ko: '추가',
+    ja: '追加',
+    'zh-CN': '添加',
+    'zh-TW': '添加'
+  },
+  'cart.toOrder': {
+    en: 'more to order',
+    ko: '더 추가하여 주문하세요',
+    ja: 'もっと追加して注文する',
+    'zh-CN': '更多以下订单',
+    'zh-TW': '更多以下訂單'
+  },
+  'cart.processing': {
+    en: 'Processing...',
+    ko: '처리 중...',
+    ja: '処理中...',
+    'zh-CN': '处理中...',
+    'zh-TW': '處理中...'
+  },
+  'cart.proceedToCheckout': {
+    en: 'Proceed to Checkout',
+    ko: '결제 진행하기',
+    ja: '決済に進む',
+    'zh-CN': '进行结算',
+    'zh-TW': '進行結算'
+  },
+  'cart.setAddressFirst': {
+    en: 'Please set up your delivery address first',
+    ko: '먼저 배송 주소를 설정해주세요',
+    ja: '配送先住所を先に設定してください',
+    'zh-CN': '请先设置您的配送地址',
+    'zh-TW': '請先設置您的配送地址'
+  },
+  'cart.failedToCreateCart': {
+    en: 'Failed to create cart',
+    ko: '장바구니 생성에 실패했습니다',
+    ja: 'カートの作成に失敗しました',
+    'zh-CN': '创建购物车失败',
+    'zh-TW': '創建購物車失敗'
+  },
+  'cart.failedToGetOrderId': {
+    en: 'Failed to get order ID',
+    ko: '주문 ID를 가져오지 못했습니다',
+    ja: '注文IDの取得に失敗しました',
+    'zh-CN': '获取订单ID失败',
+    'zh-TW': '獲取訂單ID失敗'
+  },
+  'cart.checkoutFailed': {
+    en: 'Failed to proceed to checkout',
+    ko: '결제 진행에 실패했습니다',
+    ja: '決済に進むことができませんでした',
+    'zh-CN': '无法进行结算',
+    'zh-TW': '無法進行結算'
+  },
 };
 
 /**

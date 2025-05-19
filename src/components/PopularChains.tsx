@@ -4,7 +4,7 @@ import { usePopularChains } from '../hooks/usePopularChains';
 import LoadingState from './LoadingState';
 import ErrorState from './ErrorState';
 import EmptyState from './EmptyState';
-import { STATUS_MESSAGES } from '../config/constants';
+import { getStatusMessages } from '../config/constants';
 import ImageWithFallback from './ImageWithFallback';
 import useTranslation from '../hooks/useTranslation';
 import { getLocalizedValue } from '../config/languageConfig';
@@ -13,6 +13,9 @@ const PopularChains: React.FC = () => {
   const { chains, loading, error, refetch } = usePopularChains();
   const navigate = useNavigate();
   const { t, language } = useTranslation();
+  
+  // 다국어 상태 메시지 가져오기
+  const STATUS_MESSAGES = getStatusMessages();
   
   // 체인점 클릭 핸들러
   const handleChainClick = (chainId: string, chainName: string) => {

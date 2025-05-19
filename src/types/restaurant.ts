@@ -30,6 +30,7 @@ export interface Restaurant {
   
   // 다국어 정보
   nameEn: string | null;
+  nameKo: string | null;
   nameJa: string | null;
   nameZhCn: string | null;
   nameZhTw: string | null;
@@ -38,6 +39,7 @@ export interface Restaurant {
   addressZhCn: string | null;
   addressZhTw: string | null;
   introductionTitleEn: string | null;
+  introductionTitleKo: string | null;
   introductionTitleJa: string | null;
   introductionTitleZhCn: string | null;
   introductionTitleZhTw: string | null;

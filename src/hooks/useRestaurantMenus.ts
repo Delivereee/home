@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getRestaurantMenus } from '../api/menuService';
 import { MenuSection } from '../types/menu';
-import { STATUS_MESSAGES } from '../config/constants';
+import { getStatusMessages } from '../config/constants';
 
 /**
  * 레스토랑 메뉴 목록을 가져오는 커스텀 훅
@@ -32,6 +32,7 @@ export const useRestaurantMenus = (restaurantId: string | number) => {
       setMenuSections(data);
     } catch (err) {
       console.error('Error fetching restaurant menus:', err);
+      const STATUS_MESSAGES = getStatusMessages();
       setError(STATUS_MESSAGES.error.menus || 'Failed to load menus. Please try again later.');
     } finally {
       setLoading(false);

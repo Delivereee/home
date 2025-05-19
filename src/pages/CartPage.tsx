@@ -7,6 +7,7 @@ import NavigationBar from '../components/NavigationBar';
 import EmptyState from '../components/EmptyState';
 import ImageWithFallback from '../components/ImageWithFallback';
 import { createCart, getCart, transformCartToRequest } from '../api/cartService';
+import useTranslation from '../hooks/useTranslation';
 
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const CartPage: React.FC = () => {
     isDeliveryAvailable,
     getAmountToMinOrder
   } = useCart();
+  const { t } = useTranslation();
   
   // 로딩 상태 추가
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -94,7 +96,7 @@ const CartPage: React.FC = () => {
       const addressId = address?.addressId || ''; // 저장된 주소 ID 또는 임시 ID 사용
       
       if (!address?.isComplete) {
-        setErrorMsg('Please set up your delivery address first');
+        setErrorMsg(t('cart.setAddressFirst'));
         setIsLoading(false);
         navigate('/address-setup');
         return;
@@ -109,7 +111,7 @@ const CartPage: React.FC = () => {
       const cartResponse = await createCart(cartRequest);
       
       if (!cartResponse || !cartResponse.id) {
-        throw new Error('Failed to create cart');
+        throw new Error(t('cart.failedToCreateCart'));
       }
       
       console.log('Cart created successfully:', cartResponse);
@@ -119,7 +121,7 @@ const CartPage: React.FC = () => {
       const cartDetail = await getCart(cartId);
       
       if (!cartDetail || !cartDetail.orderId) {
-        throw new Error('Failed to get order ID');
+        throw new Error(t('cart.failedToGetOrderId'));
       }
       
       console.log('Order ID retrieved successfully:', cartDetail.orderId);
@@ -129,7 +131,7 @@ const CartPage: React.FC = () => {
     } catch (error) {
       // 에러 처리
       console.error('Checkout error:', error);
-      setErrorMsg(error instanceof Error ? error.message : 'Failed to proceed to checkout');
+      setErrorMsg(error instanceof Error ? error.message : t('cart.checkoutFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -139,15 +141,15 @@ const CartPage: React.FC = () => {
   if (!cart || cart.items.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <BackHeader title="Your Cart" />
+        <BackHeader title={t('nav.cart')} />
         <div className="flex flex-col items-center justify-center h-[calc(100vh-120px)] px-6 text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">Your cart is empty</h2>
-          <p className="text-gray-500 mb-8">Add some delicious items from our restaurants!</p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-3">{t('cart.empty')}</h2>
+          <p className="text-gray-500 mb-8">{t('cart.addItems')}</p>
           <button
             onClick={navigateToRestaurants}
             className="bg-red-500 text-white py-3 px-6 rounded-md font-medium hover:bg-red-600 transition-colors"
           >
-            Browse Restaurants
+            {t('cart.browseRestaurants')}
           </button>
         </div>
         <NavigationBar />
@@ -158,7 +160,7 @@ const CartPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* GNB */}
-      <BackHeader title="Cart" />
+      <BackHeader title={t('nav.cart')} />
       
       <main className="px-4 pb-36">
         {/* 가게 정보 */}
@@ -197,7 +199,7 @@ const CartPage: React.FC = () => {
                   <div>
                     <h3 className="text-lg font-medium mb-1 text-left line-clamp-2 text-gray-800">{item.name}</h3>
                     <span className="text-base font-medium text-left text-gray-900 block">{formatPrice(item.price)}</span>
-                    <span className="text-xs text-left text-gray-500 block">(per 1 piece)</span>
+                    <span className="text-xs text-left text-gray-500 block">{t('cart.perPiece')}</span>
                   </div>
                 </div>
                 
@@ -205,7 +207,7 @@ const CartPage: React.FC = () => {
                 <button
                   className="absolute right-4 top-4 text-gray-400 hover:text-gray-500"
                   onClick={() => handleRemoveItem(item.id)}
-                  aria-label={`Remove ${item.name} from cart`}
+                  aria-label={`${t('cart.remove')} ${item.name}`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                     <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
@@ -217,7 +219,7 @@ const CartPage: React.FC = () => {
                   <button
                     className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-full bg-white text-gray-700"
                     onClick={() => decreaseQuantity(item.id, item.quantity)}
-                    aria-label={`Decrease quantity of ${item.name}`}
+                    aria-label={`${t('cart.decrease')} ${item.name}`}
                   >
                     <span className="text-xl font-medium">−</span>
                   </button>
@@ -225,7 +227,7 @@ const CartPage: React.FC = () => {
                   <button
                     className="w-10 h-10 flex items-center justify-center border rounded-full bg-red-500 text-white border-red-500"
                     onClick={() => increaseQuantity(item.id, item.quantity)}
-                    aria-label={`Increase quantity of ${item.name}`}
+                    aria-label={`${t('cart.increase')} ${item.name}`}
                   >
                     <span className="text-xl font-medium">+</span>
                   </button>
@@ -237,27 +239,27 @@ const CartPage: React.FC = () => {
         
         {/* 주문 요약 */}
         <div className="bg-white p-5 mb-4 rounded-lg shadow-sm">
-          <h3 className="text-lg font-medium mb-4 text-left text-gray-800">Order Summary</h3>
+          <h3 className="text-lg font-medium mb-4 text-left text-gray-800">{t('cart.orderSummary')}</h3>
           
           <div className="space-y-4 mb-4">
             <div className="flex justify-between items-center">
-              <p className="text-gray-600">Subtotal</p>
+              <p className="text-gray-600">{t('cart.subtotal')}</p>
               <p className="font-medium text-gray-800">{formatPrice(subtotal)}</p>
             </div>
             
             <div className="flex justify-between items-center">
-              <p className="text-gray-600">Delivery Fee</p>
+              <p className="text-gray-600">{t('cart.deliveryFee')}</p>
               <p className="font-medium text-gray-800">{formatPrice(DELIVERY_FEE)}</p>
             </div>
             
             <div className="flex justify-between items-center">
-              <p className="text-gray-600">Proxy Ordering Fee</p>
+              <p className="text-gray-600">{t('cart.proxyFee')}</p>
               <p className="font-medium text-gray-800">{formatPrice(PROXY_FEE)}</p>
             </div>
           </div>
           
           <div className="border-t border-gray-200 pt-4 flex justify-between items-center">
-            <p className="font-medium text-lg text-gray-900">Total</p>
+            <p className="font-medium text-lg text-gray-900">{t('cart.total')}</p>
             <p className="font-semibold text-lg text-gray-900">{formatPrice(total)}</p>
           </div>
         </div>
@@ -267,7 +269,7 @@ const CartPage: React.FC = () => {
       <div className="fixed bottom-[60px] left-0 right-0 p-4 bg-white shadow-lg z-10">
         {!deliveryAvailable && (
           <div className="mb-2 text-center text-sm text-red-500 font-medium">
-            Add {formatPrice(amountToMinOrder)} more to order
+            {t('cart.addMore')} {formatPrice(amountToMinOrder)} {t('cart.toOrder')}
           </div>
         )}
         {errorMsg && (
@@ -284,7 +286,7 @@ const CartPage: React.FC = () => {
           onClick={handleCheckout}
           disabled={!deliveryAvailable || isLoading}
         >
-          {isLoading ? 'Processing...' : 'Proceed to Checkout'}
+          {isLoading ? t('cart.processing') : t('cart.proceedToCheckout')}
         </button>
       </div>
       
