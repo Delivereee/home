@@ -6,10 +6,12 @@ import { getCurrentPosition, reverseGeocode, getIpBasedLocation } from '../servi
 import { showChannelTalk, trackChannelTalkEvent } from '../services/ChannelService';
 import NaverMap from '../components/NaverMap';
 import { createAddress, CreateAddressRequest } from '../api/addressService';
+import useTranslation from '../hooks/useTranslation';
 
 const AddressSetupPage: React.FC = () => {
   const navigate = useNavigate();
   const { address, setAddress, setAddressId } = useAddress();
+  const { t } = useTranslation(); // 다국어 처리 훅 사용
   
   const [mainAddress, setMainAddress] = useState('');
   const [detailAddress, setDetailAddress] = useState('');
@@ -28,17 +30,17 @@ const AddressSetupPage: React.FC = () => {
     
     // 비어 있는지 확인
     if (trimmedAddress.length === 0) {
-      return { isValid: false, message: 'Main address is required' };
+      return { isValid: false, message: t('address.required') };
     }
     
     // 너무 짧은지 확인 (최소 8자)
     if (trimmedAddress.length < 8) {
-      return { isValid: false, message: 'Address is too short, please enter a complete address' };
+      return { isValid: false, message: t('address.tooShort') };
     }
     
     // 숫자가 포함되어 있는지 확인 (대부분의 주소에는 숫자가 포함됨)
     if (!/\d/.test(trimmedAddress)) {
-      return { isValid: false, message: 'Address should include a number (building or street number)' };
+      return { isValid: false, message: t('address.missingNumber') };
     }
     
     return { isValid: true, message: null };
@@ -171,7 +173,7 @@ const AddressSetupPage: React.FC = () => {
     }
     
     if (!detailAddress.trim()) {
-      alert("Please enter your detail address");
+      alert(t('address.detailRequired'));
       return;
     }
 
@@ -214,7 +216,7 @@ const AddressSetupPage: React.FC = () => {
       navigate('/');
     } catch (error) {
       console.error('Error saving address:', error);
-      alert('Failed to save address. Please try again.');
+      alert(t('address.saveFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -232,7 +234,7 @@ const AddressSetupPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header with back button */}
-      <BackHeader title="Address Setup" />
+      <BackHeader title={t('address.setup')} />
       
       <div className="flex-1 px-4 py-4 pb-20">
         {/* Main container */}
@@ -240,7 +242,7 @@ const AddressSetupPage: React.FC = () => {
           {/* Main Address Section */}
           <div className="mb-5">
             <label htmlFor="mainAddress" className="text-base font-medium text-gray-700 flex items-center mb-2">
-              Main Address
+              {t('address.main')}
               <span className="text-red-500 ml-1">*</span>
             </label>
             
@@ -271,7 +273,7 @@ const AddressSetupPage: React.FC = () => {
           {/* Detail Address Section */}
           <div className="mb-5">
             <label htmlFor="detailAddress" className="text-base font-medium text-gray-700 flex items-center mb-2">
-              Detail Address
+              {t('address.detail')}
               <span className="text-red-500 ml-1">*</span>
             </label>
             
@@ -289,13 +291,13 @@ const AddressSetupPage: React.FC = () => {
             />
             
             {touched.detailAddress && !isDetailAddressValid && (
-              <p className="text-red-500 text-sm mt-1">Detail address is required</p>
+              <p className="text-red-500 text-sm mt-1">{t('address.detailRequired')}</p>
             )}
           </div>
-          
+
           {/* Use GPS Button */}
           <div className="mb-5">
-            <button
+            <button 
               type="button"
               onClick={handleUseGPS}
               disabled={isLoading}
@@ -316,69 +318,69 @@ const AddressSetupPage: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               )}
-              <span className="text-gray-700">{isLoading ? 'Loading...' : 'Use GPS'}</span>
+              <span className="text-gray-700">{isLoading ? 'Loading...' : t('address.useGPS')}</span>
             </button>
           </div>
-          
-          {/* 지도 표시 */}
-          {showMap && currentLocation && (
-            <div className="mb-5">
-              <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
-                <div className="relative" style={{ minHeight: '300px' }}>
-                  <NaverMap
-                    initialCenter={currentLocation}
-                    onLocationSelect={handleLocationSelect}
-                    height="300px"
-                    zoom={19}
-                  />
-                </div>
+        </div>
+
+        {/* 지도 표시 */}
+        {showMap && currentLocation && (
+          <div className="mb-5">
+            <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
+              <div className="relative" style={{ minHeight: '300px' }}>
+                <NaverMap 
+                  initialCenter={currentLocation}
+                  onLocationSelect={handleLocationSelect}
+                  height="300px"
+                  zoom={19}
+                />
               </div>
             </div>
-          )}
-          
-          {/* 대체 주소 입력 방법 
-          <div className="flex flex-col mb-5">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-gray-500 text-sm">Or enter address using:</span>
-            </div>
-            <button
-              type="button"
-              onClick={handleUploadBooking}
-              className="w-full flex justify-center items-center gap-2 py-3 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 shadow-sm"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-              <span>Upload Booking Confirmation</span>
-            </button>
-          </div> */}
-          
-          {/* 저장 버튼 */}
-          <div className="mt-6">
-            <button
-              type="button"
-              onClick={handleSaveAddress}
-              disabled={isLoading}
-              className={`w-full py-3 rounded-lg font-semibold text-white ${
-                isLoading || (!isFormValid && touched.mainAddress && touched.detailAddress && !mainAddress.includes('Latitude:'))
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
-              } transition-all duration-150 shadow-sm`}
-            >
-              Save Address
-            </button>
           </div>
-          
-          {/* Help link */}
-          <div className="mt-4 flex justify-center">
-            <button
-              type="button"
-              onClick={handleOpenHelp}
-              className="text-sm text-blue-600 hover:text-blue-800 hover:underline focus:outline-none"
-            >
-              Need help with your address?
-            </button>
+        )}
+        
+        {/* 대체 주소 입력 방법 */}
+        <div className="flex flex-col mb-5">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-gray-500 text-sm">Or enter address using:</span>
           </div>
+          <button
+            type="button"
+            onClick={handleUploadBooking}
+            className="w-full flex justify-center items-center gap-2 py-3 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 shadow-sm"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <span>{t('address.uploadBooking')}</span>
+          </button>
+        </div>
+        
+        {/* 저장 버튼 */}
+        <div className="mt-6">
+          <button
+            type="button"
+            onClick={handleSaveAddress}
+            disabled={isLoading}
+            className={`w-full py-3 rounded-lg font-semibold text-white ${
+              isLoading || (!isFormValid && touched.mainAddress && touched.detailAddress && !mainAddress.includes('Latitude:'))
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
+            } transition-all duration-150 shadow-sm`}
+          >
+            {t('address.save')}
+          </button>
+        </div>
+        
+        {/* Help link */}
+        <div className="mt-4 flex justify-center">
+          <button
+            type="button"
+            onClick={handleOpenHelp}
+            className="text-sm text-blue-600 hover:text-blue-800 hover:underline focus:outline-none"
+          >
+            {t('address.help')}
+          </button>
         </div>
       </div>
       
@@ -388,14 +390,14 @@ const AddressSetupPage: React.FC = () => {
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
-          <span className="text-xs text-gray-500 mt-1">Home</span>
+          <span className="text-xs text-gray-500 mt-1">{t('nav.home')}</span>
         </button>
         
         <button className="flex flex-col items-center justify-center py-1 focus:outline-none" onClick={() => navigate('/restaurants')}>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
-          <span className="text-xs text-gray-500 mt-1">Browse</span>
+          <span className="text-xs text-gray-500 mt-1">{t('nav.browse')}</span>
         </button>
         
         <button className="flex flex-col items-center justify-center py-1 focus:outline-none" onClick={() => navigate('/address')}>
@@ -403,14 +405,14 @@ const AddressSetupPage: React.FC = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          <span className="text-xs text-red-500 mt-1">Address</span>
+          <span className="text-xs text-red-500 mt-1">{t('header.setAddress')}</span>
         </button>
         
         <button className="flex flex-col items-center justify-center py-1 focus:outline-none" onClick={() => navigate('/cart')}>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
-          <span className="text-xs text-gray-500 mt-1">Cart</span>
+          <span className="text-xs text-gray-500 mt-1">{t('nav.cart')}</span>
         </button>
       </div>
     </div>

@@ -80,6 +80,11 @@ export const setLanguage = (language: SupportedLanguage): void => {
     try {
       // 선택한 언어 설정 저장
       localStorage.setItem('app_language', language);
+      
+      // 언어 변경 이벤트 발생 - 모든 컴포넌트에 변경 알림
+      const event = new CustomEvent('language-changed', { detail: { language } });
+      window.dispatchEvent(event);
+      
       console.log(`언어가 변경되었습니다: ${language}`);
     } catch (error) {
       console.error('언어 설정 저장 실패:', error);

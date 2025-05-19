@@ -14,10 +14,10 @@ const translations: Record<string, TranslationItem> = {
   // 공통 텍스트
   'app.name': {
     en: 'Deliver Eats Easy',
-    ko: '딜리버이츠 이지',
-    ja: 'デリバーイーツイージー',
-    'zh-CN': '送餐易',
-    'zh-TW': '送餐易'
+    ko: 'Deliver Eats Easy',
+    ja: 'Deliver Eats Easy',
+    'zh-CN': 'Deliver Eats Easy',
+    'zh-TW': 'Deliver Eats Easy'
   },
   'app.tagline': {
     en: 'Food delivery made easy',
@@ -135,7 +135,93 @@ const translations: Record<string, TranslationItem> = {
     ja: 'プロフィール',
     'zh-CN': '个人资料',
     'zh-TW': '個人資料'
-  }
+  },
+  
+  // 주소 설정 페이지
+  'address.setup': {
+    en: 'Address Setup',
+    ko: '주소 설정',
+    ja: '住所設定',
+    'zh-CN': '地址设置',
+    'zh-TW': '地址設置'
+  },
+  'address.main': {
+    en: 'Main Address',
+    ko: '기본 주소',
+    ja: '主な住所',
+    'zh-CN': '主要地址',
+    'zh-TW': '主要地址'
+  },
+  'address.detail': {
+    en: 'Detail Address',
+    ko: '상세 주소',
+    ja: '詳細住所',
+    'zh-CN': '详细地址',
+    'zh-TW': '詳細地址'
+  },
+  'address.useGPS': {
+    en: 'Use Current Location',
+    ko: '현재 위치 사용하기',
+    ja: '現在位置を使用する',
+    'zh-CN': '使用当前位置',
+    'zh-TW': '使用當前位置'
+  },
+  'address.uploadBooking': {
+    en: 'Upload Booking Confirmation',
+    ko: '예약 확인서 업로드',
+    ja: '予約確認書をアップロード',
+    'zh-CN': '上传预订确认',
+    'zh-TW': '上傳預訂確認'
+  },
+  'address.save': {
+    en: 'Save Address',
+    ko: '주소 저장',
+    ja: '住所を保存',
+    'zh-CN': '保存地址',
+    'zh-TW': '保存地址'
+  },
+  'address.help': {
+    en: 'Need Help?',
+    ko: '도움이 필요하신가요?',
+    ja: 'お手伝いが必要ですか？',
+    'zh-CN': '需要帮助？',
+    'zh-TW': '需要幫助？'
+  },
+  'address.required': {
+    en: 'Main address is required',
+    ko: '기본 주소는 필수입니다',
+    ja: '主な住所は必須です',
+    'zh-CN': '主要地址为必填项',
+    'zh-TW': '主要地址為必填項'
+  },
+  'address.tooShort': {
+    en: 'Address is too short, please enter a complete address',
+    ko: '주소가 너무 짧습니다. 전체 주소를 입력해주세요',
+    ja: '住所が短すぎます。完全な住所を入力してください',
+    'zh-CN': '地址太短，请输入完整地址',
+    'zh-TW': '地址太短，請輸入完整地址'
+  },
+  'address.missingNumber': {
+    en: 'Address should include a number (building or street number)',
+    ko: '주소에는 번호(건물 또는 도로 번호)가 포함되어야 합니다',
+    ja: '住所には番号（建物または街路番号）を含める必要があります',
+    'zh-CN': '地址应包含数字（建筑物或街道号码）',
+    'zh-TW': '地址應包含數字（建築物或街道號碼）'
+  },
+  'address.detailRequired': {
+    en: 'Please enter your detail address',
+    ko: '상세 주소를 입력해주세요',
+    ja: '詳細住所を入力してください',
+    'zh-CN': '请输入您的详细地址',
+    'zh-TW': '請輸入您的詳細地址'
+  },
+  'address.saveFailed': {
+    en: 'Failed to save address. Please try again.',
+    ko: '주소 저장에 실패했습니다. 다시 시도해주세요.',
+    ja: '住所の保存に失敗しました。もう一度お試しください。',
+    'zh-CN': '保存地址失败。请重试。',
+    'zh-TW': '保存地址失敗。請重試。'
+  },
 };
 
 /**
