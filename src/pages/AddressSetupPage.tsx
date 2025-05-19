@@ -4,6 +4,7 @@ import BackHeader from '../components/BackHeader';
 import { useAddress } from '../contexts/AddressContext';
 import { getCurrentPosition, reverseGeocode, getIpBasedLocation } from '../services/LocationService';
 import { showChannelTalk, trackChannelTalkEvent } from '../services/ChannelService';
+import NaverMap from '../components/NaverMap';
 
 const AddressSetupPage: React.FC = () => {
   const navigate = useNavigate();
@@ -17,7 +18,9 @@ const AddressSetupPage: React.FC = () => {
     mainAddress: false,
     detailAddress: false
   });
-
+  const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showMap, setShowMap] = useState(false);
+  
   // 유효성 검사 상태와 유효성 검사 함수
   const validateMainAddress = (address: string): { isValid: boolean; message: string | null } => {
     const trimmedAddress = address.trim();
@@ -103,6 +106,10 @@ const AddressSetupPage: React.FC = () => {
       
       console.log('위치 정보 가져오기 성공:', position);
       
+      // 위치 정보 저장 및 지도 표시
+      setCurrentLocation(position);
+      setShowMap(true);
+      
       // OpenStreetMap Nominatim API를 사용하여 좌표를 주소로 변환
       const geoAddress = await reverseGeocode(position.lng, position.lat);
       console.log('변환된 주소:', geoAddress);
@@ -158,6 +165,30 @@ const AddressSetupPage: React.FC = () => {
     }
   };
 
+  // 지도에서 위치가 선택되었을 때 호출되는 핸들러
+  const handleLocationSelect = async (location: { lat: number; lng: number }) => {
+    console.log('지도에서 위치 선택:', location);
+    setCurrentLocation(location);
+    
+    // 선택된 위치의 주소 변환
+    try {
+      const geoAddress = await reverseGeocode(location.lng, location.lat);
+      
+      if (geoAddress) {
+        setMainAddress(geoAddress);
+      } else {
+        const coordsText = `Latitude: ${location.lat.toFixed(5)}, Longitude: ${location.lng.toFixed(5)}`;
+        setMainAddress(coordsText);
+      }
+      
+      setTouched(prev => ({ ...prev, mainAddress: true }));
+    } catch (error) {
+      console.error('선택한 위치의 주소 변환 실패:', error);
+      const coordsText = `Latitude: ${location.lat.toFixed(5)}, Longitude: ${location.lng.toFixed(5)}`;
+      setMainAddress(coordsText);
+    }
+  };
+
   const handleUploadBooking = () => {
     // 실제 구현에서는 파일 업로드 및 OCR 서비스를 사용하여 이미지에서 주소 추출
     alert("This feature would extract address from a booking confirmation in a real implementation.");
@@ -185,11 +216,12 @@ const AddressSetupPage: React.FC = () => {
       return;
     }
 
-    // 주소 정보 저장
+    // 주소 정보 저장 (위도/경도 정보 추가)
     setAddress({
       mainAddress: mainAddress.trim(),
       detailAddress: detailAddress.trim(),
-      isComplete: true // GPS 좌표 또는 유효한 주소와 상세 주소가 있으면 완료 상태로 간주
+      isComplete: true,
+      ...(currentLocation && { lat: currentLocation.lat, lng: currentLocation.lng })
     });
 
     // 홈으로 이동
@@ -251,38 +283,50 @@ const AddressSetupPage: React.FC = () => {
               id="mainAddress"
               value={mainAddress}
               onChange={handleMainAddressChange}
+              className={`w-full border ${
+                touched.mainAddress && !isMainAddressValid && !mainAddress.includes('Latitude:')
+                  ? 'border-red-500 focus:ring-red-200'
+                  : 'border-gray-300 focus:ring-blue-200'
+              } rounded-lg p-3 text-gray-800 focus:outline-none focus:ring-2 transition-all duration-200`}
               placeholder="Enter your address"
-              className={`w-full p-3 border ${
-                !touched.mainAddress 
-                  ? 'border-gray-300'
-                  : isMainAddressValid 
-                    ? 'border-green-500' 
-                    : 'border-red-500'
-              } rounded-lg focus:outline-none focus:ring-1 ${
-                isMainAddressValid ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500'
-              } transition-all duration-150 placeholder-gray-400`}
-              aria-invalid={touched.mainAddress && !isMainAddressValid}
             />
             
-            {touched.mainAddress && !isMainAddressValid && (
-              <div className="mt-1 text-red-500 text-sm">
-                {mainAddressValidation.message}
-              </div>
+            {touched.mainAddress && !isMainAddressValid && !mainAddress.includes('Latitude:') && (
+              <p className="text-red-500 text-sm mt-1">{mainAddressValidation.message}</p>
             )}
             
             {locationError && (
-              <div className="mt-2 text-yellow-600 text-sm flex items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <span>{locationError}</span>
-              </div>
+              <p className="text-amber-600 text-sm mt-1 bg-amber-50 p-2 rounded border border-amber-200">
+                {locationError}
+              </p>
             )}
           </div>
           
-          {/* Detail Address Section - Smaller font size and left aligned */}
-          <div>
-            <label htmlFor="detailAddress" className="block text-sm font-medium text-gray-600 mb-2 text-left flex items-center">
+          {/* 네이버 지도 섹션 - GPS로 위치를 가져온 경우에만 표시 */}
+          {showMap && currentLocation && (
+            <div className="mb-5">
+              <h3 className="text-base font-medium text-gray-700 mb-2">
+                Select Exact Location
+              </h3>
+              <div className="rounded-lg overflow-hidden border border-gray-300 shadow-sm">
+                <NaverMap 
+                  initialCenter={currentLocation}
+                  onLocationSelect={handleLocationSelect}
+                  width="100%"
+                  height="250px"
+                  zoom={17}
+                  markerDraggable={true}
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Drag the marker to adjust your exact location or tap on the map.
+              </p>
+            </div>
+          )}
+          
+          {/* Detail Address Section */}
+          <div className="mb-5">
+            <label htmlFor="detailAddress" className="text-base font-medium text-gray-700 flex items-center mb-2">
               Detail Address
               <span className="text-red-500 ml-1">*</span>
             </label>
@@ -291,72 +335,64 @@ const AddressSetupPage: React.FC = () => {
               id="detailAddress"
               value={detailAddress}
               onChange={handleDetailAddressChange}
-              placeholder="e.g. Room 301, 123 Hongdae-ro"
-              className={`w-full p-3 border ${
-                !touched.detailAddress 
-                  ? 'border-gray-300'
-                  : isDetailAddressValid 
-                    ? 'border-green-500' 
-                    : 'border-red-500'
-              } rounded-lg focus:outline-none focus:ring-1 ${
-                isDetailAddressValid ? 'focus:ring-green-500 focus:border-green-500' : 'focus:ring-red-500 focus:border-red-500'
-              } transition-all duration-150 resize-none h-28 placeholder-gray-400`}
-              aria-invalid={touched.detailAddress && !isDetailAddressValid}
-            />
+              rows={3}
+              className={`w-full border ${
+                touched.detailAddress && !isDetailAddressValid
+                  ? 'border-red-500 focus:ring-red-200'
+                  : 'border-gray-300 focus:ring-blue-200'
+              } rounded-lg p-3 text-gray-800 focus:outline-none focus:ring-2 transition-all duration-200`}
+              placeholder="Enter apartment number, building name, floor, etc."
+            ></textarea>
             
             {touched.detailAddress && !isDetailAddressValid && (
-              <div className="mt-1 text-red-500 text-sm">
-                Detail address is required
-              </div>
+              <p className="text-red-500 text-sm mt-1">Detail address is required</p>
             )}
           </div>
-        </div>
-        
-        {/* Upload Booking Screenshot Section */}
-        <div className="rounded-lg border border-gray-200 p-5 mb-6 bg-white shadow-sm">
-          <button
-            type="button"
-            onClick={handleUploadBooking}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-all duration-150 mb-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <span className="text-base font-medium text-gray-700">Upload Booking Screenshot (OCR)</span>
-          </button>
           
-          <p className="text-center text-gray-500 text-sm">
-            Upload your hotel booking confirmation to extract address automatically
-          </p>
+          {/* 대체 주소 입력 방법 
+          <div className="flex flex-col mb-5">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-gray-500 text-sm">Or enter address using:</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleUploadBooking}
+              className="w-full flex justify-center items-center gap-2 py-3 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 shadow-sm"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <span>Upload Booking Confirmation</span>
+            </button>
+          </div> */}
+          
+          {/* 저장 버튼 */}
+          <div className="mt-6">
+            <button
+              type="button"
+              onClick={handleSaveAddress}
+              disabled={isLoading}
+              className={`w-full py-3 rounded-lg font-semibold text-white ${
+                isLoading || (!isFormValid && touched.mainAddress && touched.detailAddress && !mainAddress.includes('Latitude:'))
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
+              } transition-all duration-150 shadow-sm`}
+            >
+              Save Address
+            </button>
+          </div>
+          
+          {/* Help link */}
+          <div className="mt-4 flex justify-center">
+            <button
+              type="button"
+              onClick={handleOpenHelp}
+              className="text-sm text-blue-600 hover:text-blue-800 hover:underline focus:outline-none"
+            >
+              Need help with your address?
+            </button>
+          </div>
         </div>
-        
-        {/* 도움말 링크 추가 */}
-        <div className="text-center mb-6">
-          <button 
-            type="button" 
-            onClick={handleOpenHelp}
-            className="text-blue-500 text-sm font-medium hover:underline flex items-center justify-center mx-auto"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Having trouble with your address? Chat with our support!
-          </button>
-        </div>
-        
-        {/* Save Address Button - Updated to Material Design style */}
-        <button
-          type="button"
-          onClick={handleSaveAddress}
-          className={`w-full py-3.5 ${
-            isFormValid 
-              ? 'bg-red-500 hover:bg-red-600 active:bg-red-700'
-              : 'bg-red-300 cursor-not-allowed'
-          } text-white rounded-lg font-medium transition-all duration-150 shadow-md focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2`}
-        >
-          Save Address
-        </button>
       </div>
       
       {/* Navigation Bar */}

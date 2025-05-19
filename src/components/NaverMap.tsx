@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { initNaverMaps } from '../utils/naverMapsLoader';
 
 interface NaverMapProps {
   initialCenter?: { lat: number; lng: number };
@@ -23,104 +22,123 @@ const NaverMap: React.FC<NaverMapProps> = ({
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapInstance, setMapInstance] = useState<any>(null);
   const [marker, setMarker] = useState<any>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
+  const clickListenerRef = useRef<any>(null);
+  const markerDragListenerRef = useRef<any>(null);
 
   // 맵 초기화
   useEffect(() => {
-    let isMounted = true;
-    
-    const initMap = async () => {
-      try {
-        if (!mapRef.current) return;
-        
-        // SDK 로드
-        const isSDKLoaded = await initNaverMaps();
-        if (!isSDKLoaded) {
-          setMapError('네이버 맵스 SDK를 로드하지 못했습니다.');
-          return;
-        }
-        
-        if (!isMounted) return;
-        
-        // naver 객체 사용 가능 여부 다시 확인
-        if (!window.naver || !window.naver.maps) {
-          console.error('Naver Maps 객체가 로드되지 않았습니다');
-          setMapError('네이버 맵스가 정상적으로 로드되지 않았습니다.');
-          return;
-        }
+    // DOM 요소가 없으면 초기화하지 않음
+    if (!mapRef.current) return;
 
-        console.log('지도 생성 시작:', {
-          ref: mapRef.current,
-          naverExists: !!window.naver,
-          mapsExists: !!(window.naver && window.naver.maps)
+    // naver 객체가 없으면 에러 표시
+    if (typeof window.naver === 'undefined' || !window.naver.maps) {
+      console.error('Naver 객체가 존재하지 않습니다. 네이버 맵 스크립트가 로드되었는지 확인하세요.');
+      setMapError('네이버 맵스 SDK를 로드하지 못했습니다.');
+      return;
+    }
+
+    let map: any = null;
+    let mapMarker: any = null;
+
+    try {
+      console.log('지도 생성 시작:', initialCenter);
+
+      // 지도 생성
+      map = new window.naver.maps.Map(mapRef.current, {
+        center: new window.naver.maps.LatLng(initialCenter.lat, initialCenter.lng),
+        zoom: zoom,
+        draggable: draggable,
+        zoomControl: true,
+        zoomControlOptions: {
+          position: window.naver.maps.Position.TOP_RIGHT
+        }
+      });
+      
+      console.log('지도 생성 완료');
+      
+      // 마커 생성
+      mapMarker = new window.naver.maps.Marker({
+        position: new window.naver.maps.LatLng(initialCenter.lat, initialCenter.lng),
+        map: map,
+        draggable: markerDraggable,
+      });
+      
+      console.log('마커 생성 완료');
+      
+      // 마커 드래그 이벤트
+      if (markerDraggable && onLocationSelect) {
+        markerDragListenerRef.current = window.naver.maps.Event.addListener(mapMarker, 'dragend', () => {
+          const position = mapMarker.getPosition();
+          const location = {
+            lat: position.lat(),
+            lng: position.lng()
+          };
+          console.log('마커 드래그:', location);
+          onLocationSelect(location);
+        });
+      }
+      
+      // 지도 클릭 이벤트
+      clickListenerRef.current = window.naver.maps.Event.addListener(map, 'click', (e: any) => {
+        if (!mapMarker) return;
+        
+        const clickedPos = e.coord;
+        console.log('지도 클릭:', {
+          lat: clickedPos.lat(),
+          lng: clickedPos.lng()
         });
         
-        // naver 객체를 any로 캐스팅
-        const naverMaps = (window.naver as any).maps;
+        mapMarker.setPosition(clickedPos);
         
-        // 지도 생성
-        const map = new naverMaps.Map(mapRef.current, {
-          center: new naverMaps.LatLng(initialCenter.lat, initialCenter.lng),
-          zoom: zoom,
-          draggable: draggable,
-          zoomControl: true,
-          zoomControlOptions: {
-            position: 'TOP_RIGHT'
-          }
-        });
-        
-        // 마커 생성
-        const mapMarker = new naverMaps.Marker({
-          position: new naverMaps.LatLng(initialCenter.lat, initialCenter.lng),
-          map: map,
-          draggable: markerDraggable,
-        });
-        
-        // 마커 드래그 이벤트
-        if (markerDraggable && onLocationSelect) {
-          naverMaps.Event.addListener(mapMarker, 'dragend', () => {
-            const position = mapMarker.getPosition();
-            onLocationSelect({
-              lat: position.lat(),
-              lng: position.lng()
-            });
+        if (onLocationSelect) {
+          onLocationSelect({
+            lat: clickedPos.lat(),
+            lng: clickedPos.lng()
           });
         }
-        
-        // 지도 클릭 이벤트
-        naverMaps.Event.addListener(map, 'click', (e: any) => {
-          if (!mapMarker) return;
-          
-          const clickedPos = e.coord;
-          mapMarker.setPosition(clickedPos);
-          
-          if (onLocationSelect) {
-            onLocationSelect({
-              lat: clickedPos.lat(),
-              lng: clickedPos.lng()
-            });
-          }
-        });
-
-        setMapInstance(map);
-        setMarker(mapMarker);
-        setMapLoaded(true);
-      } catch (error) {
-        console.error('Failed to initialize Naver Map:', error);
-        if (isMounted) {
-          setMapError('지도를 초기화하는 중 오류가 발생했습니다.');
-        }
-      }
-    };
-
-    initMap();
+      });
+      
+      setMapInstance(map);
+      setMarker(mapMarker);
+    } catch (error) {
+      console.error('지도 초기화 중 오류 발생:', error);
+      setMapError('지도를 초기화하는 중 오류가 발생했습니다.');
+    }
     
+    // 컴포넌트 언마운트 시 정리 작업
     return () => {
-      isMounted = false;
-      if (mapInstance) {
-        // 지도 인스턴스 정리
-        mapInstance.destroy();
+      // 이벤트 리스너 제거
+      try {
+        if (clickListenerRef.current && window.naver && window.naver.maps) {
+          window.naver.maps.Event.removeListener(clickListenerRef.current);
+          clickListenerRef.current = null;
+        }
+        
+        if (markerDragListenerRef.current && window.naver && window.naver.maps) {
+          window.naver.maps.Event.removeListener(markerDragListenerRef.current);
+          markerDragListenerRef.current = null;
+        }
+        
+        // 마커 제거
+        if (mapMarker) {
+          mapMarker.setMap(null);
+        }
+        
+        // 맵 제거 - 맵 인스턴스가 있을 때만 수행
+        if (map) {
+          try {
+            // 명시적으로 모든 이벤트 리스너 제거 시도
+            if (window.naver && window.naver.maps && window.naver.maps.Event) {
+              window.naver.maps.Event.clearListeners(map);
+            }
+            map.destroy();
+          } catch (error) {
+            console.error('지도 정리 중 오류 발생:', error);
+          }
+        }
+      } catch (e) {
+        console.error('이벤트 리스너 정리 중 오류 발생:', e);
       }
     };
   }, [initialCenter, zoom, draggable, markerDraggable, onLocationSelect]);
@@ -128,10 +146,13 @@ const NaverMap: React.FC<NaverMapProps> = ({
   // initialCenter가 변경된 경우 지도와 마커 위치 업데이트
   useEffect(() => {
     if (mapInstance && marker && window.naver) {
-      const naverMaps = (window.naver as any).maps;
-      const position = new naverMaps.LatLng(initialCenter.lat, initialCenter.lng);
-      mapInstance.setCenter(position);
-      marker.setPosition(position);
+      try {
+        const position = new window.naver.maps.LatLng(initialCenter.lat, initialCenter.lng);
+        mapInstance.setCenter(position);
+        marker.setPosition(position);
+      } catch (error) {
+        console.error('지도 중심 업데이트 중 오류:', error);
+      }
     }
   }, [initialCenter, mapInstance, marker]);
 
@@ -152,26 +173,6 @@ const NaverMap: React.FC<NaverMapProps> = ({
         }}
       >
         <p>{mapError}</p>
-      </div>
-    );
-  }
-
-  // 로딩 상태
-  if (!mapLoaded) {
-    return (
-      <div
-        style={{
-          width,
-          height,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#f5f5f5',
-          border: '1px solid #e0e0e0',
-          borderRadius: '8px'
-        }}
-      >
-        <div className="animate-spin h-8 w-8 border-2 border-gray-500 rounded-full border-t-transparent"></div>
       </div>
     );
   }

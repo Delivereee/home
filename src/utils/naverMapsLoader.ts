@@ -30,8 +30,9 @@ export const isNaverMapsLoaded = (): boolean => {
 };
 
 /**
- * 네이버 맵스 SDK를 동적으로 로드하는 함수
- * @returns Promise - SDK 로드 결과
+ * 네이버 맵스 SDK 체크 및 로드 완료 대기 함수
+ * 이제는 index.html에 직접 스크립트가 포함되어 있으므로 
+ * 로드 여부만 체크하고 Promise를 리턴합니다.
  */
 export const loadNaverMapsScript = (): Promise<boolean> => {
   // 이미 로드되었으면 즉시 완료
@@ -47,91 +48,40 @@ export const loadNaverMapsScript = (): Promise<boolean> => {
     return mapLoadStatus.loadPromise;
   }
 
-  // 새로운 로딩 시작
-  console.log('Starting to load Naver Maps SDK');
+  // 로딩 상태로 변경
   mapLoadStatus.isLoading = true;
   
-  // 기존 스크립트 제거 (중복 방지)
-  const existingScript = document.querySelector('script[src*="openapi.map.naver.com"]');
-  if (existingScript) {
-    console.log('Removing existing Naver Maps script');
-    existingScript.remove();
-  }
-  
+  // index.html에 스크립트가 이미 포함되어 있으므로
+  // 로드 완료를 확인하는 Promise를 생성합니다.
   mapLoadStatus.loadPromise = new Promise<boolean>((resolve, reject) => {
-    try {
-      const script = document.createElement('script');
-      const callbackName = `naverMapsCallback_${new Date().getTime()}`;
-      let timeoutId: number | null = null;
-      
-      // 타임아웃 설정
-      timeoutId = window.setTimeout(() => {
-        console.error('Naver Maps SDK loading timed out');
-        delete (window as any)[callbackName];
-        mapLoadStatus.isLoading = false;
-        reject(new Error('Naver Maps SDK loading timed out'));
-      }, NAVER_MAPS_TIMEOUT);
-      
-      // 콜백 함수 정의
-      (window as any)[callbackName] = () => {
-        // 타임아웃 클리어
-        if (timeoutId !== null) {
-          clearTimeout(timeoutId);
-        }
-        
-        // 콜백 정리
-        delete (window as any)[callbackName];
-        
-        // 디버깅을 위한 로그 추가
-        console.log('Naver Maps SDK loaded successfully:', {
-          naverExists: typeof window.naver !== 'undefined',
-          mapsExists: typeof window.naver !== 'undefined' && window.naver.maps !== undefined,
-          geocoderExists: typeof window.naver !== 'undefined' && (window.naver as any).geocoder !== undefined,
-          availableProperties: typeof window.naver !== 'undefined' ? Object.keys(window.naver) : []
-        });
-        
-        // 로드 상태 업데이트
+    // 스크립트 로드 확인을 위한 타이머
+    let checkCount = 0;
+    const maxChecks = 50; // 10초(50 * 200ms) 동안 체크
+    
+    const checkLoaded = () => {
+      if (isNaverMapsLoaded()) {
+        console.log('Naver Maps SDK is now available');
         mapLoadStatus.isLoaded = true;
         mapLoadStatus.isLoading = false;
-        
-        // 실제로 로드되었는지 다시 확인
-        if (isNaverMapsLoaded()) {
-          resolve(true);
-        } else {
-          console.error('Naver Maps SDK callback was called but objects are not available');
-          reject(new Error('Naver Maps SDK objects not available after loading'));
-        }
-      };
-
-      // 스크립트 속성 설정
-      script.type = 'text/javascript';
-      script.async = true;
-      script.defer = true; // defer 추가
-      script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${NAVER_MAPS_CLIENT_ID}&submodules=geocoder&callback=${callbackName}`;
+        resolve(true);
+        return;
+      }
       
-      script.onerror = (event) => {
-        // 오류 시 타임아웃 클리어
-        if (timeoutId !== null) {
-          clearTimeout(timeoutId);
-        }
-        
-        // 오류 시 상태 업데이트
-        console.error('Failed to load Naver Maps SDK:', event);
+      checkCount++;
+      if (checkCount >= maxChecks) {
+        console.error('Naver Maps SDK loading timed out');
         mapLoadStatus.isLoading = false;
         mapLoadStatus.loadPromise = null;
-        reject(new Error('Failed to load Naver Maps SDK'));
-      };
-
-      // 스크립트 추가
-      document.head.appendChild(script);
-      console.log('Naver Maps script added to document head');
-    } catch (error) {
-      // 예외 발생 시 상태 업데이트
-      console.error('Error while setting up Naver Maps SDK loading:', error);
-      mapLoadStatus.isLoading = false;
-      mapLoadStatus.loadPromise = null;
-      reject(error);
-    }
+        reject(new Error('Naver Maps SDK loading timed out'));
+        return;
+      }
+      
+      // 200ms 간격으로 재확인
+      setTimeout(checkLoaded, 200);
+    };
+    
+    // 첫 번째 확인 시작
+    checkLoaded();
   });
 
   return mapLoadStatus.loadPromise;
@@ -143,9 +93,15 @@ export const loadNaverMapsScript = (): Promise<boolean> => {
  */
 export const initNaverMaps = async (): Promise<boolean> => {
   try {
-    console.log('Initializing Naver Maps');
+    // 이미 로드되었으면 즉시 반환
+    if (isNaverMapsLoaded()) {
+      console.log('Naver Maps is already loaded');
+      return true;
+    }
+    
+    console.log('Waiting for Naver Maps to load');
     const result = await loadNaverMapsScript();
-    console.log('Naver Maps initialization result:', result);
+    console.log('Naver Maps initialization result:', result, 'naver object:', window.naver);
     return result;
   } catch (error) {
     console.error('Failed to initialize Naver Maps:', error);

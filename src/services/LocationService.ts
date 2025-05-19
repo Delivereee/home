@@ -49,8 +49,8 @@ interface NaverReverseGeoResponse {
 }
 
 // 네이버 API 키 (참조용으로 유지)
-const NAVER_API_KEY_ID = 'sjwtteaf8b';
-const NAVER_API_KEY = '17oXuPH6IBiBfifTIGdEcLc4D2PlkMNjXNU18KAN';
+const NAVER_API_KEY_ID = 't9urh3v0l9';
+const NAVER_API_KEY = 'uF1arW1RxI9MREhrfQpgfYwmHyoYHR4LE1heWfUz';
 
 /**
  * OpenStreetMap Nominatim API를 사용하여 좌표를 주소로 변환

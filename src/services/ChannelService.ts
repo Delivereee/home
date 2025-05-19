@@ -1,14 +1,5 @@
 // 채널톡 타입 정의
-declare global {
-  interface Window {
-    // 채널톡은 함수로 명령을 보내는 방식으로 동작합니다
-    ChannelIO?: ((command: string, ...args: any[]) => void) & {
-      q?: any[];
-      c?: (args: any[]) => void;
-    };
-    ChannelIOInitialized?: boolean;
-  }
-}
+// Window 인터페이스는 react-app-env.d.ts에서 정의됨
 
 // 채널톡 설정 인터페이스
 export interface ChannelIOSettings {
