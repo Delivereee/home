@@ -106,59 +106,29 @@ const AddressSetupPage: React.FC = () => {
       
       console.log('위치 정보 가져오기 성공:', position);
       
-      // 위치 정보 저장 및 지도 표시
+      // 위치 정보 저장
       setCurrentLocation(position);
-      setShowMap(true);
+      
+      // 약간의 지연 후 지도 표시
+      setTimeout(() => {
+        setShowMap(true);
+      }, 500);
       
       // OpenStreetMap Nominatim API를 사용하여 좌표를 주소로 변환
       const geoAddress = await reverseGeocode(position.lng, position.lat);
       console.log('변환된 주소:', geoAddress);
       
       if (geoAddress) {
-        // API에서 가져온 주소에 쉼표가 없다면 추가
-        let formattedAddress = geoAddress;
-        if (!formattedAddress.includes(',')) {
-          // 공백을 기준으로 주소를 분리하고 콤마로 재구성
-          const parts = formattedAddress.split(' ').filter(Boolean);
-          if (parts.length >= 3) {
-            // 주소 요소가 충분하면 쉼표 추가 (예: "123 Main Street, New York, USA")
-            formattedAddress = [
-              parts.slice(0, Math.ceil(parts.length / 3)).join(' '),
-              parts.slice(Math.ceil(parts.length / 3), Math.ceil(parts.length * 2 / 3)).join(' '),
-              parts.slice(Math.ceil(parts.length * 2 / 3)).join(' ')
-            ].filter(Boolean).join(', ');
-          }
-        }
-        
-        setMainAddress(formattedAddress);
+        setMainAddress(geoAddress);
         setTouched(prev => ({ ...prev, mainAddress: true }));
         console.log('주소 입력 필드 업데이트 완료');
       } else {
-        // 주소를 얻지 못했지만 위치는 얻은 경우, 좌표만 표시
-        const coordsText = `Latitude: ${position.lat.toFixed(5)}, Longitude: ${position.lng.toFixed(5)}`;
-        setMainAddress(coordsText);
-        setTouched(prev => ({ ...prev, mainAddress: true }));
-        setLocationError('Could not find address for your location. Showing coordinates only.');
-        console.log('좌표로 주소 필드 업데이트');
+        // 주소 변환 실패 시 좌표 표시
+        setMainAddress(`Latitude: ${position.lat.toFixed(6)}, Longitude: ${position.lng.toFixed(6)}`);
       }
     } catch (error) {
-      console.error('위치 정보 처리 중 오류:', error);
-      
-      // 사용자에게 적절한 오류 메시지 표시
-      if ((error as GeolocationPositionError)?.code === 1) {
-        // 위치 정보 권한 거부
-        setLocationError('Location access permission denied. Please allow location access to use this feature.');
-      } else if ((error as GeolocationPositionError)?.code === 2) {
-        // 위치 정보를 사용할 수 없음
-        setLocationError('Location information is unavailable. Please check your internet connection.');
-      } else if ((error as GeolocationPositionError)?.code === 3) {
-        // 시간 초과
-        setLocationError('Location information request timed out. Please try again.');
-      } else {
-        // 기타 오류
-        setLocationError('Error retrieving location information. Please enter your address manually.');
-        console.error('상세 오류 정보:', error);
-      }
+      console.error('위치 정보 가져오기 실패:', error);
+      setLocationError('위치 정보를 가져오는 데 실패했습니다. 직접 주소를 입력해주세요.');
     } finally {
       setIsLoading(false);
       console.log('GPS 위치 정보 요청 완료');
@@ -302,25 +272,20 @@ const AddressSetupPage: React.FC = () => {
             )}
           </div>
           
-          {/* 네이버 지도 섹션 - GPS로 위치를 가져온 경우에만 표시 */}
+          {/* 지도 표시 */}
           {showMap && currentLocation && (
-            <div className="mb-5">
-              <h3 className="text-base font-medium text-gray-700 mb-2">
-                Select Exact Location
-              </h3>
-              <div className="rounded-lg overflow-hidden border border-gray-300 shadow-sm">
-                <NaverMap 
-                  initialCenter={currentLocation}
-                  onLocationSelect={handleLocationSelect}
-                  width="100%"
-                  height="250px"
-                  zoom={17}
-                  markerDraggable={true}
-                />
+            <div className="mt-4">
+              <div className="rounded-lg border border-gray-200 p-4 mb-4 bg-white shadow-sm">
+                <h3 className="text-base font-medium text-gray-700 mb-3">위치 확인</h3>
+                <div className="relative" style={{ minHeight: '300px' }}>
+                  <NaverMap
+                    initialCenter={currentLocation}
+                    onLocationSelect={handleLocationSelect}
+                    height="300px"
+                    zoom={17}
+                  />
+                </div>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Drag the marker to adjust your exact location or tap on the map.
-              </p>
             </div>
           )}
           
