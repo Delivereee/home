@@ -57,11 +57,12 @@ const PopularChains: React.FC = () => {
               className="flex flex-col items-center min-w-[80px] pb-3 cursor-pointer"
               onClick={() => handleChainClick(chain.id, chain.name)}
             >
-              <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md border mb-2">
+              <div className="w-16 h-16 p-0 flex items-center justify-center mb-2">
                 <ImageWithFallback 
                   src={chain.imageUrl} 
                   alt={chain.name} 
-                  className="w-12 h-12 object-contain"
+                  className="w-14 h-14 rounded-full object-cover shadow-md"
+                  style={{ display: 'block' }}
                   fallback="https://delivereee.github.io/home/images/chains/default-logo.png"
                 />
               </div>
