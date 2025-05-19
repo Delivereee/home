@@ -17,7 +17,8 @@ import OrderSuccessPage from './pages/OrderSuccessPage';
 import NotFoundPage from './pages/NotFoundPage';
 import AddressSetupPage from './pages/AddressSetupPage';
 import { setChannelTalkPage, updateChannelTalkUser, bootChannelTalk, shutdownChannelTalk } from './services/ChannelService';
-import { getCurrentLanguage, SupportedLanguage } from './config/languageConfig';
+import { getCurrentLanguage, SupportedLanguage, LANGUAGE_CHANGE_EVENT } from './config/languageConfig';
+import { invalidateLanguageCache } from './api/cacheUtils';
 
 // 채널톡 관리 컴포넌트 - 홈 페이지에서만 활성화
 const ChannelTalkManager = () => {
@@ -116,10 +117,36 @@ const ChannelTalkManager = () => {
     };
     
     // 언어 변경 이벤트 리스너 등록
-    window.addEventListener('language-changed', handleLanguageChange as EventListener);
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange as EventListener);
     
     return () => {
-      window.removeEventListener('language-changed', handleLanguageChange as EventListener);
+      window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange as EventListener);
+    };
+  }, []);
+  
+  return null;
+};
+
+// 앱 수준의 이벤트 핸들러 컴포넌트
+const AppEventHandler = () => {
+  useEffect(() => {
+    // 언어 변경 이벤트 발생 시, 해당 언어의 API 캐시를 무효화
+    const handleLanguageChange = (event: Event) => {
+      const customEvent = event as CustomEvent<{language: SupportedLanguage, timestamp: number}>;
+      const newLang = customEvent.detail.language;
+      
+      console.log(`언어 변경됨: ${newLang} - API 캐시 무효화`);
+      
+      // 이전 언어의 캐시 무효화
+      invalidateLanguageCache(newLang);
+    };
+    
+    // 언어 변경 이벤트 리스너 등록
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange as EventListener);
+    
+    return () => {
+      // 이벤트 리스너 제거
+      window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange as EventListener);
     };
   }, []);
   
@@ -140,6 +167,7 @@ const AppContent = () => {
   return (
     <div className="App bg-gray-50 min-h-screen">
       <ChannelTalkManager />
+      <AppEventHandler />
       <Routes>
         {/* 홈 화면 */}
         <Route path="/" element={

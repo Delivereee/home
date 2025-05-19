@@ -2,6 +2,7 @@ import apiClient from './config';
 import { Category } from '../types/category';
 import { getCurrentLanguage } from '../config/languageConfig';
 import { buildQueryString } from './utils';
+import { createCacheKey, getCacheData, setCacheData } from './cacheUtils';
 
 /**
  * 이미지 경로를 환경에 맞게 변환하는 함수
@@ -25,22 +26,40 @@ export const getCategories = async (): Promise<Category[]> => {
     // 현재 설정된 언어 가져오기
     const currentLang = getCurrentLanguage();
     
+    // 쿼리 파라미터와 엔드포인트
+    const endpoint = '/api/dee-categories';
+    const params = { lang: currentLang };
+    
+    // 캐시 키 생성
+    const cacheKey = createCacheKey(endpoint, params);
+    
+    // 캐시된 데이터 확인
+    const cachedData = getCacheData<Category[]>(cacheKey, currentLang);
+    if (cachedData) {
+      return cachedData;
+    }
+    
     // 쿼리 파라미터 생성
-    const queryString = buildQueryString({ lang: currentLang });
+    const queryString = buildQueryString(params);
     
     // API에서 카테고리 데이터 가져오기 (언어 설정 포함)
-    const response = await apiClient.get(`/api/dee-categories${queryString}`);
-    console.log(`카테고리 요청: /api/dee-categories${queryString}`);
+    const response = await apiClient.get(`${endpoint}${queryString}`);
+    console.log(`카테고리 요청: ${endpoint}${queryString}`);
     
     if (response.data && Array.isArray(response.data)) {
       // API 응답 데이터를 Category 인터페이스에 맞게 변환
-      return response.data.map((item: any) => ({
+      const categories = response.data.map((item: any) => ({
         id: item.id,
         name: item.nameKo || item.name, // 한국어 이름을 우선 사용
         nameKo: item.nameKo,
         nameEn: item.nameEn,
         imageUrl: getCategoryImageUrl(item.imageUrl) // 환경에 맞게 이미지 경로 변환
       }));
+      
+      // 변환된 데이터 캐싱
+      setCacheData(cacheKey, categories, currentLang);
+      
+      return categories;
     }
     
     // 응답이 배열이 아니거나 비어있으면 빈 배열 반환

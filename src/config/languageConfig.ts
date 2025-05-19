@@ -4,6 +4,9 @@ export type SupportedLanguage = 'en' | 'ko' | 'ja' | 'zh-CN' | 'zh-TW';
 // 기본 언어 설정
 export const DEFAULT_LANGUAGE: SupportedLanguage = 'en';
 
+// 언어 변경 이벤트 이름 상수화
+export const LANGUAGE_CHANGE_EVENT = 'language-changed';
+
 /**
  * 브라우저 언어를 감지하여 지원되는 언어로 변환
  * @returns 지원되는 언어 코드
@@ -73,6 +76,12 @@ export const isDeviceLanguage = (): boolean => {
  * @param language 변경할 언어 코드
  */
 export const setLanguage = (language: SupportedLanguage): void => {
+  // 동일한 언어로 변경 시 중복 이벤트 방지
+  if (language === currentLanguage) {
+    console.log(`이미 ${language} 언어로 설정되어 있습니다.`);
+    return;
+  }
+
   currentLanguage = language;
   
   // 브라우저 환경에서만 실행
@@ -82,7 +91,12 @@ export const setLanguage = (language: SupportedLanguage): void => {
       localStorage.setItem('app_language', language);
       
       // 언어 변경 이벤트 발생 - 모든 컴포넌트에 변경 알림
-      const event = new CustomEvent('language-changed', { detail: { language } });
+      const event = new CustomEvent(LANGUAGE_CHANGE_EVENT, { 
+        detail: { 
+          language,
+          timestamp: Date.now()
+        } 
+      });
       window.dispatchEvent(event);
       
       console.log(`언어가 변경되었습니다: ${language}`);

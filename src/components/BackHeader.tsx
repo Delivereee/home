@@ -5,7 +5,8 @@ import {
   setLanguage, 
   SupportedLanguage, 
   detectBrowserLanguage,
-  isDeviceLanguage
+  isDeviceLanguage,
+  LANGUAGE_CHANGE_EVENT
 } from '../config/languageConfig';
 import useTranslation from '../hooks/useTranslation';
 
@@ -26,10 +27,10 @@ const BackHeader: React.FC<BackHeaderProps> = ({ title = 'Back' }) => {
     };
     
     // 언어 변경 감지를 위한 이벤트 리스너
-    window.addEventListener('language-changed', updateLangState);
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, updateLangState);
     
     return () => {
-      window.removeEventListener('language-changed', updateLangState);
+      window.removeEventListener(LANGUAGE_CHANGE_EVENT, updateLangState);
     };
   }, []);
 
@@ -43,15 +44,11 @@ const BackHeader: React.FC<BackHeaderProps> = ({ title = 'Back' }) => {
     const usingDeviceLang = isDeviceLanguage();
     const newLang = usingDeviceLang ? 'en' : deviceLang;
     
-    // 언어 설정 변경
+    // 언어 설정 변경 (이 함수 내부에서 이미 이벤트를 발생시킴)
     setLanguage(newLang);
-    setCurrentLang(newLang);
     
-    // 언어 변경 이벤트 발생 (다른 컴포넌트에 알림)
-    const event = new CustomEvent('language-changed', { detail: { language: newLang } });
-    window.dispatchEvent(event);
-    
-    console.log(`언어가 변경되었습니다: ${getCurrentLanguage()} → ${newLang}`);
+    // 중복 이벤트 발생 제거 - setLanguage 함수가 이미 이벤트를 발생시킴
+    console.log(`언어 변경 시도: ${getCurrentLanguage()} → ${newLang}`);
   }, [deviceLang]);
 
   // 현재 언어에 따라 버튼 툴팁 설정

@@ -1,7 +1,8 @@
 import apiClient from './config';
 import { MenuSection, MenuResponse, MenuItem } from '../types/menu';
 import { buildQueryString, handleApiError, logApiResponse } from './utils';
-import { getCurrentLanguage } from '../config/languageConfig';
+import { getCurrentLanguage, SupportedLanguage } from '../config/languageConfig';
+import { createCacheKey, getCacheData, setCacheData } from './cacheUtils';
 
 /**
  * 가게의 메뉴 목록 조회
@@ -17,13 +18,30 @@ export const getRestaurantMenus = async (
   const currentLang = lang || getCurrentLanguage();
   
   try {
+    // 쿼리 파라미터와 엔드포인트
+    const params = { lang: currentLang };
+    
+    // 캐시 키 생성
+    const cacheKey = createCacheKey(endpoint, params);
+    
+    // 캐시된 데이터 확인
+    const cachedData = getCacheData<MenuSection[]>(cacheKey, currentLang as SupportedLanguage);
+    if (cachedData) {
+      return cachedData;
+    }
+    
     // 언어 설정 쿼리 파라미터 추가
-    const queryString = buildQueryString({ lang: currentLang });
+    const queryString = buildQueryString(params);
     const response = await apiClient.get(`${endpoint}${queryString}`);
     logApiResponse(endpoint, response.data);
     
     // API 응답을 애플리케이션 데이터 구조로 변환
-    return transformMenuData(response.data);
+    const menuData = transformMenuData(response.data);
+    
+    // 변환된 데이터 캐싱
+    setCacheData(cacheKey, menuData, currentLang as SupportedLanguage);
+    
+    return menuData;
   } catch (error) {
     const apiError = handleApiError(error);
     console.error(`Error fetching restaurant menus: ${apiError.message}`, apiError);
@@ -49,13 +67,30 @@ export const getMenuDetail = async (
   const currentLang = lang || getCurrentLanguage();
   
   try {
+    // 쿼리 파라미터와 엔드포인트
+    const params = { lang: currentLang };
+    
+    // 캐시 키 생성
+    const cacheKey = createCacheKey(endpoint, params);
+    
+    // 캐시된 데이터 확인
+    const cachedData = getCacheData<MenuItem>(cacheKey, currentLang as SupportedLanguage);
+    if (cachedData) {
+      return cachedData;
+    }
+    
     // 언어 설정 쿼리 파라미터 추가
-    const queryString = buildQueryString({ lang: currentLang });
+    const queryString = buildQueryString(params);
     const response = await apiClient.get(`${endpoint}${queryString}`);
     logApiResponse(endpoint, response.data);
     
     // API 응답을 애플리케이션 데이터 구조로 변환
-    return transformMenuItemData(response.data);
+    const menuItem = transformMenuItemData(response.data);
+    
+    // 변환된 데이터 캐싱
+    setCacheData(cacheKey, menuItem, currentLang as SupportedLanguage);
+    
+    return menuItem;
   } catch (error) {
     const apiError = handleApiError(error);
     console.error(`Error fetching menu detail: ${apiError.message}`, apiError);

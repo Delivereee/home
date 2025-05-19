@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { t } from '../config/translations';
-import { getCurrentLanguage } from '../config/languageConfig';
+import { getCurrentLanguage, LANGUAGE_CHANGE_EVENT } from '../config/languageConfig';
 
 /**
  * 다국어 처리를 위한 React 훅
@@ -20,11 +20,11 @@ export const useTranslation = () => {
     };
     
     // 언어 변경 이벤트 리스너 등록
-    window.addEventListener('language-changed', handleLanguageChange);
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
     
     // 컴포넌트 언마운트 시 이벤트 리스너 제거
     return () => {
-      window.removeEventListener('language-changed', handleLanguageChange);
+      window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
     };
   }, []);
   

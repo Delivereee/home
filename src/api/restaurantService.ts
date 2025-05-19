@@ -1,7 +1,8 @@
 import apiClient from './config';
 import { Restaurant, RestaurantSearchParams } from '../types/restaurant';
 import { buildQueryString, handleApiError, logApiResponse } from './utils';
-import { getCurrentLanguage } from '../config/languageConfig';
+import { getCurrentLanguage, SupportedLanguage } from '../config/languageConfig';
+import { createCacheKey, getCacheData, setCacheData } from './cacheUtils';
 
 /**
  * 근처 음식점 조회
@@ -12,14 +13,26 @@ export const getNearbyRestaurants = async (params: RestaurantSearchParams): Prom
   const endpoint = '/api/v1/stores';
   
   try {
-    const queryString = buildQueryString({
+    // 캐시 키 생성을 위한 파라미터 구성
+    const queryParams = {
       lat: params.lat,
       lng: params.lng,
       categoryId: params.categoryId,
       category: params.category,
       franchiseId: params.franchiseId,
       lang: params.lang || 'en'
-    });
+    };
+    
+    // 캐시 키 생성
+    const cacheKey = createCacheKey(endpoint, queryParams);
+    
+    // 캐시된 데이터 확인
+    const cachedData = getCacheData<Restaurant[]>(cacheKey, queryParams.lang as SupportedLanguage);
+    if (cachedData) {
+      return cachedData;
+    }
+    
+    const queryString = buildQueryString(queryParams);
     
     console.log(`API 요청: ${endpoint}${queryString}`);
     const response = await apiClient.get(`${endpoint}${queryString}`);
@@ -34,7 +47,12 @@ export const getNearbyRestaurants = async (params: RestaurantSearchParams): Prom
     logApiResponse(endpoint, response.data);
     
     // API 응답을 Restaurant 인터페이스에 맞게 변환
-    return convertApiResponseToRestaurants(response.data);
+    const restaurants = convertApiResponseToRestaurants(response.data);
+    
+    // 변환된 데이터 캐싱
+    setCacheData(cacheKey, restaurants, queryParams.lang as SupportedLanguage);
+    
+    return restaurants;
   } catch (error) {
     const apiError = handleApiError(error);
     console.error(`Error fetching nearby restaurants: ${apiError.message}`, apiError);
@@ -116,17 +134,32 @@ export const getRestaurantDetails = async (id: string): Promise<Restaurant> => {
   // 현재 설정된 언어 가져오기
   const currentLang = getCurrentLanguage();
   
-  // 쿼리 파라미터 생성
-  const queryString = buildQueryString({ lang: currentLang });
-  
+  // 엔드포인트 및 파라미터 구성
   const endpoint = `/api/v1/stores/${id}`;
+  const params = { lang: currentLang };
+  
+  // 캐시 키 생성
+  const cacheKey = createCacheKey(endpoint, params);
+  
+  // 캐시된 데이터 확인
+  const cachedData = getCacheData<Restaurant>(cacheKey, currentLang);
+  if (cachedData) {
+    return cachedData;
+  }
+  
+  // 쿼리 파라미터 생성
+  const queryString = buildQueryString(params);
   
   try {
     const response = await apiClient.get(`${endpoint}${queryString}`);
     console.log(`음식점 상세 요청: ${endpoint}${queryString}`);
     logApiResponse(endpoint, response.data);
     
-    return response.data;
+    // 응답 데이터 캐싱
+    const restaurant = response.data;
+    setCacheData(cacheKey, restaurant, currentLang);
+    
+    return restaurant;
   } catch (error) {
     const apiError = handleApiError(error);
     console.error(`Error fetching restaurant details: ${apiError.message}`, apiError);
