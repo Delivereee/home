@@ -300,7 +300,7 @@ const AddressSetupPage: React.FC = () => {
                     initialCenter={currentLocation}
                     onLocationSelect={handleLocationSelect}
                     height="300px"
-                    zoom={17}
+                    zoom={19}
                   />
                 </div>
               </div>
