@@ -2,10 +2,10 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface BackHeaderProps {
-  title: string;
+  title?: string;
 }
 
-const BackHeader: React.FC<BackHeaderProps> = ({ title }) => {
+const BackHeader: React.FC<BackHeaderProps> = ({ title = 'Back' }) => {
   const navigate = useNavigate();
 
   const handleGoBack = () => {

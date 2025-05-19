@@ -17,6 +17,7 @@ import OrderSuccessPage from './pages/OrderSuccessPage';
 import NotFoundPage from './pages/NotFoundPage';
 import AddressSetupPage from './pages/AddressSetupPage';
 import { setChannelTalkPage, updateChannelTalkUser, bootChannelTalk, shutdownChannelTalk } from './services/ChannelService';
+import { getCurrentLanguage, SupportedLanguage } from './config/languageConfig';
 
 // 채널톡 관리 컴포넌트 - 홈 페이지에서만 활성화
 const ChannelTalkManager = () => {
@@ -61,8 +62,11 @@ const ChannelTalkManager = () => {
     if (isHomePage) {
       console.log('홈 페이지 확인: 채널톡 활성화');
       
-      // 채널톡 초기화 및 버튼 표시
-      bootChannelTalk();
+      // 현재 언어 설정으로 채널톡 초기화
+      const currentLang = getCurrentLanguage();
+      bootChannelTalk({
+        language: currentLang
+      });
       setChannelTalkPage('Home');
       
       // 약간의 지연 후 DOM에서 버튼 표시 (초기화 후 생성 시간 고려)
@@ -86,6 +90,38 @@ const ChannelTalkManager = () => {
       }
     };
   }, [location.pathname, location.hash]);
+  
+  // 언어 변경 감지 및 처리
+  useEffect(() => {
+    const handleLanguageChange = (event: Event) => {
+      const customEvent = event as CustomEvent<{language: SupportedLanguage}>;
+      const newLang = customEvent.detail.language;
+      console.log('언어 변경 감지:', newLang);
+      
+      // 현재 경로 확인
+      const currentPath = window.location.hash.replace('#', '');
+      const isHomePage = currentPath === '/' || currentPath === '/home' || currentPath === '';
+      
+      // 홈 페이지인 경우 채널톡 언어 설정 변경
+      if (isHomePage && window.ChannelIO) {
+        shutdownChannelTalk();
+        
+        // 약간의 지연 후 새 언어로 재시작
+        setTimeout(() => {
+          bootChannelTalk({
+            language: newLang
+          }, true);
+        }, 300);
+      }
+    };
+    
+    // 언어 변경 이벤트 리스너 등록
+    window.addEventListener('language-changed', handleLanguageChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('language-changed', handleLanguageChange as EventListener);
+    };
+  }, []);
   
   return null;
 };

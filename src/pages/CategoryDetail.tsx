@@ -10,6 +10,7 @@ import { useRestaurants } from '../hooks/useRestaurants';
 import { getCategories } from '../api/categoryService';
 import { STATUS_MESSAGES } from '../config/constants';
 import { Category } from '../types/category';
+import { getCurrentLanguage } from '../config/languageConfig';
 
 const CategoryDetail: React.FC = () => {
   const { categoryId, categoryName, chainName, chainId } = useParams<{ 
@@ -90,8 +91,31 @@ const CategoryDetail: React.FC = () => {
   // API 요청
   const { restaurants, loading, error, refetch } = useRestaurants(searchParams);
   
+  // 현재 언어
+  const currentLang = getCurrentLanguage();
+  
+  // 카테고리 언어별 이름 가져오기
+  const getCategoryLocalizedName = (category: Category): string => {
+    if (!category) return '';
+    
+    // 현재 언어에 맞는 필드 찾기
+    switch (currentLang) {
+      case 'ko':
+        return category.nameKo || category.nameEn || category.name;
+      case 'ja':
+        return category.nameJa || category.nameEn || category.name;
+      case 'zh-CN':
+        return category.nameZhCn || category.nameEn || category.name;
+      case 'zh-TW':
+        return category.nameZhTw || category.nameEn || category.name;
+      case 'en':
+      default:
+        return category.nameEn || category.name;
+    }
+  };
+  
   // 표시할 타이틀 결정
-  const displayTitle = useMemo(() => {
+  const displayTitle = useMemo((): string => {
     if (isAllRestaurants) {
       return 'All Restaurants Near You';
     }
@@ -103,14 +127,14 @@ const CategoryDetail: React.FC = () => {
     
     // 선택된 카테고리가 있으면 그 이름을 표시
     if (selectedCategory) {
-      return selectedCategory.nameEn;
+      return getCategoryLocalizedName(selectedCategory);
     }
     
     // ID로 카테고리 찾기
     if (categoryId) {
       const category = allCategories.find(cat => cat.id === categoryId);
       if (category) {
-        return category.nameEn;
+        return getCategoryLocalizedName(category);
       }
     }
     
@@ -121,13 +145,13 @@ const CategoryDetail: React.FC = () => {
         cat.nameKo === decodedName || cat.name === decodedName
       );
       if (category) {
-        return category.nameEn;
+        return getCategoryLocalizedName(category);
       }
       return decodedName;
     }
     
     return 'Restaurants';
-  }, [categoryId, categoryName, chainName, isAllRestaurants, allCategories, selectedCategory]);
+  }, [categoryId, categoryName, chainName, isAllRestaurants, allCategories, selectedCategory, currentLang]);
   
   return (
     <div className="min-h-screen bg-gray-50">

@@ -314,4 +314,36 @@ const createCustomChannelButton = () => {
   
   // 문서에 버튼 추가
   document.body.appendChild(button);
+};
+
+/**
+ * 채널톡 언어 설정 변경
+ * @param language 변경할 언어 코드
+ */
+export const updateChannelTalkLanguage = (language: string) => {
+  if (window.ChannelIO) {
+    try {
+      // 현재 경로가 홈인지 확인
+      const currentPath = window.location.hash.replace('#', '');
+      const isHomePage = currentPath === '/' || currentPath === '/home' || currentPath === '';
+      
+      if (isHomePage) {
+        // 홈 페이지에서는 채널톡 재초기화
+        window.ChannelIO('shutdown');
+        
+        // 약간의 지연 후 다시 시작
+        setTimeout(() => {
+          bootChannelTalk({
+            language: language
+          }, true);
+          console.log(`ChannelTalk language updated to: ${language}`);
+        }, 300);
+      } else {
+        // 홈 페이지가 아닌 경우에는 언어 설정만 저장해두고 실제 적용은 하지 않음
+        console.log(`ChannelTalk language will be updated to ${language} when returning to home`);
+      }
+    } catch (error) {
+      console.error('Failed to update ChannelTalk language:', error);
+    }
+  }
 }; 
