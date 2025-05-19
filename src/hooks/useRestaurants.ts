@@ -6,6 +6,7 @@ import { useAddress } from '../contexts/AddressContext';
 
 interface UseRestaurantsProps {
   categoryName?: string;
+  categoryId?: string;
   franchiseId?: string;
   allRestaurants?: boolean;
 }
@@ -13,6 +14,7 @@ interface UseRestaurantsProps {
 /**
  * 레스토랑 목록을 가져오는 커스텀 훅
  * @param categoryName 카테고리 이름 (선택적)
+ * @param categoryId 카테고리 ID (선택적)
  * @param franchiseId 체인점 ID (선택적)
  * @param allRestaurants 전체 레스토랑 목록 조회 여부 (선택적)
  */
@@ -33,7 +35,7 @@ export const useRestaurants = (
     options = categoryNameOrOptions;
   }
   
-  const { categoryName, franchiseId, allRestaurants } = options;
+  const { categoryName, categoryId, franchiseId, allRestaurants } = options;
   
   const fetchRestaurants = useCallback(async () => {
     try {
@@ -52,8 +54,12 @@ export const useRestaurants = (
         lng: coordinates.lng
       };
       
-      // 카테고리가 있는 경우, 요청 파라미터에 추가
-      if (categoryName) {
+      // 카테고리 ID가 있는 경우, 요청 파라미터에 추가 (우선순위)
+      if (categoryId) {
+        Object.assign(params, { categoryId });
+      }
+      // 호환성을 위해 카테고리 이름이 있고 ID가 없는 경우에만 category 사용
+      else if (categoryName) {
         Object.assign(params, { category: decodeURIComponent(categoryName) });
       }
       
@@ -72,7 +78,7 @@ export const useRestaurants = (
     } finally {
       setLoading(false);
     }
-  }, [categoryName, franchiseId, allRestaurants, address]);
+  }, [categoryName, categoryId, franchiseId, allRestaurants, address]);
   
   useEffect(() => {
     fetchRestaurants();

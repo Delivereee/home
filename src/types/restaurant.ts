@@ -51,7 +51,8 @@ export interface Restaurant {
  */
 export interface RestaurantSearchParams {
   // 검색 조건 (카테고리, 체인점 ID)
-  category?: string;
+  category?: string;  // 이전 버전 호환성을 위해 유지
+  categoryId?: string; // 새로운 API 파라미터
   franchiseId?: string;
   
   // 위치 정보 (필수)

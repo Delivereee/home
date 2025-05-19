@@ -4,7 +4,7 @@ import { buildQueryString, handleApiError, logApiResponse } from './utils';
 
 /**
  * 근처 음식점 조회
- * @param params 검색 파라미터 (위도, 경도, 카테고리, 체인점ID 등)
+ * @param params 검색 파라미터 (위도, 경도, 카테고리ID, 체인점ID 등)
  * @returns 음식점 목록
  */
 export const getNearbyRestaurants = async (params: RestaurantSearchParams): Promise<Restaurant[]> => {
@@ -14,6 +14,7 @@ export const getNearbyRestaurants = async (params: RestaurantSearchParams): Prom
     const queryString = buildQueryString({
       lat: params.lat,
       lng: params.lng,
+      categoryId: params.categoryId,
       category: params.category,
       franchiseId: params.franchiseId,
       lang: params.lang || 'en'

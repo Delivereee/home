@@ -59,13 +59,33 @@ const CategoryDetail: React.FC = () => {
       return { franchiseId: chainId };
     }
     
-    // 선택된 카테고리가 있으면 그 이름을 사용, 없으면 URL의 categoryName 사용
-    if (selectedCategory) {
-      return { categoryName: selectedCategory.name };
+    // 카테고리 ID가 있는 경우 - 가장 우선시
+    if (categoryId) {
+      return { categoryId };
     }
     
-    return { categoryName };
-  }, [categoryName, chainId, chainName, isAllRestaurants, selectedCategory]);
+    // 선택된 카테고리가 있는 경우 - 차선
+    if (selectedCategory) {
+      return { categoryId: selectedCategory.id };
+    }
+    
+    // 하위 호환성을 위해 카테고리 이름이 있는 경우
+    if (categoryName) {
+      // 이름으로 카테고리 ID를 찾아서 사용
+      const category = allCategories.find(cat => 
+        cat.nameKo === decodeURIComponent(categoryName) || cat.name === decodeURIComponent(categoryName)
+      );
+      
+      if (category) {
+        return { categoryId: category.id };
+      }
+      
+      // 찾지 못한 경우 기존 방식 사용
+      return { categoryName };
+    }
+    
+    return {};
+  }, [categoryId, categoryName, chainId, chainName, isAllRestaurants, selectedCategory, allCategories]);
   
   // API 요청
   const { restaurants, loading, error, refetch } = useRestaurants(searchParams);
