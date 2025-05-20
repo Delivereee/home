@@ -19,6 +19,22 @@ import AddressSetupPage from './pages/AddressSetupPage';
 import { setChannelTalkPage, updateChannelTalkUser, bootChannelTalk, shutdownChannelTalk } from './services/ChannelService';
 import { getCurrentLanguage, SupportedLanguage, LANGUAGE_CHANGE_EVENT } from './config/languageConfig';
 import { invalidateLanguageCache } from './api/cacheUtils';
+import { trackPageView } from './services/AnalyticsService';
+
+// Google Analytics 페이지 추적 컴포넌트
+const AnalyticsTracker = () => {
+  const location = useLocation();
+  
+  useEffect(() => {
+    // 현재 경로 추출
+    const currentPath = window.location.hash.replace('#', '') || '/';
+    
+    // Google Analytics에 페이지 뷰 이벤트 전송
+    trackPageView(currentPath);
+  }, [location.pathname, location.hash]);
+  
+  return null;
+};
 
 // 채널톡 관리 컴포넌트 - 모든 페이지에서 활성화하되 UI 요소와 겹치지 않도록 조정
 const ChannelTalkManager = () => {
@@ -158,6 +174,7 @@ const AppWithRouter = () => {
 const AppContent = () => {
   return (
     <div className="App bg-gray-50 min-h-screen">
+      <AnalyticsTracker />
       <ChannelTalkManager />
       <AppEventHandler />
       <Routes>
