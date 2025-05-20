@@ -40,21 +40,11 @@ const CHANNEL_IO_ACCESS_SECRET = '20157795b28f1efefb6415a2686cca15';
 /**
  * 채널톡 초기화
  * @param settings 채널톡 설정
- * @param forceInit 홈 페이지가 아니더라도 강제 초기화할지 여부
+ * @param forceInit 강제 초기화 여부 (기본값: false)
  */
 export const bootChannelTalk = (settings?: Partial<ChannelIOSettings>, forceInit: boolean = false) => {
   if (!window.ChannelIO) {
     console.error('ChannelIO is not loaded yet');
-    return;
-  }
-
-  // 현재 경로가 홈인지 확인
-  const currentPath = window.location.hash.replace('#', '');
-  const isHomePage = currentPath === '/' || currentPath === '/home' || currentPath === '';
-  
-  // 홈 페이지가 아니고, 강제 초기화도 아니면 초기화하지 않음
-  if (!isHomePage && !forceInit) {
-    console.log('Not home page, skipping ChannelTalk initialization');
     return;
   }
 
@@ -243,10 +233,6 @@ const createCustomChannelButton = () => {
     existingButton.remove();
   }
   
-  // 현재 경로 확인
-  const currentPath = window.location.hash.replace('#', '');
-  const isHomePage = currentPath === '/' || currentPath === '/home';
-  
   // 새 버튼 생성
   const button = document.createElement('button');
   button.id = 'custom-channel-button';
@@ -259,10 +245,10 @@ const createCustomChannelButton = () => {
     </svg>
   `;
   
-  // 버튼 스타일 지정
+  // 버튼 스타일 지정 - 위치 및 z-index 조정
   Object.assign(button.style, {
     position: 'fixed',
-    bottom: '80px', // 네비게이션 바 위에 위치하도록 조정 (이전 70px)
+    bottom: '100px', // 네비게이션 바에서 더 멀리 위치하도록 조정
     left: 'auto',
     right: '20px', // 오른쪽 하단에 배치
     transform: 'none', // 중앙 정렬 제거
@@ -270,15 +256,16 @@ const createCustomChannelButton = () => {
     color: 'white',
     border: 'none',
     borderRadius: '50%', // 원형 버튼으로 변경
-    width: '50px',       // 고정 너비
-    height: '50px',      // 고정 높이
-    display: isHomePage ? 'flex' : 'none', // 홈 페이지일 때만 표시
+    width: '45px',       // 크기 약간 축소
+    height: '45px',      // 크기 약간 축소
+    display: 'flex', // 항상 표시
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: '0 4px 12px rgba(255, 59, 48, 0.3)', // 그림자 강화
-    zIndex: '1000',
+    zIndex: '999', // 다른 UI 요소보다 낮은 z-index로 조정
     cursor: 'pointer',
-    transition: 'all 0.2s ease' // 호버 효과를 위한 트랜지션 추가
+    transition: 'all 0.2s ease', // 호버 효과를 위한 트랜지션 추가
+    opacity: '0.85' // 약간 투명하게 설정
   });
   
   // 호버 효과 추가
@@ -300,7 +287,26 @@ const createCustomChannelButton = () => {
   button.addEventListener('click', () => {
     if (window.ChannelIO) {
       try {
+        // 채널톡 메신저가 열릴 때 다른 UI 요소와 충돌 방지
         window.ChannelIO('showMessenger');
+        
+        // 메신저가 열리면 버튼 숨기기
+        button.style.display = 'none';
+        
+        // 채널톡 메신저가 닫힐 때 이벤트 감지
+        const handleClose = () => {
+          // 메신저가 닫히면 버튼 다시 표시
+          button.style.display = 'flex';
+        };
+        
+        // 채널톡 메신저 닫힘 이벤트 한 번만 감지
+        const checkCloseInterval = setInterval(() => {
+          const messenger = document.querySelector('[class*="channel-messenger"]');
+          if (!messenger) {
+            handleClose();
+            clearInterval(checkCloseInterval);
+          }
+        }, 500);
         
         // 이벤트 추적
         trackChannelTalkEvent('help_button_clicked', {
@@ -323,25 +329,16 @@ const createCustomChannelButton = () => {
 export const updateChannelTalkLanguage = (language: string) => {
   if (window.ChannelIO) {
     try {
-      // 현재 경로가 홈인지 확인
-      const currentPath = window.location.hash.replace('#', '');
-      const isHomePage = currentPath === '/' || currentPath === '/home' || currentPath === '';
+      // 채널톡 재초기화
+      window.ChannelIO('shutdown');
       
-      if (isHomePage) {
-        // 홈 페이지에서는 채널톡 재초기화
-        window.ChannelIO('shutdown');
-        
-        // 약간의 지연 후 다시 시작
-        setTimeout(() => {
-          bootChannelTalk({
-            language: language
-          }, true);
-          console.log(`ChannelTalk language updated to: ${language}`);
-        }, 300);
-      } else {
-        // 홈 페이지가 아닌 경우에는 언어 설정만 저장해두고 실제 적용은 하지 않음
-        console.log(`ChannelTalk language will be updated to ${language} when returning to home`);
-      }
+      // 약간의 지연 후 다시 시작
+      setTimeout(() => {
+        bootChannelTalk({
+          language: language
+        }, true);
+        console.log(`ChannelTalk language updated to: ${language}`);
+      }, 300);
     } catch (error) {
       console.error('Failed to update ChannelTalk language:', error);
     }

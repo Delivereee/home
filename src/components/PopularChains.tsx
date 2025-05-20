@@ -62,7 +62,9 @@ const PopularChains: React.FC = () => {
     return (
       <div className="p-4">
         <h2 className="text-xl font-semibold mb-4 text-left">{t('home.popularChains')}</h2>
-        <EmptyState message={t('status.empty.chains')} />
+        <EmptyState 
+          message={t('status.empty.chains')} 
+        />
       </div>
     );
   }

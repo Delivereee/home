@@ -36,6 +36,7 @@ export const getStatusMessages = () => ({
   empty: {
     restaurants: t('status.empty.restaurants'),
     chains: t('status.empty.chains'),
-    menus: t('status.empty.menus')
+    menus: t('status.empty.menus'),
+    categories: t('status.empty.categories')
   }
 }); 

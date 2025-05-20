@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Category } from '../types/category';
 import LoadingState from './LoadingState';
 import ErrorState from './ErrorState';
+import EmptyState from './EmptyState';
 import { useCategories } from '../hooks/useCategories';
 import { getStatusMessages } from '../config/constants';
 import ImageWithFallback from './ImageWithFallback';
@@ -51,6 +52,19 @@ const CategorySection: React.FC = () => {
       <div className="p-4">
         <h2 className="text-xl font-semibold mb-4 text-left">{t('home.categories')}</h2>
         <ErrorState height="h-40" message={error} onRetry={refetch} />
+      </div>
+    );
+  }
+  
+  // 카테고리가 없는 경우
+  if (categories.length === 0) {
+    return (
+      <div className="p-4">
+        <h2 className="text-xl font-semibold mb-4 text-left">{t('home.categories')}</h2>
+        <EmptyState 
+          height="h-40" 
+          message={t('status.empty.categories')} 
+        />
       </div>
     );
   }

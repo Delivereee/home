@@ -99,6 +99,13 @@ const translations: Record<string, TranslationItem> = {
     'zh-CN': '未找到热门连锁店',
     'zh-TW': '未找到熱門連鎖店'
   },
+  'status.empty.categories': {
+    en: 'No categories found',
+    ko: '카테고리가 없습니다',
+    ja: 'カテゴリーが見つかりません',
+    'zh-CN': '未找到类别',
+    'zh-TW': '未找到類別'
+  },
   
   // 네비게이션
   'nav.home': {
