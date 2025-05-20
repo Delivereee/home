@@ -341,7 +341,7 @@ const AddressSetupPage: React.FC = () => {
         )}
         
         {/* 대체 주소 입력 방법 */}
-        <div className="flex flex-col mb-5">
+        {/* <div className="flex flex-col mb-5">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-gray-500 text-sm">Or enter address using:</span>
           </div>
@@ -355,7 +355,7 @@ const AddressSetupPage: React.FC = () => {
             </svg>
             <span>{t('address.uploadBooking')}</span>
           </button>
-        </div>
+        </div> */}
         
         {/* 저장 버튼 */}
         <div className="mt-6">
