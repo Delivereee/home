@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useTranslation from '../hooks/useTranslation';
+import { useAddress } from '../contexts/AddressContext';
 
 const NavigationBar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+  const { isAddressSet } = useAddress();
+  
+  // 주소 탭 하이라이트 상태 
+  const [addressHighlight, setAddressHighlight] = useState(false);
   
   // 현재 활성화된 탭 확인
   const isActive = (path: string) => {
@@ -14,17 +19,46 @@ const NavigationBar: React.FC = () => {
       (path === '/browse' && location.pathname === '/restaurants');
   };
   
-  // 홈으로 이동
+  // 주소가 설정되지 않았을 때 하이라이트 효과 추가
+  useEffect(() => {
+    // 주소가 설정되지 않았고, 주소 설정 페이지가 아닌 경우에만
+    if (!isAddressSet() && location.pathname !== '/address') {
+      // 깜빡임 효과
+      const interval = setInterval(() => {
+        setAddressHighlight(prev => !prev);
+      }, 800);
+      
+      return () => clearInterval(interval);
+    } else {
+      setAddressHighlight(false);
+    }
+  }, [isAddressSet, location.pathname]);
+  
+  // 홈으로 이동 (주소 체크 없음)
   const goToHome = () => navigate('/');
   
-  // 전체 레스토랑 목록으로 이동 (Browse)
-  const goToBrowse = () => navigate('/browse');
+  // 전체 레스토랑 목록으로 이동 (주소 체크)
+  const goToBrowse = () => {
+    if (isAddressSet()) {
+      navigate('/browse');
+    } else {
+      // 주소 탭으로 직접 이동
+      navigate('/address');
+    }
+  };
   
   // 주소 페이지로 이동
   const goToAddress = () => navigate('/address');
   
-  // 장바구니로 이동
-  const goToCart = () => navigate('/cart');
+  // 장바구니로 이동 (주소 체크)
+  const goToCart = () => {
+    if (isAddressSet()) {
+      navigate('/cart');
+    } else {
+      // 주소 탭으로 직접 이동
+      navigate('/address');
+    }
+  };
   
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-10 shadow-lg">
@@ -54,15 +88,29 @@ const NavigationBar: React.FC = () => {
         </div>
         
         <div 
-          className="flex flex-col items-center justify-center cursor-pointer py-1" 
+          className={`
+            flex flex-col items-center justify-center cursor-pointer py-1
+            ${addressHighlight ? 'animate-pulse' : ''}
+            ${!isAddressSet() && !isActive('/address') ? 'relative' : ''}
+          `}
           onClick={goToAddress}
         >
           {/* Address/Location Icon */}
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" 
-            className={`w-6 h-6 ${isActive('/address') ? 'text-red-500' : 'text-gray-500'}`}>
+            className={`w-6 h-6 ${isActive('/address') ? 'text-red-500' : addressHighlight ? 'text-red-400' : 'text-gray-500'}`}>
             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
           </svg>
-          <span className={`text-xs mt-1 ${isActive('/address') ? 'text-red-500 font-medium' : 'text-gray-500'}`}>{t('header.setAddress')}</span>
+          <span className={`text-xs mt-1 ${isActive('/address') ? 'text-red-500 font-medium' : addressHighlight ? 'text-red-400 font-medium' : 'text-gray-500'}`}>
+            {t('header.setAddress')}
+          </span>
+          
+          {/* 주소 설정 필요 안내 메시지 */}
+          {!isAddressSet() && !isActive('/address') && (
+            <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-2 py-1 rounded text-xs whitespace-nowrap shadow-lg">
+              {t('address.tapToSet')}
+              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-red-500"></div>
+            </div>
+          )}
         </div>
         
         <div 

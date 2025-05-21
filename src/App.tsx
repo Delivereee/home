@@ -89,11 +89,7 @@ const ChannelTalkManager = () => {
     
     // 홈 페이지 여부 확인
     const homePageActive = isHomePage();
-    console.log('홈 페이지 여부:', homePageActive);
-    
     if (homePageActive) {
-      // 홈 페이지에서만 채널톡 활성화
-      console.log('채널톡 활성화 (홈 페이지)');
       
       // 현재 언어 설정으로 채널톡 초기화
       const currentLang = getCurrentLanguage();

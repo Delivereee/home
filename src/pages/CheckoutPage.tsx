@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
+import { useAddress } from '../contexts/AddressContext';
 import BackHeader from '../components/BackHeader';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import apiClient from '../api/config';
+import useTranslation from '../hooks/useTranslation';
 
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
   const { cart, getTotalPrice } = useCart();
+  const { isAddressSet } = useAddress();
+  const { t } = useTranslation();
   
   // Email state management
   const [email, setEmail] = useState('');
@@ -22,6 +26,14 @@ const CheckoutPage: React.FC = () => {
   // Payment processing state
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  
+  // 컴포넌트 마운트 시 주소 설정 여부 확인
+  useEffect(() => {
+    if (!isAddressSet()) {
+      // 주소가 설정되지 않았으면 바로 주소 페이지로 리다이렉션
+      navigate('/address');
+    }
+  }, [isAddressSet, navigate]);
   
   // PayPal initial options
   const getPayPalClientId = () => {
@@ -223,8 +235,8 @@ const CheckoutPage: React.FC = () => {
   }
   
   return (
-    <div className="min-h-screen bg-gray-50">
-      <BackHeader title="Checkout" />
+    <div className="min-h-screen bg-gray-50 pb-16">
+      <BackHeader title={t('checkout.title')} />
       
       <main className="px-4 py-4 pb-32">
         <h1 className="text-xl font-bold text-gray-800 mb-4 text-left">Order Summary</h1>

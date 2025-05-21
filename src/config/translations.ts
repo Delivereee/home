@@ -91,6 +91,15 @@ const translations: Record<string, TranslationItem> = {
     'zh-TW': '重試'
   },
   
+  // 일반 상태 메시지
+  'status.cancel': {
+    en: 'Cancel',
+    ko: '취소',
+    ja: 'キャンセル',
+    'zh-CN': '取消',
+    'zh-TW': '取消'
+  },
+  
   // 빈 상태
   'status.empty.chains': {
     en: 'No popular chains found',
@@ -228,6 +237,50 @@ const translations: Record<string, TranslationItem> = {
     ja: '住所の保存に失敗しました。もう一度お試しください。',
     'zh-CN': '保存地址失败。请重试。',
     'zh-TW': '保存地址失敗。請重試。'
+  },
+  
+  // 주소 미설정 알림 메시지
+  'address.notSet': {
+    en: 'Please set your delivery address first',
+    ko: '배달 주소를 먼저 설정해주세요',
+    ja: '配達先住所を先に設定してください',
+    'zh-CN': '请先设置您的送餐地址',
+    'zh-TW': '請先設置您的送餐地址'
+  },
+  'address.requiredForAction': {
+    en: 'You need to set your address to continue',
+    ko: '계속하려면 주소를 설정해야 합니다',
+    ja: '続行するには住所を設定する必要があります',
+    'zh-CN': '您需要设置地址才能继续',
+    'zh-TW': '您需要設置地址才能繼續'
+  },
+  'address.setNow': {
+    en: 'Set Address Now',
+    ko: '지금 주소 설정하기',
+    ja: '今すぐ住所を設定する',
+    'zh-CN': '立即设置地址',
+    'zh-TW': '立即設置地址'
+  },
+  'address.requiredForCheckout': {
+    en: 'Address required for checkout',
+    ko: '결제를 위해 주소가 필요합니다',
+    ja: '決済には住所が必要です',
+    'zh-CN': '结账需要地址',
+    'zh-TW': '結帳需要地址'
+  },
+  'address.setAddress': {
+    en: 'Please set your address',
+    ko: '주소를 설정해주세요',
+    ja: '住所を設定してください',
+    'zh-CN': '请设置您的地址',
+    'zh-TW': '請設置您的地址'
+  },
+  'address.tapToSet': {
+    en: 'Tap to set delivery address',
+    ko: '탭하여 배달 주소 설정',
+    ja: 'タップして配達先住所を設定',
+    'zh-CN': '点击设置送餐地址',
+    'zh-TW': '點擊設置送餐地址'
   },
   
   // 상태 메시지 - 로딩
@@ -529,6 +582,15 @@ const translations: Record<string, TranslationItem> = {
     ja: '決済に進むことができませんでした',
     'zh-CN': '无法进行结算',
     'zh-TW': '無法進行結算'
+  },
+  
+  // 체크아웃 페이지
+  'checkout.title': {
+    en: 'Checkout',
+    ko: '주문 결제',
+    ja: '注文決済',
+    'zh-CN': '结账',
+    'zh-TW': '結帳'
   },
 };
 

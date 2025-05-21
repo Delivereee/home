@@ -11,7 +11,7 @@ import useTranslation from '../hooks/useTranslation';
 
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
-  const { address } = useAddress();
+  const { address, isAddressSet } = useAddress();
   const { 
     cart, 
     removeItem, 
@@ -87,6 +87,13 @@ const CartPage: React.FC = () => {
   const handleCheckout = async () => {
     if (!cart || !deliveryAvailable) return;
     
+    // 주소 설정 여부 확인
+    if (!isAddressSet()) {
+      // 주소 설정 페이지로 이동
+      navigate('/address');
+      return;
+    }
+    
     try {
       // 로딩 상태 설정
       setIsLoading(true);
@@ -95,13 +102,6 @@ const CartPage: React.FC = () => {
       // 주소 ID 가져오기
       const addressId = address?.addressId || ''; // 저장된 주소 ID 또는 임시 ID 사용
       
-      if (!address?.isComplete) {
-        setErrorMsg(t('cart.setAddressFirst'));
-        setIsLoading(false);
-        navigate('/address-setup');
-        return;
-      }
-
       if (!addressId) {
         console.warn('Address ID is missing. Using temporary ID.');
       }
@@ -135,6 +135,11 @@ const CartPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  // 주소 설정 페이지로 이동
+  const goToAddressSetup = () => {
+    navigate('/address');
   };
   
   // 카트가 비어있을 때
@@ -277,14 +282,27 @@ const CartPage: React.FC = () => {
             {errorMsg}
           </div>
         )}
+        {!isAddressSet() && (
+          <div className="mb-3 flex flex-col items-center">
+            <p className="mb-2 text-center text-sm text-red-500 font-medium">
+              {t('address.requiredForCheckout')}
+            </p>
+            <button
+              className="py-2 px-4 rounded-md bg-gray-200 text-gray-800 text-sm font-medium hover:bg-gray-300 transition-colors"
+              onClick={goToAddressSetup}
+            >
+              {t('address.setNow')}
+            </button>
+          </div>
+        )}
         <button
           className={`w-full py-4 rounded-lg font-medium text-white text-base tracking-wide shadow-md transition-colors ${
-            deliveryAvailable && !isLoading
+            deliveryAvailable && !isLoading && isAddressSet()
               ? 'bg-red-500 hover:bg-red-600 active:bg-red-700' 
               : 'bg-gray-400 cursor-not-allowed'
           }`}
           onClick={handleCheckout}
-          disabled={!deliveryAvailable || isLoading}
+          disabled={!deliveryAvailable || isLoading || !isAddressSet()}
         >
           {isLoading ? t('cart.processing') : t('cart.proceedToCheckout')}
         </button>
