@@ -29,19 +29,12 @@ const RestaurantDetail: React.FC = () => {
   // 메뉴 정보 가져오기
   const { menuSections, loading: menuLoading, error: menuError, refetch: refetchMenus } = useRestaurantMenus(restaurantId);
   
-  // 최소 주문 금액 (USD로 변환)
-  const EXCHANGE_RATE = 0.00071; // 1원 = 0.00071달러
-  const minOrderInUSD = useMemo(() => {
-    if (!restaurant || !restaurant.minOrderAmount) return null;
-    return restaurant.minOrderAmount * EXCHANGE_RATE;
-  }, [restaurant]);
-  
   // CartContext에 최소 주문 금액 저장
   useEffect(() => {
-    if (minOrderInUSD !== null) {
-      setRestaurantMinOrderAmount(minOrderInUSD);
+    if (restaurant && restaurant.minOrderAmount) {
+      setRestaurantMinOrderAmount(restaurant.minOrderAmount);
     }
-  }, [minOrderInUSD, setRestaurantMinOrderAmount]);
+  }, [restaurant, setRestaurantMinOrderAmount]);
   
   // 영문 이름을 우선 사용하고, 없을 경우 기본 필드 사용
   const displayName = useMemo(() => {
@@ -160,7 +153,7 @@ const RestaurantDetail: React.FC = () => {
       
       {/* 장바구니 바텀시트 */}
       <CartBottomSheet 
-        minOrderAmount={minOrderInUSD}
+        minOrderAmount={restaurant.minOrderAmount}
         onCheckout={handleCheckout}
         restaurantId={restaurantId}
       />

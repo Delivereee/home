@@ -1,24 +1,24 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCart } from '../contexts/CartContext';
+import { MenuItem as MenuItemType, MenuOption } from '../types/menu';
 import { CartItem, CartOption, CartOptionItem } from '../types/cart';
-import { MenuItem as MenuItemType, MenuOption, MenuOptionItem } from '../types/menu';
 import { getMenuDetail } from '../api/menuService';
+import { useCart } from '../contexts/CartContext';
 import BackHeader from '../components/BackHeader';
 import NavigationBar from '../components/NavigationBar';
-import CartBottomSheet from '../components/CartBottomSheet';
+import ImageWithFallback from '../components/ImageWithFallback';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
-import ImageWithFallback from '../components/ImageWithFallback';
 import { getStatusMessages } from '../config/constants';
 import useTranslation from '../hooks/useTranslation';
+import { formatCurrency } from '../utils/currencyUtils';
 
-// 메뉴 옵션을 장바구니 옵션으로 변환하는 함수 추가
+// 메뉴 옵션을 장바구니 옵션으로 변환하는 함수
 const convertMenuOptionToCartOption = (menuOption: MenuOption): CartOption => {
   const optionItems: CartOptionItem[] = menuOption.menuOptionItems.map(item => ({
     id: item.id,
     name: item.name,
-    price: item.price * 0.00071 // 원화를 USD로 변환
+    price: item.price // 서버에서 환율 계산된 금액
   }));
 
   return {
@@ -32,8 +32,13 @@ const convertMenuOptionToCartOption = (menuOption: MenuOption): CartOption => {
 const MenuDetail: React.FC = () => {
   const { restaurantId = '', menuId = '' } = useParams<{ restaurantId: string; menuId: string }>();
   const navigate = useNavigate();
-  const { cart, addToCart, updateItemQuantity, canceledItemId } = useCart();
   const { t } = useTranslation();
+  const { 
+    cart, 
+    addToCart, 
+    updateItemQuantity, 
+    canceledItemId
+  } = useCart();
   
   // 다국어 상태 메시지 가져오기
   const STATUS_MESSAGES = getStatusMessages();
@@ -49,15 +54,6 @@ const MenuDetail: React.FC = () => {
   
   // 수량 상태
   const [quantity, setQuantity] = useState<number>(0);
-  
-  // 화폐 변환 상수
-  const EXCHANGE_RATE = 0.00071; // 1원 = 0.00071달러
-  
-  // 달러로 변환된 가격
-  const priceInUSD = useMemo(() => {
-    if (!menuItem) return 0;
-    return menuItem.price * EXCHANGE_RATE;
-  }, [menuItem]);
   
   // 표시할 이름과 설명
   const displayName = useMemo(() => {
@@ -83,15 +79,11 @@ const MenuDetail: React.FC = () => {
     return description;
   }, [menuItem]);
   
-  // 가격 포맷팅
-  const displayPrice = useMemo(() => {
-    return `$${priceInUSD.toFixed(2)}`;
-  }, [priceInUSD]);
-  
   // 총 가격 계산 (수량 × 가격)
   const totalPrice = useMemo(() => {
-    return `$${(priceInUSD * quantity).toFixed(2)}`;
-  }, [priceInUSD, quantity]);
+    if (!menuItem) return formatCurrency(0);
+    return formatCurrency(menuItem.price * quantity);
+  }, [menuItem, quantity]);
   
   // 결제 페이지로 이동
   const handleCheckout = () => {
@@ -121,7 +113,7 @@ const MenuDetail: React.FC = () => {
         setMenuItem(menuData);
         setRestaurantName(menuData.name);
         // TODO: 레스토랑 정보에서 최소 주문 금액을 가져와야 함
-        setMinOrderAmount(10000 * EXCHANGE_RATE); // 예시: 최소 주문 금액 10,000원
+        setMinOrderAmount(10000); // 예시: 최소 주문 금액 10,000원
         setLoading(false);
       } catch (err) {
         console.error('Error fetching menu details:', err);
@@ -201,7 +193,7 @@ const MenuDetail: React.FC = () => {
       const cartItem: CartItem = {
         id: menuId,
         name: displayName,
-        price: priceInUSD,
+        price: menuItem.price,
         quantity: newQuantity,
         options: cartOptions,
         image: menuItem.image
@@ -239,25 +231,15 @@ const MenuDetail: React.FC = () => {
   }
   
   // 에러 표시
-  if (error) {
+  if (error || !menuItem) {
     return (
       <div className="min-h-screen bg-gray-50">
         <BackHeader title={t('error.title')} />
         <div className="p-4">
-          <ErrorState message={error} onRetry={() => window.location.reload()} />
-        </div>
-        <NavigationBar />
-      </div>
-    );
-  }
-  
-  // 메뉴 정보가 없을 때
-  if (!menuItem) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <BackHeader title={t('error.notFound')} />
-        <div className="p-4">
-          <ErrorState message={t('menu.notFound')} onRetry={() => navigate(`/restaurant/${restaurantId}`)} />
+          <ErrorState 
+            message={error || t('menu.notFound')} 
+            onRetry={() => navigate(`/restaurant/${restaurantId}`)}
+          />
         </div>
         <NavigationBar />
       </div>
@@ -267,11 +249,11 @@ const MenuDetail: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* GNB */}
-      <BackHeader title="Menu Item" />
+      <BackHeader title={t('menu.item')} />
       
-      <main className="pb-24">
+      <main className="bg-white pb-28">
         {/* 메뉴 이미지 */}
-        <div className="w-full aspect-video bg-gray-200 overflow-hidden">
+        <div className="w-full h-64 bg-gray-200 overflow-hidden">
           <ImageWithFallback
             src={menuItem.image || ''}
             alt={displayName}
@@ -281,59 +263,67 @@ const MenuDetail: React.FC = () => {
         </div>
         
         {/* 메뉴 정보 */}
-        <div className="p-4">
+        <div className="p-5">
           <h1 className="text-2xl font-bold mb-2 text-left">{displayName}</h1>
-          <p className="text-gray-700 mb-6 text-left whitespace-pre-line">{displayDescription}</p>
           
-          {/* 가격 정보 */}
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-left mb-1">{displayPrice}</h2>
-            <p className="text-sm text-gray-500 text-left">(per 1 piece)</p>
+          {displayDescription && (
+            <p className="text-gray-600 mb-6 text-left text-base">{displayDescription}</p>
+          )}
+          
+          <div className="text-left mb-4">
+            <span className="text-xl font-bold text-gray-900">{formatCurrency(menuItem.price)}</span>
           </div>
-          
-          {/* 구분선 */}
-          <div className="border-t border-gray-200 mb-6"></div>
           
           {/* 수량 조절 */}
-          <div className="mb-8">
+          <div className="flex items-center justify-between my-6">
+            <span className="text-lg font-medium text-gray-800">{t('menu.quantity')}</span>
             <div className="flex items-center">
-              <h3 className="text-lg font-medium mr-auto">Quantity</h3>
-              <div className="flex items-center">
-                <button
-                  className="w-12 h-12 flex items-center justify-center border border-gray-300 rounded-md bg-white"
-                  onClick={decreaseQuantity}
-                  disabled={quantity === 0}
-                  aria-label="Decrease quantity"
-                >
-                  <span className="text-2xl font-medium text-gray-700">−</span>
-                </button>
-                <span className="mx-6 text-xl font-medium min-w-[20px] text-center">{quantity}</span>
-                <button
-                  className="w-12 h-12 flex items-center justify-center border border-gray-300 rounded-md bg-white"
-                  onClick={increaseQuantity}
-                  aria-label="Increase quantity"
-                >
-                  <span className="text-2xl font-medium text-gray-700">+</span>
-                </button>
-              </div>
+              <button
+                className={`w-10 h-10 flex items-center justify-center border rounded-md ${
+                  quantity > 0 ? 'text-gray-700 border-gray-300' : 'text-gray-400 border-gray-200'
+                }`}
+                onClick={decreaseQuantity}
+                disabled={quantity === 0}
+                aria-label={t('menu.decrease')}
+              >
+                <span className="text-2xl">−</span>
+              </button>
+              <span className="mx-4 text-xl font-medium min-w-[30px] text-center">{quantity}</span>
+              <button
+                className="w-10 h-10 flex items-center justify-center border rounded-md bg-red-500 text-white border-red-500"
+                onClick={increaseQuantity}
+                aria-label={t('menu.increase')}
+              >
+                <span className="text-2xl">+</span>
+              </button>
             </div>
           </div>
-        </div>
-        
-        {/* 주문 버튼 */}
-        <div className="fixed bottom-[60px] left-0 right-0 p-4 bg-white shadow-md">
-          <button
-            className="w-full py-4 rounded-lg font-bold text-white bg-red-500"
-            onClick={addToCartHandler}
-          >
-            {quantity > 0 ? `Add to Cart - ${totalPrice}` : `Add to Cart - ${displayPrice}`}
-          </button>
+          
+          {/* 총 가격 */}
+          <div className="flex justify-between items-center my-6 pt-4 border-t border-gray-100">
+            <span className="text-lg font-semibold text-gray-800">{t('menu.total')}</span>
+            <span className="text-2xl font-bold text-red-500">{totalPrice}</span>
+          </div>
         </div>
       </main>
       
-      {/* 바텀시트를 메뉴 상세 페이지에서는 제거 */}
+      {/* Bottom Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex shadow-lg">
+        <button 
+          className={`w-full py-3 rounded-md font-semibold text-base ${
+            quantity > 0 
+              ? 'bg-red-500 text-white hover:bg-red-600' 
+              : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+          }`}
+          onClick={addToCartHandler}
+        >
+          {quantity > 0 
+            ? `${t('menu.addToCart')} (${totalPrice})`
+            : t('menu.addToCart')
+          }
+        </button>
+      </div>
       
-      {/* 하단 네비게이션 바 */}
       <NavigationBar />
     </div>
   );

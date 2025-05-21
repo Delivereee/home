@@ -5,6 +5,7 @@ import { CartItem, CartOption, CartOptionItem } from '../types/cart';
 import ImageWithFallback from './ImageWithFallback';
 import { useNavigate } from 'react-router-dom';
 import { getLocalizedValue, getCurrentLanguage } from '../config/languageConfig';
+import { formatCurrency } from '../utils/currencyUtils';
 
 interface MenuItemProps {
   menuItem: MenuItemType;
@@ -17,7 +18,7 @@ const convertMenuOptionToCartOption = (menuOption: MenuOption): CartOption => {
   const optionItems: CartOptionItem[] = menuOption.menuOptionItems.map(item => ({
     id: item.id,
     name: item.name,
-    price: item.price * 0.00071 // 원화를 USD로 변환
+    price: item.price // 서버에서 이미 환율 적용된 금액으로 제공
   }));
 
   return {
@@ -54,10 +55,8 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
   // 유효한 설명인지 확인 (빈 문자열이거나 [] 형태가 아닌 경우)
   const hasValidDescription = displayDescription && !displayDescription.match(/^\[]$/);
   
-  // 달러로 변환된 가격
-  const EXCHANGE_RATE = 0.00071; // 1원 = 0.00071달러
-  const priceInUSD = menuItem.price * EXCHANGE_RATE;
-  const displayPrice = `$${priceInUSD.toFixed(2)}`;
+  // 가격 표시 형식 - 현재 언어에 맞는 통화 사용
+  const displayPrice = formatCurrency(menuItem.price);
   
   // 장바구니에서 현재 아이템의 수량 찾기
   const getCartQuantity = useCallback((): number => {
@@ -123,7 +122,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, restaurantId, restaurantN
       const cartItem: CartItem = {
         id: menuItem.id,
         name: displayName,
-        price: priceInUSD,
+        price: menuItem.price, // 서버에서 이미 환율 적용된 금액으로 제공
         quantity: newQuantity,
         options: cartOptions,
         image: menuItem.image

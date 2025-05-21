@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext';
+import { formatCurrency } from '../utils/currencyUtils';
 
 interface CartBottomSheetProps {
   minOrderAmount: number | null;
@@ -64,11 +65,6 @@ const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onChe
   const deliveryAvailable = isDeliveryAvailable(minOrderAmount);
   const amountToMinOrder = getAmountToMinOrder(minOrderAmount);
   
-  // 가격 포맷팅 (USD)
-  const formatPrice = (price: number) => {
-    return `$${price.toFixed(2)}`;
-  };
-  
   return (
     <div 
       className={`fixed bottom-[60px] left-0 right-0 bg-white z-20 rounded-t-xl transition-all duration-300 ease-in-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
@@ -104,7 +100,7 @@ const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onChe
               {deliveryAvailable ? (
                 <span className="text-base font-medium text-gray-800 whitespace-nowrap">Delivery Available</span>
               ) : (
-                <span className="text-base font-medium text-red-500 whitespace-nowrap">Add {formatPrice(amountToMinOrder)} more for delivery</span>
+                <span className="text-base font-medium text-red-500 whitespace-nowrap">Add {formatCurrency(amountToMinOrder)} more for delivery</span>
               )}
             </div>
             
@@ -121,7 +117,7 @@ const CartBottomSheet: React.FC<CartBottomSheetProps> = ({ minOrderAmount, onChe
                 }`}>
                   <span className="text-sm font-bold">{totalItems}</span>
                 </div>
-                <span className="text-lg font-semibold text-white">{formatPrice(totalPrice)}</span>
+                <span className="text-lg font-semibold text-white">{formatCurrency(totalPrice)}</span>
               </button>
             </div>
           </div>

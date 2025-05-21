@@ -8,6 +8,7 @@ import EmptyState from '../components/EmptyState';
 import ImageWithFallback from '../components/ImageWithFallback';
 import { createCart, getCart, transformCartToRequest } from '../api/cartService';
 import useTranslation from '../hooks/useTranslation';
+import { formatCurrency } from '../utils/currencyUtils';
 
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,12 +28,9 @@ const CartPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
-  // 화폐 변환 상수
-  const EXCHANGE_RATE = 0.00071; // 1원 = 0.00071달러
-  
   // 배송비 및 수수료 (하드코딩된 값)
-  const DELIVERY_FEE = 3000 * EXCHANGE_RATE; // 3,000원
-  const PROXY_FEE = 1000 * EXCHANGE_RATE; // 1,000원
+  const DELIVERY_FEE = 3000; // 3,000원
+  const PROXY_FEE = 1000; // 1,000원
   
   // 소계 (카트 아이템 총액)
   const subtotal = getTotalPrice();
@@ -46,11 +44,6 @@ const CartPage: React.FC = () => {
   // 최소 주문 금액 충족 여부
   const deliveryAvailable = isDeliveryAvailable(minOrderAmount);
   const amountToMinOrder = getAmountToMinOrder(minOrderAmount);
-  
-  // 가격 포맷팅 (USD)
-  const formatPrice = (price: number) => {
-    return `$${price.toFixed(2)}`;
-  };
   
   // 가게 상세 페이지로 이동
   const navigateToRestaurant = () => {
@@ -203,7 +196,7 @@ const CartPage: React.FC = () => {
                 <div className="flex-grow flex flex-col justify-between ml-4 py-1">
                   <div>
                     <h3 className="text-lg font-medium mb-1 text-left line-clamp-2 text-gray-800">{item.name}</h3>
-                    <span className="text-base font-medium text-left text-gray-900 block">{formatPrice(item.price)}</span>
+                    <span className="text-base font-medium text-left text-gray-900 block">{formatCurrency(item.price)}</span>
                     <span className="text-xs text-left text-gray-500 block">{t('cart.perPiece')}</span>
                   </div>
                 </div>
@@ -243,38 +236,42 @@ const CartPage: React.FC = () => {
         </div>
         
         {/* 주문 요약 */}
-        <div className="bg-white p-5 mb-4 rounded-lg shadow-sm">
-          <h3 className="text-lg font-medium mb-4 text-left text-gray-800">{t('cart.orderSummary')}</h3>
+        <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-left text-gray-800">{t('cart.orderSummary')}</h3>
           
-          <div className="space-y-4 mb-4">
-            <div className="flex justify-between items-center">
+          <div className="space-y-3 text-left">
+            {/* 소계 */}
+            <div className="flex justify-between">
               <p className="text-gray-600">{t('cart.subtotal')}</p>
-              <p className="font-medium text-gray-800">{formatPrice(subtotal)}</p>
+              <p className="font-medium text-gray-800">{formatCurrency(subtotal)}</p>
             </div>
             
-            <div className="flex justify-between items-center">
+            {/* 배달 비용 */}
+            <div className="flex justify-between">
               <p className="text-gray-600">{t('cart.deliveryFee')}</p>
-              <p className="font-medium text-gray-800">{formatPrice(DELIVERY_FEE)}</p>
+              <p className="font-medium text-gray-800">{formatCurrency(DELIVERY_FEE)}</p>
             </div>
             
-            <div className="flex justify-between items-center">
-              <p className="text-gray-600">{t('cart.proxyFee')}</p>
-              <p className="font-medium text-gray-800">{formatPrice(PROXY_FEE)}</p>
+            {/* 수수료 */}
+            <div className="flex justify-between">
+              <p className="text-gray-600">{t('cart.serviceFee')}</p>
+              <p className="font-medium text-gray-800">{formatCurrency(PROXY_FEE)}</p>
             </div>
-          </div>
-          
-          <div className="border-t border-gray-200 pt-4 flex justify-between items-center">
-            <p className="font-medium text-lg text-gray-900">{t('cart.total')}</p>
-            <p className="font-semibold text-lg text-gray-900">{formatPrice(total)}</p>
+            
+            {/* 합계 - 굵은 선으로 구분 */}
+            <div className="border-t pt-3 border-gray-200 flex justify-between">
+              <p className="font-semibold text-lg text-gray-900">{t('cart.total')}</p>
+              <p className="font-semibold text-lg text-gray-900">{formatCurrency(total)}</p>
+            </div>
           </div>
         </div>
       </main>
       
       {/* 체크아웃 버튼 */}
-      <div className="fixed bottom-[60px] left-0 right-0 p-4 bg-white shadow-lg z-10">
+      <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-gray-200 p-4 px-6">
         {!deliveryAvailable && (
-          <div className="mb-2 text-center text-sm text-red-500 font-medium">
-            {t('cart.addMore')} {formatPrice(amountToMinOrder)} {t('cart.toOrder')}
+          <div className="text-center mb-4 text-sm text-red-500">
+            {t('cart.addMore')} {formatCurrency(amountToMinOrder)} {t('cart.toOrder')}
           </div>
         )}
         {errorMsg && (

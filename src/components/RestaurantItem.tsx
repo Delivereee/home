@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Restaurant } from '../types/restaurant';
 import { getCurrentLanguage } from '../config/languageConfig';
 import useTranslation from '../hooks/useTranslation';
+import { formatCurrency } from '../utils/currencyUtils';
 
 interface RestaurantItemProps {
   restaurant: Restaurant;
@@ -51,15 +52,9 @@ const RestaurantItem: React.FC<RestaurantItemProps> = ({ restaurant, disableNavi
     }
   }, [restaurant, currentLang]);
   
-  // 환율 정보 (1원 = 0.00071달러)
-  const EXCHANGE_RATE = 0.00071;
-  
-  // 최소 주문 금액을 달러로 변환
-  const minOrderInUSD = restaurant.minOrderAmount * EXCHANGE_RATE;
-  
   // 최소 주문 금액 표시 텍스트
   const minOrderText = restaurant.minOrderAmount > 0 
-    ? `${t('restaurant.minimumOrder')}: $${minOrderInUSD.toFixed(2)}` 
+    ? `${t('restaurant.minimumOrder')}: ${formatCurrency(restaurant.minOrderAmount)}` 
     : t('restaurant.noMinimumOrder');
     
   // 가게 상세 페이지로 이동
@@ -99,7 +94,7 @@ const RestaurantItem: React.FC<RestaurantItemProps> = ({ restaurant, disableNavi
             {t('restaurant.deliveryTime')}
           </div>
           
-          {/* 최소 주문 금액 (우측 하단) - 달러로 표시 */}
+          {/* 최소 주문 금액 (우측 하단) - 현재 언어에 맞는 통화로 표시 */}
           <div className="text-sm text-gray-600 text-right font-medium">
             {minOrderText}
           </div>

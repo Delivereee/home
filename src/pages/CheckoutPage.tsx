@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAddress } from '../contexts/AddressContext';
 import BackHeader from '../components/BackHeader';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import apiClient from '../api/config';
 import useTranslation from '../hooks/useTranslation';
+import { formatCurrency } from '../utils/currencyUtils';
 
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
@@ -64,23 +65,15 @@ const CheckoutPage: React.FC = () => {
     console.log('페이팔 Client ID:', getPayPalClientId());
   }
   
-  // Currency conversion constant
-  const EXCHANGE_RATE = 0.00071; // 1 KRW = 0.00071 USD
-  
   // Delivery fee and service fee (hardcoded values)
-  const DELIVERY_FEE = 3000 * EXCHANGE_RATE; // 3,000 KRW
-  const PROXY_FEE = 1000 * EXCHANGE_RATE; // 1,000 KRW
+  const DELIVERY_FEE = 3000; // 3,000 KRW
+  const PROXY_FEE = 1000; // 1,000 KRW
   
   // Subtotal (cart items total)
   const subtotal = getTotalPrice();
   
   // Total order amount
   const total = subtotal + DELIVERY_FEE + PROXY_FEE;
-  
-  // Price formatting (USD)
-  const formatPrice = (price: number) => {
-    return `$${price.toFixed(2)}`;
-  };
   
   // Email validation
   const validateEmail = (email: string) => {
@@ -269,36 +262,31 @@ const CheckoutPage: React.FC = () => {
                     </div>
                   )}
                 </div>
-                <span className="text-gray-800 font-medium ml-4">
-                  {formatPrice(item.price * item.quantity)}
-                </span>
+                <div className="ml-4 text-right">
+                  {formatCurrency(item.price * item.quantity)}
+                </div>
               </div>
             ))}
           </div>
-        </div>
-        
-        {/* Payment summary information */}
-        <div className="bg-gray-100 rounded-lg p-4 mb-6">
-          <div className="space-y-3 mb-3">
-            <div className="flex justify-between items-center">
-              <p className="text-gray-600">Subtotal</p>
-              <p className="font-medium text-gray-800">{formatPrice(subtotal)}</p>
-            </div>
-            
-            <div className="flex justify-between items-center">
-              <p className="text-gray-600">Delivery Fee</p>
-              <p className="font-medium text-gray-800">{formatPrice(DELIVERY_FEE)}</p>
-            </div>
-            
-            <div className="flex justify-between items-center">
-              <p className="text-gray-600">Proxy Ordering Fee</p>
-              <p className="font-medium text-gray-800">{formatPrice(PROXY_FEE)}</p>
-            </div>
-          </div>
           
-          <div className="border-t border-gray-300 pt-3 flex justify-between items-center">
-            <p className="font-medium text-lg text-gray-900">Total</p>
-            <p className="font-semibold text-lg text-gray-900">{formatPrice(total)}</p>
+          {/* Cost summary */}
+          <div className="border-t border-gray-200 pt-3 space-y-2">
+            <div className="flex justify-between text-gray-600">
+              <span>Subtotal:</span>
+              <span>{formatCurrency(subtotal)}</span>
+            </div>
+            <div className="flex justify-between text-gray-600">
+              <span>Delivery Fee:</span>
+              <span>{formatCurrency(DELIVERY_FEE)}</span>
+            </div>
+            <div className="flex justify-between text-gray-600">
+              <span>Service Fee:</span>
+              <span>{formatCurrency(PROXY_FEE)}</span>
+            </div>
+            <div className="flex justify-between font-bold text-gray-800 pt-1">
+              <span>Total:</span>
+              <span>{formatCurrency(total)}</span>
+            </div>
           </div>
         </div>
         
