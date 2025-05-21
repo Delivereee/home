@@ -38,6 +38,28 @@ const CHANNEL_IO_PLUGIN_KEY = '4de468b6-e6bf-4446-a6d0-fb3ccb1132a6';
 const CHANNEL_IO_ACCESS_SECRET = '20157795b28f1efefb6415a2686cca15';
 
 /**
+ * 현재 경로가 홈인지 확인하는 함수
+ * URL의 해시 경로나 pathname을 기준으로 판단
+ */
+export const isHomePage = (): boolean => {
+  // 기본 URL이 /home인 경우 확인
+  const pathname = window.location.pathname;
+  
+  // 해시 라우팅 (#/ 형태) 확인
+  const hash = window.location.hash.replace('#', '');
+  
+  // /home URL에서만 홈 경로로 간주할 수 있는 패턴들
+  if (pathname === '/home') {
+    return hash === '/' || 
+           hash === '' || 
+           hash === '/home';
+  }
+  
+  // 그 외 홈으로 간주할 수 있는 패턴들
+  return pathname === '/' && (hash === '/' || hash === '' || hash === '/home');
+};
+
+/**
  * 채널톡 초기화
  * @param settings 채널톡 설정
  * @param forceInit 강제 초기화 여부 (기본값: false)
@@ -45,6 +67,12 @@ const CHANNEL_IO_ACCESS_SECRET = '20157795b28f1efefb6415a2686cca15';
 export const bootChannelTalk = (settings?: Partial<ChannelIOSettings>, forceInit: boolean = false) => {
   if (!window.ChannelIO) {
     console.error('ChannelIO is not loaded yet');
+    return;
+  }
+
+  // 홈 페이지가 아니면 초기화하지 않음 (강제 초기화 플래그가 false인 경우에만)
+  if (!isHomePage() && !forceInit) {
+    console.log('Not on home page, ChannelTalk will not be initialized');
     return;
   }
 
@@ -211,6 +239,11 @@ export const updateChannelTalkUser = (userInfo: ChannelIOUserInfo) => {
  * @param pageName 페이지 이름
  */
 export const setChannelTalkPage = (pageName: string) => {
+  // 홈 페이지가 아니면 동작하지 않음
+  if (!isHomePage()) {
+    return;
+  }
+
   if (window.ChannelIO) {
     try {
       // 직접 호출 방식 사용
@@ -227,6 +260,16 @@ export const setChannelTalkPage = (pageName: string) => {
  * 화면 하단에 고정된 채팅 버튼을 생성합니다.
  */
 const createCustomChannelButton = () => {
+  // 홈 페이지가 아니면 버튼을 생성하지 않음
+  if (!isHomePage()) {
+    // 이미 존재하는 버튼이 있으면 제거
+    const existingButton = document.getElementById('custom-channel-button');
+    if (existingButton) {
+      existingButton.remove();
+    }
+    return;
+  }
+
   // 이미 존재하는 버튼이 있으면 제거
   const existingButton = document.getElementById('custom-channel-button');
   if (existingButton) {
@@ -327,6 +370,11 @@ const createCustomChannelButton = () => {
  * @param language 변경할 언어 코드
  */
 export const updateChannelTalkLanguage = (language: string) => {
+  // 홈 페이지가 아니면 언어 변경 작업을 수행하지 않음
+  if (!isHomePage()) {
+    return;
+  }
+
   if (window.ChannelIO) {
     try {
       // 채널톡 재초기화

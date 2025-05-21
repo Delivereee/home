@@ -8,6 +8,7 @@ import { showChannelTalk, trackChannelTalkEvent } from '../services/ChannelServi
 import NaverMap from '../components/NaverMap';
 import { createAddress, CreateAddressRequest } from '../api/addressService';
 import useTranslation from '../hooks/useTranslation';
+import { getCurrentLanguage } from '../config/languageConfig';
 
 const AddressSetupPage: React.FC = () => {
   const navigate = useNavigate();
@@ -225,11 +226,38 @@ const AddressSetupPage: React.FC = () => {
 
   // 채널톡 도움말 열기
   const handleOpenHelp = () => {
+    // 주소 설정 페이지에서도 사용자에게 도움을 제공하기 위해 이벤트 추적 및 채널톡 표시
+    // 이벤트 추적하고 강제로 채널톡을 열도록 시도
     trackChannelTalkEvent('address_help_requested', {
       mainAddress: mainAddress,
       hasDetailAddress: !!detailAddress.trim()
     });
-    showChannelTalk();
+    
+    // 채널톡이 초기화된 후에만 표시 시도
+    if (window.ChannelIO) {
+      try {
+        // 초기화되어 있지 않은 경우 일시적으로 활성화
+        window.ChannelIO('boot', {
+          "pluginKey": "4de468b6-e6bf-4446-a6d0-fb3ccb1132a6",
+          "language": getCurrentLanguage(),
+          "hideDefaultLauncher": true,
+          "customLauncherSelector": "#custom-channel-button" 
+        });
+        
+        // 약간의 지연 후 메신저 표시 시도
+        setTimeout(() => {
+          showChannelTalk();
+        }, 500);
+      } catch (error) {
+        console.error('Failed to initialize ChannelTalk on help request:', error);
+        
+        // 채널톡 초기화 실패 시 대체 메시지 표시
+        alert('Chat support is only available on the home page. Please go to the home page for chat support.');
+      }
+    } else {
+      // 채널톡 스크립트가 로드되지 않은 경우
+      alert('Chat support is only available on the home page. Please go to the home page for chat support.');
+    }
   };
 
   return (

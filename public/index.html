@@ -71,62 +71,8 @@
           return hash === '/' || hash === '/home' || hash === '' || window.location.pathname === '/home';
         }
         
-        // 채널톡 초기화/종료 함수
-        function toggleChannelTalk() {
-          if(isHomePage()) {
-            // 홈 페이지면 채널톡 초기화
-            if(w.ChannelIO && typeof w.ChannelIO === 'function') {
-              w.ChannelIO('boot', {
-                "pluginKey": "4de468b6-e6bf-4446-a6d0-fb3ccb1132a6",
-                "language": "en",
-                "hideDefaultLauncher": true,
-                "customLauncherSelector": "#custom-channel-button"
-              });
-              console.log('ChannelIO initialized on home page');
-            } else {
-              // 채널톡이 로드되지 않았으면 로드 후 초기화
-              loadChannelScript();
-              setTimeout(function() {
-                toggleChannelTalk();
-              }, 1000);
-            }
-          } else {
-            // 홈 페이지가 아니면 채널톡 종료
-            if(w.ChannelIO && typeof w.ChannelIO === 'function') {
-              w.ChannelIO('shutdown');
-              console.log('ChannelIO shutdown on non-home page');
-              
-              // DOM에서 채널톡 요소 찾아서 숨기기
-              setTimeout(function() {
-                var buttons = document.querySelectorAll('[class*="channel-"], #custom-channel-button');
-                buttons.forEach(function(btn) {
-                  if(btn) btn.style.display = 'none';
-                });
-              }, 100);
-            }
-          }
-        }
-        
-        // 페이지 로드 시 채널톡 초기화 여부 결정
-        if(document.readyState === "complete") {
-          loadChannelScript();
-          setTimeout(toggleChannelTalk, 500);
-        } else {
-          w.addEventListener("DOMContentLoaded", function() {
-            loadChannelScript();
-            setTimeout(toggleChannelTalk, 500);
-          });
-          
-          w.addEventListener("load", function() {
-            setTimeout(toggleChannelTalk, 1000);
-          });
-        }
-        
-        // 해시 변경 감지 (SPA 내부 라우팅)
-        w.addEventListener("hashchange", function() {
-          console.log("Hash changed:", window.location.hash);
-          setTimeout(toggleChannelTalk, 300);
-        });
+        // 채널톡 스크립트만 로드하고, 초기화는 React 앱에서 처리
+        loadChannelScript();
       })();
     </script>
     

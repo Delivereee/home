@@ -16,7 +16,13 @@ import CheckoutPage from './pages/CheckoutPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
 import NotFoundPage from './pages/NotFoundPage';
 import AddressSetupPage from './pages/AddressSetupPage';
-import { setChannelTalkPage, updateChannelTalkUser, bootChannelTalk, shutdownChannelTalk } from './services/ChannelService';
+import { 
+  setChannelTalkPage, 
+  updateChannelTalkUser, 
+  bootChannelTalk, 
+  shutdownChannelTalk, 
+  isHomePage 
+} from './services/ChannelService';
 import { getCurrentLanguage, SupportedLanguage, LANGUAGE_CHANGE_EVENT } from './config/languageConfig';
 import { invalidateLanguageCache } from './api/cacheUtils';
 import { trackPageView } from './services/AnalyticsService';
@@ -36,7 +42,7 @@ const AnalyticsTracker = () => {
   return null;
 };
 
-// 채널톡 관리 컴포넌트 - 모든 페이지에서 활성화하되 UI 요소와 겹치지 않도록 조정
+// 채널톡 관리 컴포넌트 - 홈 페이지에서만 활성화
 const ChannelTalkManager = () => {
   const location = useLocation();
   
@@ -81,24 +87,39 @@ const ChannelTalkManager = () => {
     const currentPath = window.location.hash.replace('#', '');
     console.log('라우트 변경 감지:', currentPath);
     
-    // 모든 페이지에서 채널톡 활성화
-    console.log('채널톡 활성화');
+    // 홈 페이지 여부 확인
+    const homePageActive = isHomePage();
+    console.log('홈 페이지 여부:', homePageActive);
     
-    // 현재 언어 설정으로 채널톡 초기화
-    const currentLang = getCurrentLanguage();
-    bootChannelTalk({
-      language: currentLang
-    }, true); // 강제 초기화 플래그 true로 설정
+    if (homePageActive) {
+      // 홈 페이지에서만 채널톡 활성화
+      console.log('채널톡 활성화 (홈 페이지)');
+      
+      // 현재 언어 설정으로 채널톡 초기화
+      const currentLang = getCurrentLanguage();
+      bootChannelTalk({
+        language: currentLang
+      }, true); // 강제 초기화 플래그 true로 설정
+      
+      // 현재 페이지 이름 설정
+      setChannelTalkPage(location.pathname || 'Home');
+      
+      // 약간의 지연 후 DOM에서 버튼 표시
+      setTimeout(() => {
+        toggleChannelTalkButton(true);
+      }, 500);
+    } else {
+      // 홈 페이지가 아니면 채널톡 종료 및 요소 숨김
+      console.log('채널톡 비활성화 (홈 페이지 아님)');
+      shutdownChannelTalk();
+      
+      // 약간의 지연 후 DOM에서 버튼 숨김
+      setTimeout(() => {
+        toggleChannelTalkButton(false);
+      }, 300);
+    }
     
-    // 현재 페이지 이름 설정
-    setChannelTalkPage(location.pathname || 'Home');
-    
-    // 약간의 지연 후 DOM에서 버튼 표시
-    setTimeout(() => {
-      toggleChannelTalkButton(true);
-    }, 500);
-    
-    // 컴포넌트 언마운트 시 정리 작업 (필요한 경우)
+    // 컴포넌트 언마운트 시 정리 작업
     return () => {
       // 특별한 정리 작업은 필요 없음
     };
@@ -111,8 +132,8 @@ const ChannelTalkManager = () => {
       const newLang = customEvent.detail.language;
       console.log('언어 변경 감지:', newLang);
       
-      // 모든 페이지에서 언어 변경 적용
-      if (window.ChannelIO) {
+      // 홈 페이지에서만 언어 변경 적용
+      if (isHomePage() && window.ChannelIO) {
         shutdownChannelTalk();
         
         // 약간의 지연 후 새 언어로 재시작
