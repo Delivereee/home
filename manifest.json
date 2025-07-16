@@ -1,19 +1,19 @@
 {
-  "short_name": "Delivereee",
-  "name": "Delivereee - Food Delivery App",
+  "short_name": "KOREA ORDER",
+  "name": "KOREA ORDER",
   "icons": [
     {
-      "src": "https://delivereee.github.io/home/favicon.ico",
+      "src": "https://recipeee-api.s3.ap-northeast-2.amazonaws.com/delivereee/favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
     {
-      "src": "https://delivereee.github.io/home/logo192.png",
+      "src": "https://recipeee-api.s3.ap-northeast-2.amazonaws.com/delivereee/android-icon-192x192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "https://delivereee.github.io/home/logo512.png",
+      "src": "https://recipeee-api.s3.ap-northeast-2.amazonaws.com/delivereee/symbol.png",
       "type": "image/png",
       "sizes": "512x512"
     }
