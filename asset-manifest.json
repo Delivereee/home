@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "https://delivereee.github.io/home/static/css/main.991f71d0.css",
-    "main.js": "https://delivereee.github.io/home/static/js/main.90032764.js",
+    "main.js": "https://delivereee.github.io/home/static/js/main.7265de4e.js",
     "static/js/453.4f6ad01f.chunk.js": "https://delivereee.github.io/home/static/js/453.4f6ad01f.chunk.js",
     "index.html": "https://delivereee.github.io/home/index.html",
     "main.991f71d0.css.map": "https://delivereee.github.io/home/static/css/main.991f71d0.css.map",
-    "main.90032764.js.map": "https://delivereee.github.io/home/static/js/main.90032764.js.map",
+    "main.7265de4e.js.map": "https://delivereee.github.io/home/static/js/main.7265de4e.js.map",
     "453.4f6ad01f.chunk.js.map": "https://delivereee.github.io/home/static/js/453.4f6ad01f.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.991f71d0.css",
-    "static/js/main.90032764.js"
+    "static/js/main.7265de4e.js"
   ]
 }
