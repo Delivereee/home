@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Processing...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        p {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner"></div>
+        <h2>Processing your payment...</h2>
+        <p>Please wait while we verify your payment.</p>
+    </div>
+
+    <script>
+        // 결제 완료 신호 전송 (결제 데이터 포함)
+        function sendPaymentCompletedSignal(paymentData, orderId, email) {
+            console.log('Sending payment completed signal with data:', paymentData);
+            
+            if (window.opener) {
+                window.opener.postMessage({
+                    type: 'EXIMBAY_PAYMENT_COMPLETED_WITH_DATA',
+                    orderId: orderId,
+                    email: email,
+                    paymentData: paymentData,
+                    timestamp: Date.now()
+                }, '*');
+                console.log('Payment completed signal sent to parent');
+            }
+            
+            setTimeout(() => window.close(), 2000);
+        }
+        
+        // 성공 신호 전송
+        function sendSuccessSignal(orderId, email) {
+            if (window.opener) {
+                window.opener.postMessage({
+                    type: 'EXIMBAY_PAYMENT_SUCCESS',
+                    orderId: orderId,
+                    email: email,
+                    timestamp: Date.now()
+                }, '*');
+                console.log('Payment success signal sent to parent');
+            }
+            
+            setTimeout(() => window.close(), 2000);
+        }
+        
+        // 에러 신호 전송
+        function sendErrorSignal(errorMessage) {
+            if (window.opener) {
+                window.opener.postMessage({
+                    type: 'EXIMBAY_PAYMENT_ERROR',
+                    error: errorMessage,
+                    timestamp: Date.now()
+                }, '*');
+                console.log('Payment error signal sent to parent');
+            }
+            
+            setTimeout(() => window.close(), 3000);
+        }
+        
+        // 완료 신호만 전송 (결제 데이터 없을 때)
+        function sendCompletionSignal(orderId, email) {
+            if (window.opener) {
+                window.opener.postMessage({
+                    type: 'EXIMBAY_PAYMENT_COMPLETED',
+                    orderId: orderId,
+                    email: email,
+                    timestamp: Date.now()
+                }, '*');
+                console.log('Payment completion signal sent to parent');
+            }
+            
+            setTimeout(() => window.close(), 3000);
+        }
+        
+        // 페이지 로드 시 실행
+        console.log('🚀 === Eximbay return page loaded ===');
+        console.log('📍 Current URL:', window.location.href);
+        console.log('📄 Document body HTML:', document.body.innerHTML);
+        console.log('🔗 Window.opener exists:', !!window.opener);
+        console.log('🔗 Window.parent exists:', !!window.parent);
+        
+        // URL에서 orderId와 email 추출
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('orderId');
+        const email = urlParams.get('email');
+        
+        console.log('Order ID:', orderId);
+        console.log('Email:', email);
+        
+        // POST 데이터 확인 (엑심베이에서 자동 제출된 폼이 있는 경우)
+        let paymentData = null;
+        const forms = document.getElementsByTagName('form');
+        console.log('Number of forms found:', forms.length);
+        
+        if (forms.length > 0) {
+            // POST로 받은 데이터 처리
+            console.log('Form detected, processing POST data from Eximbay');
+            const form = forms[0];
+            console.log('Form HTML:', form.outerHTML);
+            const formData = new FormData(form);
+            
+            // 엑심베이 결제 결과 데이터 추출
+            paymentData = {};
+            for (let [key, value] of formData.entries()) {
+                paymentData[key] = value;
+                console.log('Form data:', key, '=', value);
+            }
+            
+            // transaction_id 확인 (엑심베이는 'transacton_id' 필드명 사용)
+            if (paymentData.transacton_id || paymentData.transaction_id) {
+                console.log('Transaction ID found in form:', paymentData.transacton_id || paymentData.transaction_id);
+            }
+            
+            // 결제 데이터가 있으면 데이터와 함께 완료 신호 전송
+            if (paymentData && Object.keys(paymentData).length > 0) {
+                console.log('Sending payment completion signal with form data...');
+                sendPaymentCompletedSignal(paymentData, orderId, email);
+            } else {
+                console.log('No payment data found in form - sending completion signal only');
+                sendCompletionSignal(orderId, email);
+            }
+        } else {
+            // POST 데이터가 없으면 URL 파라미터에서 확인
+            const urlPaymentData = {};
+            urlParams.forEach((value, key) => {
+                if (key !== 'orderId' && key !== 'email' && key !== 'returnFromPayment') {
+                    urlPaymentData[key] = value;
+                }
+            });
+            
+            // transaction_id 확인 (엑심베이는 'transacton_id' 필드명 사용)
+            if (urlPaymentData.transacton_id || urlPaymentData.transaction_id) {
+                console.log('Transaction ID found in URL:', urlPaymentData.transacton_id || urlPaymentData.transaction_id);
+            }
+            
+            if (Object.keys(urlPaymentData).length > 0) {
+                console.log('Sending payment completion signal with URL data:', urlPaymentData);
+                sendPaymentCompletedSignal(urlPaymentData, orderId, email);
+            } else {
+                console.log('No payment data found - sending completion signal only');
+                sendCompletionSignal(orderId, email);
+            }
+        }
+    </script>
+</body>
+</html>
